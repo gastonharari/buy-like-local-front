@@ -4,27 +4,27 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color palette for unified dark navy theme with electric violet accent */
-  --background: #0a1d2b;
-  --foreground: #ece5dd;
-  --card: #0a1d2b;
-  --card-foreground: #ece5dd;
-  --popover: #0a1d2b;
-  --popover-foreground: #ece5dd;
-  --primary: #7f00ff;
-  --primary-foreground: #ece5dd;
-  --secondary: #0a1d2b;
-  --secondary-foreground: #ece5dd;
-  --muted: #0a1d2b;
-  --muted-foreground: #dcf8c6;
+  /* Apple dark-mode design tokens */
+  --background: #000000;
+  --foreground: #f5f5f7;
+  --card: #1c1c1e;
+  --card-foreground: #f5f5f7;
+  --popover: #1c1c1e;
+  --popover-foreground: #f5f5f7;
+  --primary: #0a84ff;
+  --primary-foreground: #ffffff;
+  --secondary: #2c2c2e;
+  --secondary-foreground: #f5f5f7;
+  --muted: #2c2c2e;
+  --muted-foreground: #98989d;
   --accent: #25d366;
-  --accent-foreground: #0a1d2b;
+  --accent-foreground: #000000;
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #ece5dd;
-  --border: #1a2f3f;
-  --input: #1a2f3f;
-  --ring: #7f00ff;
-  --radius: 0.75rem;
+  --destructive-foreground: #f5f5f7;
+  --border: #38383a;
+  --input: #2c2c2e;
+  --ring: #0a84ff;
+  --radius: 0.875rem;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);

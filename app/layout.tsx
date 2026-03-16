@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script"
 import { Suspense } from "react"
+import { CookieBanner } from "@/components/cookie-banner"
 import "./globals.css"
 
 const inter = Inter({
@@ -43,12 +44,14 @@ export const metadata: Metadata = {
     siteName: "Buy Like Local",
     locale: "en_US",
     type: "website",
+    images: [{ url: "/buenos-aires-obelisco-night.jpg", width: 1200, height: 630, alt: "Buy Like Local — Your concierge in Buenos Aires" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Buy Like Local | Buy Argentine Products in USD",
     description:
       "WhatsApp concierge helping foreigners buy authentic Argentine brands in USD. International shipping from Buenos Aires.",
+    images: ["/buenos-aires-obelisco-night.jpg"],
   },
   robots: {
     index: true,
@@ -109,7 +112,7 @@ function JsonLd() {
         name: "Can foreigners buy from Argentine brands?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. Buy Like Local helps foreigners, tourists, and expats purchase from Argentine brands. Many local shops only accept Argentine payment methods or sell in-store only. We handle the purchase on your behalf and accept international credit cards in USD.",
+          text: "Yes. Buy Like Local helps foreigners, tourists, and expats purchase from Argentine brands. Many local shops only accept Argentine payment methods or sell in-store only. We handle the purchase on your behalf and accept international credit cards in USD. We also help tourists already in Argentina access local payment systems like Mercado Pago and QR codes.",
         },
       },
       {
@@ -149,7 +152,7 @@ function JsonLd() {
         name: "Why not buy directly from the Argentine brand?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Most Argentine brands do not sell online to international customers, do not accept foreign credit cards, and do not ship internationally. Buy Like Local bridges that gap by acting as your local buyer.",
+          text: "Most Argentine brands do not sell online to international customers, do not accept foreign credit cards, and do not ship internationally. Buy Like Local bridges that gap by acting as your local buyer. If you're a tourist in Argentina with a foreign card, most QR codes and local digital wallets will reject your payment. We act as your local payment proxy.",
         },
       },
     ],
@@ -215,6 +218,7 @@ export default function RootLayout({
           `}
         </Script>
         <Suspense fallback={null}>{children}</Suspense>
+        <CookieBanner />
         <Analytics />
       </body>
     </html>

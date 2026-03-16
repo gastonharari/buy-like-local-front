@@ -1,0 +1,15 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded background -->
+  <rect width="180" height="180" rx="40" fill="#2563EB"/>
+
+  <!-- Shopping bag body -->
+  <rect x="42" y="82" width="96" height="66" rx="10" fill="white"/>
+
+  <!-- Bag handle -->
+  <path d="M67 82 C67 60 113 60 113 82" stroke="white" stroke-width="11" stroke-linecap="round" fill="none"/>
+
+  <!-- Location pin -->
+  <circle cx="130" cy="54" r="26" fill="#F59E0B"/>
+  <path d="M130 78 C130 78 112 62 112 52 C112 42.059 120.059 34 130 34 C139.941 34 148 42.059 148 52 C148 62 130 78 130 78Z" fill="#F59E0B"/>
+  <circle cx="130" cy="52" r="8" fill="#2563EB"/>
+</svg>
