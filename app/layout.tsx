@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Poppins } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script"
@@ -13,44 +13,54 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-poppins",
+})
+
 export const metadata: Metadata = {
-  title: "Buy Like Local | Buy Argentine Products in USD via WhatsApp",
+  title: "Concierge — Your Local Concierge in Buenos Aires | Buy, Book & Deliver",
   description:
-    "Buy Like Local is a WhatsApp concierge that helps foreigners, tourists, and expats buy authentic Argentine products in USD. International shipping from Buenos Aires. Pay with international credit cards.",
-  generator: "v0.app",
-  metadataBase: new URL("https://buylikelocal.com"),
+    "Can't buy with foreign cards in Argentina? Concierge handles MercadoLibre, local stores, food delivery, and reservations for you. Just WhatsApp us.",
+  metadataBase: new URL("https://www.concierge.com.ar"),
   alternates: {
-    canonical: "/",
+    canonical: "https://www.concierge.com.ar",
   },
   keywords: [
-    "buy Argentine products",
-    "Argentina shopping concierge",
-    "buy from Argentina in USD",
-    "Argentine brands international shipping",
-    "WhatsApp concierge Argentina",
+    "concierge Buenos Aires",
+    "foreign card Argentina",
+    "buy MercadoLibre tourist",
     "Buenos Aires personal shopper",
-    "buy Argentine wine online",
-    "Argentine leather goods",
-    "buy alfajores online",
-    "shop Argentina from abroad",
-    "foreign credit card Argentina",
-    "expat shopping Buenos Aires",
+    "WhatsApp concierge Argentina",
+    "PedidosYa foreign card",
+    "Argentina tourist shopping",
+    "buy like local Buenos Aires",
+    "Mercado Pago tourist",
+    "Argentina expat shopping",
   ],
   openGraph: {
-    title: "Buy Like Local | Buy Argentine Products in USD via WhatsApp",
+    title: "Concierge — Shop Buenos Aires Like a Local",
     description:
-      "WhatsApp concierge helping foreigners buy authentic Argentine brands in USD. Leather, wine, fashion, artisan goods. International shipping from Buenos Aires.",
-    url: "https://buylikelocal.com",
-    siteName: "Buy Like Local",
+      "Foreign tourist in Argentina? We buy, book, and deliver for you. One WhatsApp message is all it takes.",
+    url: "https://www.concierge.com.ar",
+    siteName: "Concierge",
     locale: "en_US",
     type: "website",
-    images: [{ url: "/buenos-aires-obelisco-night.jpg", width: 1200, height: 630, alt: "Buy Like Local — Your concierge in Buenos Aires" }],
+    images: [
+      {
+        url: "/buenos-aires-obelisco-night.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Concierge — Your local concierge in Buenos Aires",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Buy Like Local | Buy Argentine Products in USD",
+    title: "Concierge — Shop Buenos Aires Like a Local",
     description:
-      "WhatsApp concierge helping foreigners buy authentic Argentine brands in USD. International shipping from Buenos Aires.",
+      "Foreign tourist in Argentina? We buy, book, and deliver for you. One WhatsApp message is all it takes.",
     images: ["/buenos-aires-obelisco-night.jpg"],
   },
   robots: {
@@ -63,11 +73,11 @@ function JsonLd() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Buy Like Local",
-    url: "https://buylikelocal.com",
+    name: "Concierge",
+    url: "https://www.concierge.com.ar",
     description:
-      "Buy Like Local is a WhatsApp-based concierge service that helps foreigners, tourists, and expats buy authentic Argentine products in USD and ships them internationally from Buenos Aires.",
-    areaServed: "Worldwide",
+      "Concierge is a WhatsApp-based local concierge service in Buenos Aires that helps foreign tourists buy, book, and receive orders when foreign cards and local accounts are blocked.",
+    areaServed: "Buenos Aires, Argentina",
     foundingLocation: {
       "@type": "Place",
       name: "Buenos Aires, Argentina",
@@ -76,30 +86,32 @@ function JsonLd() {
       "@type": "ContactPoint",
       contactType: "customer service",
       telephone: "+5491158637341",
-      availableLanguage: ["English", "Spanish"],
+      email: "hola@concierge.com.ar",
+      availableLanguage: ["English", "Spanish", "Portuguese"],
     },
+    sameAs: ["https://instagram.com/concierge.ok"],
   }
 
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Buy Like Local - Argentine Shopping Concierge",
+    name: "Concierge — Buenos Aires Local Concierge",
     description:
-      "WhatsApp-based personal shopping concierge in Buenos Aires, Argentina. Helps foreigners buy local Argentine brands (wine, leather, fashion, artisan goods, alfajores, dulce de leche) in USD with international shipping. Accepts Visa, Mastercard, Amex, PayPal.",
+      "WhatsApp-based concierge service for foreign tourists in Buenos Aires. We buy on MercadoLibre, order food delivery, make reservations, handle QR payments, and deliver to your hotel or Airbnb.",
     provider: {
       "@type": "Organization",
-      name: "Buy Like Local",
+      name: "Concierge",
     },
     areaServed: {
       "@type": "Place",
-      name: "Worldwide",
+      name: "Buenos Aires, Argentina",
     },
-    serviceType: "Personal Shopping Concierge",
+    serviceType: "Local Concierge / Personal Shopping",
     offers: {
       "@type": "Offer",
       priceCurrency: "USD",
       description:
-        "Average order between $50 and $500 USD. Service fee included in quoted price. International shipping quoted separately.",
+        "Service fee typically 10-20% of order value. Exact quote sent before purchase. Payment via Mercado Pago, bank transfer, or crypto.",
     },
   }
 
@@ -109,50 +121,50 @@ function JsonLd() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "Can foreigners buy from Argentine brands?",
+        name: "How does payment work?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. Buy Like Local helps foreigners, tourists, and expats purchase from Argentine brands. Many local shops only accept Argentine payment methods or sell in-store only. We handle the purchase on your behalf and accept international credit cards in USD. We also help tourists already in Argentina access local payment systems like Mercado Pago and QR codes.",
+          text: "We send you a payment link via Mercado Pago or bank transfer details. You can pay in USD or ARS. You always see the exact total before paying.",
         },
       },
       {
         "@type": "Question",
-        name: "How do I pay in USD?",
+        name: "Is Concierge safe?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "All prices are quoted in USD. You pay via international credit card (Visa, Mastercard, Amex), PayPal, or wire transfer. No Argentine pesos needed.",
+          text: "Yes. We're a registered company in Buenos Aires. We send you a detailed quote before charging anything. No payment without your approval.",
         },
       },
       {
         "@type": "Question",
-        name: "Do you ship internationally from Argentina?",
+        name: "How long does delivery take?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. We ship worldwide from Buenos Aires. Delivery takes 5-10 business days to the US and Europe, 7-14 days to Asia and Oceania. Tracking provided on all shipments.",
+          text: "Depends on the order. Food delivery: 1-2 hours. Online purchases: 24-48 hours. Experiences and reservations: usually same day.",
         },
       },
       {
         "@type": "Question",
-        name: "Can I use my international credit card?",
+        name: "Do you deliver to hotels or Airbnbs?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. We accept Visa, Mastercard, and American Express from any country. All transactions are processed securely in USD.",
+          text: "Yes, anywhere in Buenos Aires. Just send us the address.",
         },
       },
       {
         "@type": "Question",
-        name: "What Argentine products can I buy through Buy Like Local?",
+        name: "Do I need to create an account?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "We source from any brand or store in Argentina: fashion designers, boutique wineries in Mendoza, leather artisans in San Telmo, specialty food producers (alfajores, dulce de leche, mate), and more. If it is sold in Argentina, we can get it for you.",
+          text: "No. Just WhatsApp. That's it.",
         },
       },
       {
         "@type": "Question",
-        name: "Why not buy directly from the Argentine brand?",
+        name: "What languages do you speak?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Most Argentine brands do not sell online to international customers, do not accept foreign credit cards, and do not ship internationally. Buy Like Local bridges that gap by acting as your local buyer. If you're a tourist in Argentina with a foreign card, most QR codes and local digital wallets will reject your payment. We act as your local payment proxy.",
+          text: "English, Español, and Português.",
         },
       },
     ],
@@ -186,7 +198,10 @@ export default function RootLayout({
       <head>
         <JsonLd />
       </head>
-      <body className={`font-sans ${inter.variable} ${GeistMono.variable} antialiased`}>
+      <body
+        className={`font-sans ${inter.variable} ${poppins.variable} ${GeistMono.variable} antialiased`}
+      >
+        {/* Google Analytics 4 */}
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-JK2YHFCTCD"
@@ -217,6 +232,23 @@ export default function RootLayout({
             gtag('config', 'G-JK2YHFCTCD');
           `}
         </Script>
+
+        {/* Meta Pixel — replace TODO_PIXEL_ID with actual pixel ID */}
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', 'TODO_PIXEL_ID');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+
         <Suspense fallback={null}>{children}</Suspense>
         <CookieBanner />
         <Analytics />
