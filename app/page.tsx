@@ -221,7 +221,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6" style={{ color: "#4A7070" }}>
+              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6" style={{ color: "#E8D5C0" }}>
                 {t.hero.subtitle}
               </p>
 
