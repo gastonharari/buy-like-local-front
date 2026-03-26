@@ -35,10 +35,10 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Chat on WhatsApp",
     },
     hero: {
-      h1: "We take care of the local.",
-      h1Echo: "Take care of enjoying.",
+      h1: "Local, handled.",
+      h1Echo: "You just enjoy.",
       subtitle:
-        "Can't pay with foreign cards? Can't create local accounts? Message us — we buy, book, and deliver for you.",
+        "Can't pay with foreign cards or create a local account? We handle it.",
       cta: "Chat with us on WhatsApp",
     },
     howItWorks: {
