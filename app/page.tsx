@@ -216,12 +216,12 @@ export default function Home() {
                 <span className="block text-5xl md:text-7xl font-bold text-balance">
                   {t.hero.h1}
                 </span>
-                <span className="block text-3xl md:text-5xl font-semibold text-balance text-muted-foreground mt-2">
+                <span className="block text-3xl md:text-5xl font-semibold text-balance text-white/70 mt-2">
                   {t.hero.h1Echo}
                 </span>
               </h1>
 
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed mt-6">
                 {t.hero.subtitle}
               </p>
 
