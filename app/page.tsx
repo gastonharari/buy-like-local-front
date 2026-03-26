@@ -210,10 +210,15 @@ export default function Home() {
           <div className="relative z-10 container mx-auto px-4 py-20 text-center">
             <div className="max-w-4xl mx-auto space-y-8">
               <h1
-                className="text-5xl md:text-7xl font-bold tracking-tight text-balance text-foreground"
+                className="tracking-tight text-foreground"
                 style={{ fontFamily: "var(--font-poppins)" }}
               >
-                {t.hero.h1}
+                <span className="block text-5xl md:text-7xl font-bold text-balance">
+                  {t.hero.h1}
+                </span>
+                <span className="block text-3xl md:text-5xl font-semibold text-balance text-muted-foreground mt-2">
+                  {t.hero.h1Echo}
+                </span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">

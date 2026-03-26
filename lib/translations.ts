@@ -3,7 +3,7 @@ export type Lang = "en" | "es" | "pt"
 interface LangConfig {
   waLink: string
   header: { cta: string }
-  hero: { h1: string; subtitle: string; cta: string }
+  hero: { h1: string; h1Echo: string; subtitle: string; cta: string }
   howItWorks: {
     title: string
     steps: Array<{ title: string; description: string }>
@@ -35,7 +35,8 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Chat on WhatsApp",
     },
     hero: {
-      h1: "We take care of the local. Take care of enjoying.",
+      h1: "We take care of the local.",
+      h1Echo: "Take care of enjoying.",
       subtitle:
         "Can't pay with foreign cards? Can't create local accounts? Message us — we buy, book, and deliver for you.",
       cta: "Chat with us on WhatsApp",
@@ -164,7 +165,8 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Escribinos por WhatsApp",
     },
     hero: {
-      h1: "Nos encargamos de lo local. Encárgate de disfrutar.",
+      h1: "Nos encargamos de lo local.",
+      h1Echo: "Encárgate de disfrutar.",
       subtitle:
         "No podés pagar con tarjeta extranjera? No podés crear cuenta local? Escribinos — compramos, reservamos y entregamos por vos.",
       cta: "Escribinos por WhatsApp",
@@ -299,7 +301,8 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Fale conosco no WhatsApp",
     },
     hero: {
-      h1: "A gente cuida do local. Cuide de aproveitar.",
+      h1: "A gente cuida do local.",
+      h1Echo: "Cuide de aproveitar.",
       subtitle:
         "Não consegue pagar com cartão estrangeiro? Não consegue criar conta local? Fale conosco — compramos, reservamos e entregamos pra você.",
       cta: "Fale conosco no WhatsApp",
