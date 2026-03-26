@@ -35,7 +35,7 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Chat on WhatsApp",
     },
     hero: {
-      h1: "Your local concierge in Buenos Aires",
+      h1: "We take care of the local. Take care of enjoying.",
       subtitle:
         "Can't pay with foreign cards? Can't create local accounts? Message us — we buy, book, and deliver for you.",
       cta: "Chat with us on WhatsApp",
@@ -151,7 +151,7 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Chat with us on WhatsApp",
     },
     footer: {
-      tagline: "Your local concierge in Buenos Aires",
+      tagline: "Every local errand in Buenos Aires, handled.",
       linkLabels: ["How it works", "Services", "Pricing", "FAQ", "About"],
       legal: "© 2026 Concierge. All rights reserved.",
     },
@@ -164,7 +164,7 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Escribinos por WhatsApp",
     },
     hero: {
-      h1: "Tu concierge local en Buenos Aires",
+      h1: "Nos encargamos de lo local. Encárgate de disfrutar.",
       subtitle:
         "No podés pagar con tarjeta extranjera? No podés crear cuenta local? Escribinos — compramos, reservamos y entregamos por vos.",
       cta: "Escribinos por WhatsApp",
@@ -280,7 +280,7 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Escribinos por WhatsApp",
     },
     footer: {
-      tagline: "Tu concierge local en Buenos Aires",
+      tagline: "Cada gestión local en Buenos Aires, resuelta.",
       linkLabels: [
         "Cómo funciona",
         "Servicios",
@@ -299,7 +299,7 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Fale conosco no WhatsApp",
     },
     hero: {
-      h1: "Seu concierge local em Buenos Aires",
+      h1: "A gente cuida do local. Cuide de aproveitar.",
       subtitle:
         "Não consegue pagar com cartão estrangeiro? Não consegue criar conta local? Fale conosco — compramos, reservamos e entregamos pra você.",
       cta: "Fale conosco no WhatsApp",
@@ -415,7 +415,7 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Fale conosco no WhatsApp",
     },
     footer: {
-      tagline: "Seu concierge local em Buenos Aires",
+      tagline: "Cada tarefa local em Buenos Aires, resolvida.",
       linkLabels: ["Como funciona", "Serviços", "Preços", "FAQ", "Quem somos"],
       legal: "© 2026 Concierge. Todos os direitos reservados.",
     },
