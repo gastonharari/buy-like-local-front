@@ -216,7 +216,7 @@ export default function Home() {
                 <span className="block text-5xl md:text-7xl font-bold text-balance">
                   {t.hero.h1}
                 </span>
-                <span className="block text-3xl md:text-5xl font-semibold text-balance mt-2" style={{ color: "#E8B84B" }}>
+                <span className="block text-3xl md:text-5xl font-semibold text-balance mt-2" style={{ color: "#D4A574" }}>
                   {t.hero.h1Echo}
                 </span>
               </h1>
