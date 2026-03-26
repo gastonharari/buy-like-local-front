@@ -3,7 +3,7 @@ export type Lang = "en" | "es" | "pt"
 interface LangConfig {
   waLink: string
   header: { cta: string }
-  hero: { h1: string; h1Echo: string; subtitle: string; cta: string }
+  hero: { h1: string; h1Echo: string; subtitle: string; cta: string; chatCta: string }
   howItWorks: {
     title: string
     steps: Array<{ title: string; description: string }>
@@ -19,7 +19,7 @@ interface LangConfig {
     title: string
     items: Array<{ q: string; a: string }>
   }
-  finalCta: { h2: string; subtitle: string; cta: string }
+  finalCta: { h2: string; subtitle: string; cta: string; chatCta: string }
   footer: {
     tagline: string
     linkLabels: string[]
@@ -32,13 +32,14 @@ export const translations: Record<Lang, LangConfig> = {
     waLink:
       "https://wa.me/5491158637341?text=Hi!%20I%20saw%20Concierge%20and%20I'd%20like%20to%20place%20an%20order",
     header: {
-      cta: "Chat on WhatsApp",
+      cta: "Chat with us",
     },
     hero: {
       h1: "Local, handled.",
       h1Echo: "You just enjoy.",
       subtitle:
         "Can't pay with foreign cards or create a local account? We handle it.",
+      chatCta: "No WhatsApp? Chat here",
       cta: "Chat with us on WhatsApp",
     },
     howItWorks: {
@@ -149,6 +150,7 @@ export const translations: Record<Lang, LangConfig> = {
     finalCta: {
       h2: "Ready to shop like a local?",
       subtitle: "It starts with a message. Tell us what you need.",
+      chatCta: "No WhatsApp? Chat here",
       cta: "Chat with us on WhatsApp",
     },
     footer: {
@@ -162,14 +164,15 @@ export const translations: Record<Lang, LangConfig> = {
     waLink:
       "https://wa.me/5491158637341?text=Hola!%20Vi%20Concierge%20y%20quiero%20hacer%20un%20pedido",
     header: {
-      cta: "Escribinos por WhatsApp",
+      cta: "Chatear con nosotros",
     },
     hero: {
       h1: "Nos encargamos de lo local.",
       h1Echo: "Encárgate de disfrutar.",
       subtitle:
         "No podés pagar con tarjeta extranjera? No podés crear cuenta local? Escribinos — compramos, reservamos y entregamos por vos.",
-      cta: "Escribinos por WhatsApp",
+      chatCta: "¿Sin WhatsApp? Chateá acá",
+      cta: "Chateá con nosotros por WhatsApp",
     },
     howItWorks: {
       title: "Cómo funciona",
@@ -279,7 +282,8 @@ export const translations: Record<Lang, LangConfig> = {
     finalCta: {
       h2: "Listo para comprar como un local?",
       subtitle: "Empieza con un mensaje. Contanos qué necesitás.",
-      cta: "Escribinos por WhatsApp",
+      chatCta: "¿Sin WhatsApp? Chateá acá",
+      cta: "Chateá con nosotros por WhatsApp",
     },
     footer: {
       tagline: "Cada gestión local en Buenos Aires, resuelta.",
@@ -298,14 +302,15 @@ export const translations: Record<Lang, LangConfig> = {
     waLink:
       "https://wa.me/5491158637341?text=Oi!%20Vi%20o%20Concierge%20e%20quero%20fazer%20um%20pedido",
     header: {
-      cta: "Fale conosco no WhatsApp",
+      cta: "Falar conosco",
     },
     hero: {
       h1: "A gente cuida do local.",
       h1Echo: "Cuide de aproveitar.",
       subtitle:
         "Não consegue pagar com cartão estrangeiro? Não consegue criar conta local? Fale conosco — compramos, reservamos e entregamos pra você.",
-      cta: "Fale conosco no WhatsApp",
+      chatCta: "Sem WhatsApp? Chat aqui",
+      cta: "Fale conosco pelo WhatsApp",
     },
     howItWorks: {
       title: "Como funciona",
@@ -415,7 +420,8 @@ export const translations: Record<Lang, LangConfig> = {
     finalCta: {
       h2: "Pronto para comprar como um local?",
       subtitle: "Começa com uma mensagem. Diga o que precisa.",
-      cta: "Fale conosco no WhatsApp",
+      chatCta: "Sem WhatsApp? Chat aqui",
+      cta: "Fale conosco pelo WhatsApp",
     },
     footer: {
       tagline: "Cada tarefa local em Buenos Aires, resolvida.",

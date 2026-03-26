@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script"
 import { Suspense } from "react"
 import { CookieBanner } from "@/components/cookie-banner"
+import { ChatWidget } from "@/components/chat-widget"
 import "./globals.css"
 
 const inter = Inter({
@@ -251,6 +252,7 @@ export default function RootLayout({
 
         <Suspense fallback={null}>{children}</Suspense>
         <CookieBanner />
+        <ChatWidget />
         <Analytics />
       </body>
     </html>

@@ -94,7 +94,6 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export default function Home() {
   const [lang, setLang] = useState<Lang>("en")
   const [scrolled, setScrolled] = useState(false)
-  const [isPulsing, setIsPulsing] = useState(true)
 
   useEffect(() => {
     // Initialize language from localStorage, then browser preference
@@ -106,10 +105,6 @@ export default function Home() {
       if (browserLang.startsWith("pt")) setLang("pt")
       else if (browserLang.startsWith("es")) setLang("es")
     }
-
-    // Stop floating button pulse after 3 seconds
-    const pulseTimer = setTimeout(() => setIsPulsing(false), 3000)
-    return () => clearTimeout(pulseTimer)
   }, [])
 
   useEffect(() => {
@@ -127,18 +122,6 @@ export default function Home() {
 
   return (
     <>
-      {/* ── Floating WhatsApp Button ─────────────────────────────────────── */}
-      <a
-        href={t.waLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat on WhatsApp"
-        className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-black/30 transition-transform duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#25D366] ${isPulsing ? "animate-pulse" : ""}`}
-        style={{ backgroundColor: "#25D366" }}
-      >
-        <WhatsAppIcon className="h-7 w-7 text-white" />
-      </a>
-
       {/* ── Sticky Header ────────────────────────────────────────────────── */}
       <header
         className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 backdrop-blur-md transition-all duration-300 ${
@@ -176,18 +159,28 @@ export default function Home() {
               ))}
             </div>
 
-            <Button
-              size="sm"
-              className="shrink-0 text-white hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#25D366" }}
-              asChild
-            >
-              <a href={t.waLink} target="_blank" rel="noopener noreferrer">
-                <WhatsAppIcon className="w-4 h-4 mr-1.5" />
-                <span className="hidden sm:inline">{t.header.cta}</span>
-                <span className="sm:hidden">WhatsApp</span>
-              </a>
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                className="hover:opacity-90 transition-opacity text-white font-semibold"
+                style={{ backgroundColor: "#25D366" }}
+                asChild
+              >
+                <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                  <WhatsAppIcon className="w-4 h-4 mr-1.5" />
+                  WhatsApp
+                </a>
+              </Button>
+              <Button
+                size="sm"
+                className="hidden sm:flex font-semibold hover:scale-105 transition-all duration-200"
+                style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+              >
+                <MessageCircle className="w-4 h-4 mr-1.5" />
+                {t.header.cta}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -225,10 +218,10 @@ export default function Home() {
                 {t.hero.subtitle}
               </p>
 
-              <div className="flex justify-center pt-4">
+              <div className="flex flex-col items-center gap-3 pt-4">
                 <Button
                   size="lg"
-                  className="text-lg px-8 py-6 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  className="text-lg px-10 py-6 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl"
                   style={{ backgroundColor: "#25D366" }}
                   asChild
                 >
@@ -236,6 +229,15 @@ export default function Home() {
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.hero.cta}
                   </a>
+                </Button>
+                <Button
+                  size="default"
+                  className="font-semibold transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  {t.hero.chatCta}
                 </Button>
               </div>
             </div>
@@ -504,17 +506,28 @@ export default function Home() {
               <p className="text-xl text-muted-foreground text-balance leading-relaxed">
                 {t.finalCta.subtitle}
               </p>
-              <Button
-                size="lg"
-                className="text-lg px-8 py-6 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                style={{ backgroundColor: "#25D366" }}
-                asChild
-              >
-                <a href={t.waLink} target="_blank" rel="noopener noreferrer">
-                  <WhatsAppIcon className="w-5 h-5 mr-2" />
-                  {t.finalCta.cta}
-                </a>
-              </Button>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  size="lg"
+                  className="text-lg px-10 py-6 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  style={{ backgroundColor: "#25D366" }}
+                  asChild
+                >
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                    <WhatsAppIcon className="w-5 h-5 mr-2" />
+                    {t.finalCta.cta}
+                  </a>
+                </Button>
+                <Button
+                  size="default"
+                  className="font-semibold transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  {t.finalCta.chatCta}
+                </Button>
+              </div>
             </div>
           </div>
         </section>
