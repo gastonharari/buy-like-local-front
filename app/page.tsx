@@ -108,9 +108,13 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
+    let raf: number
+    const handleScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setScrolled(window.scrollY > 20))
+    }
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => { window.removeEventListener("scroll", handleScroll); cancelAnimationFrame(raf) }
   }, [])
 
   const changeLang = (newLang: Lang) => {
@@ -125,8 +129,8 @@ export default function Home() {
     <>
       {/* ── Sticky Header ────────────────────────────────────────────────── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 backdrop-blur-md transition-all duration-300 ${
-          scrolled ? "bg-background/95 shadow-lg" : "bg-background/80"
+        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-colors duration-300 ${
+          scrolled ? "bg-background shadow-lg" : "bg-background/90"
         }`}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
@@ -272,7 +276,7 @@ export default function Home() {
                 return (
                   <Card
                     key={i}
-                    className={`p-8 text-center space-y-4 border-2 border-border hover:${c.ring} transition-all duration-300 hover:shadow-lg bg-card`}
+                    className={`p-8 text-center space-y-4 border-2 border-border hover:${c.ring} transition-colors duration-300 bg-card`}
                   >
                     <div
                       className={`w-16 h-16 rounded-full ${c.icon} flex items-center justify-center mx-auto`}
@@ -316,7 +320,7 @@ export default function Home() {
                 return (
                   <Card
                     key={i}
-                    className="p-6 space-y-4 border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 bg-card group"
+                    className="p-6 space-y-4 border border-border hover:border-primary/50 transition-colors duration-300 bg-card group"
                   >
                     <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300">
                       <Icon className="w-6 h-6 text-primary" />
