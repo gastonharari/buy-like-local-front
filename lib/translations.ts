@@ -40,7 +40,7 @@ export const translations: Record<Lang, LangConfig> = {
       subtitle:
         "Can't pay with foreign cards or create a local account? We handle it.",
       chatCta: "No WhatsApp? Chat here",
-      cta: "Chat with us on WhatsApp",
+      cta: "Chat on WhatsApp",
     },
     howItWorks: {
       title: "How it works",
@@ -151,7 +151,7 @@ export const translations: Record<Lang, LangConfig> = {
       h2: "Ready to shop like a local?",
       subtitle: "It starts with a message. Tell us what you need.",
       chatCta: "No WhatsApp? Chat here",
-      cta: "Chat with us on WhatsApp",
+      cta: "Chat on WhatsApp",
     },
     footer: {
       tagline: "Every local errand in Buenos Aires, handled.",
@@ -172,7 +172,7 @@ export const translations: Record<Lang, LangConfig> = {
       subtitle:
         "No podés pagar con tarjeta extranjera? No podés crear cuenta local? Escribinos — compramos, reservamos y entregamos por vos.",
       chatCta: "¿Sin WhatsApp? Chateá acá",
-      cta: "Chateá con nosotros por WhatsApp",
+      cta: "Chateá por WhatsApp",
     },
     howItWorks: {
       title: "Cómo funciona",
@@ -283,7 +283,7 @@ export const translations: Record<Lang, LangConfig> = {
       h2: "Listo para comprar como un local?",
       subtitle: "Empieza con un mensaje. Contanos qué necesitás.",
       chatCta: "¿Sin WhatsApp? Chateá acá",
-      cta: "Chateá con nosotros por WhatsApp",
+      cta: "Chateá por WhatsApp",
     },
     footer: {
       tagline: "Cada gestión local en Buenos Aires, resuelta.",
@@ -310,7 +310,7 @@ export const translations: Record<Lang, LangConfig> = {
       subtitle:
         "Não consegue pagar com cartão estrangeiro? Não consegue criar conta local? Fale conosco — compramos, reservamos e entregamos pra você.",
       chatCta: "Sem WhatsApp? Chat aqui",
-      cta: "Fale conosco pelo WhatsApp",
+      cta: "Fale pelo WhatsApp",
     },
     howItWorks: {
       title: "Como funciona",
@@ -421,7 +421,7 @@ export const translations: Record<Lang, LangConfig> = {
       h2: "Pronto para comprar como um local?",
       subtitle: "Começa com uma mensagem. Diga o que precisa.",
       chatCta: "Sem WhatsApp? Chat aqui",
-      cta: "Fale conosco pelo WhatsApp",
+      cta: "Fale pelo WhatsApp",
     },
     footer: {
       tagline: "Cada tarefa local em Buenos Aires, resolvida.",

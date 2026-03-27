@@ -76,6 +76,11 @@ export function ChatWidget() {
   }, [])
 
   useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [open])
+
+  useEffect(() => {
     function handleMessage(e: MessageEvent) {
       if (e.data?.type !== "new-message") return
       playNotificationSound()
