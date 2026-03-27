@@ -186,9 +186,9 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="min-h-screen pt-16">
+      <main className="min-h-dvh pt-16">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-dvh flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
@@ -201,16 +201,16 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
           </div>
 
-          <div className="relative z-10 container mx-auto px-4 py-20 text-center">
-            <div className="max-w-4xl mx-auto space-y-8">
+          <div className="relative z-10 container mx-auto px-4 py-10 md:py-20 text-center">
+            <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
               <h1
                 className="tracking-tight text-foreground"
                 style={{ fontFamily: "var(--font-poppins)" }}
               >
-                <span className="block text-5xl md:text-7xl font-bold text-balance">
+                <span className="block text-4xl md:text-7xl font-bold text-balance">
                   {t.hero.h1}
                 </span>
-                <span className="block text-3xl md:text-5xl font-semibold text-balance mt-2" style={{ color: "#D4A574" }}>
+                <span className="block text-2xl md:text-5xl font-semibold text-balance mt-2" style={{ color: "#D4A574" }}>
                   {t.hero.h1Echo}
                 </span>
               </h1>

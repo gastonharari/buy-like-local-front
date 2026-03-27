@@ -48,6 +48,7 @@ export function ChatWidget() {
   const [pulsing, setPulsing] = useState(true)
   const [unread, setUnread] = useState(false)
   const [lang, setLang] = useState<Lang>("en")
+  const [revealed, setRevealed] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export function ChatWidget() {
   }, [])
 
   useEffect(() => {
-    const handler = () => setOpen(true)
+    const handler = () => { setOpen(true); setRevealed(true) }
     window.addEventListener("open-chat", handler)
     return () => window.removeEventListener("open-chat", handler)
   }, [])
@@ -79,6 +80,15 @@ export function ChatWidget() {
     document.body.style.overflow = open ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
   }, [open])
+
+  useEffect(() => {
+    if (revealed) return
+    function handleScroll() {
+      if (window.scrollY > window.innerHeight * 0.7) setRevealed(true)
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [revealed])
 
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
@@ -159,8 +169,16 @@ export function ChatWidget() {
         />
       </div>
 
-      {/* Floating button + label */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+      {/* Floating button + label — hidden until user scrolls past hero */}
+      <div
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
+        style={{
+          opacity: (revealed || open) ? 1 : 0,
+          transform: (revealed || open) ? "translateY(0)" : "translateY(16px)",
+          pointerEvents: (revealed || open) ? "auto" : "none",
+          transition: "opacity 300ms ease, transform 300ms ease",
+        }}
+      >
         {!open && (
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg pointer-events-none"
