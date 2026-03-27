@@ -116,6 +116,7 @@ export default function Home() {
   const changeLang = (newLang: Lang) => {
     setLang(newLang)
     localStorage.setItem("concierge-lang", newLang)
+    window.dispatchEvent(new CustomEvent("lang-change", { detail: newLang }))
   }
 
   const t = translations[lang]
