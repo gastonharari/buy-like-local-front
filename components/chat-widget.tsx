@@ -83,11 +83,15 @@ export function ChatWidget() {
 
   useEffect(() => {
     if (revealed) return
+    let raf: number
     function handleScroll() {
-      if (window.scrollY > window.innerHeight * 0.7) setRevealed(true)
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        if (window.scrollY > window.innerHeight * 0.7) setRevealed(true)
+      })
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => { window.removeEventListener("scroll", handleScroll); cancelAnimationFrame(raf) }
   }, [revealed])
 
   useEffect(() => {
@@ -112,6 +116,7 @@ export function ChatWidget() {
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 200ms ease",
+          willChange: "opacity",
         }}
         onClick={() => setOpen(false)}
       />
@@ -128,6 +133,7 @@ export function ChatWidget() {
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 200ms ease, transform 200ms ease",
           boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,165,116,0.25)",
+          willChange: "opacity, transform",
         }}
       >
         {/* Toolbar */}
@@ -177,16 +183,18 @@ export function ChatWidget() {
           transform: (revealed || open) ? "translateY(0)" : "translateY(16px)",
           pointerEvents: (revealed || open) ? "auto" : "none",
           transition: "opacity 300ms ease, transform 300ms ease",
+          willChange: "opacity, transform",
         }}
       >
         {!open && (
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg pointer-events-none"
+          <button
+            onClick={() => { setOpen(true); setUnread(false) }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg cursor-pointer"
             style={{ background: "#112E2F", color: "#D4A574", border: "1px solid rgba(212,165,116,0.3)" }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#D4A574" }} />
             {i18n.label}
-          </div>
+          </button>
         )}
         <button
           onClick={() => { setOpen((v) => !v); setUnread(false) }}

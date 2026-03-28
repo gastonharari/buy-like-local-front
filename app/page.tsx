@@ -129,9 +129,10 @@ export default function Home() {
     <>
       {/* ── Sticky Header ────────────────────────────────────────────────── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-colors duration-300 ${
-          scrolled ? "bg-background shadow-lg" : "bg-background/90"
+        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-shadow duration-300 bg-background ${
+          scrolled ? "shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : ""
         }`}
+        style={{ willChange: "transform" }}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
@@ -178,7 +179,7 @@ export default function Home() {
               </Button>
               <Button
                 size="sm"
-                className="hidden sm:flex font-semibold hover:scale-105 transition-all duration-200"
+                className="hidden sm:flex font-semibold hover:scale-105 transition-transform duration-200"
                 style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
                 onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
               >
@@ -226,7 +227,7 @@ export default function Home() {
               <div className="flex flex-col items-center gap-3 pt-4">
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-6 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  className="text-lg px-10 py-6 font-bold text-white transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   style={{ backgroundColor: "#25D366" }}
                   asChild
                 >
@@ -237,7 +238,7 @@ export default function Home() {
                 </Button>
                 <Button
                   size="default"
-                  className="font-semibold transition-all duration-300 hover:scale-105"
+                  className="font-semibold transition-transform duration-300 hover:scale-105"
                   style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
                   onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
                 >
@@ -514,7 +515,7 @@ export default function Home() {
               <div className="flex flex-col items-center gap-3">
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-6 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  className="text-lg px-10 py-6 font-bold text-white transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   style={{ backgroundColor: "#25D366" }}
                   asChild
                 >
@@ -525,7 +526,7 @@ export default function Home() {
                 </Button>
                 <Button
                   size="default"
-                  className="font-semibold transition-all duration-300 hover:scale-105"
+                  className="font-semibold transition-transform duration-300 hover:scale-105"
                   style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
                   onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
                 >
