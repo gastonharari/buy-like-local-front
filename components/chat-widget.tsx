@@ -82,17 +82,16 @@ export function ChatWidget() {
   }, [open])
 
   useEffect(() => {
-    if (revealed) return
     let raf: number
     function handleScroll() {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        if (window.scrollY > window.innerHeight * 0.7) setRevealed(true)
+        setRevealed(window.scrollY > window.innerHeight * 0.7)
       })
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => { window.removeEventListener("scroll", handleScroll); cancelAnimationFrame(raf) }
-  }, [revealed])
+  }, [])
 
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
