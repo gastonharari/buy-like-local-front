@@ -15,14 +15,9 @@ import {
   ShoppingBag,
   Package,
   ShoppingCart,
-  UtensilsCrossed,
   Ticket,
   Wine,
-  QrCode,
-  HelpCircle,
   Instagram,
-  CheckCircle,
-  CreditCard,
 } from "lucide-react"
 import { translations, type Lang } from "@/lib/translations"
 
@@ -32,11 +27,8 @@ const STEP_ICONS = [MessageCircle, ShoppingBag, Package]
 
 const SERVICE_ICONS = [
   ShoppingCart,
-  UtensilsCrossed,
   Ticket,
   Wine,
-  QrCode,
-  HelpCircle,
 ]
 
 // Testimonials are always in English — they're quotes from foreign tourists
@@ -57,18 +49,17 @@ const TESTIMONIALS = [
     country: "United States",
   },
   {
-    flag: "🇬🇧",
+    flag: "🇺🇾",
     quote:
-      "I wanted to order food delivery but PedidosYa wouldn't accept my card. Concierge saved my night.",
-    name: "James R.",
-    country: "United Kingdom",
+      "Quería comprar una camiseta de Independiente en la página de Puma pero no me dejaba pagar. Concierge la compró por mí.",
+    name: "Matías R.",
+    country: "Uruguay",
   },
 ]
 
 const FOOTER_LINK_HREFS = [
   "#how-it-works",
   "#services",
-  "#pricing",
   "#faq",
   "#about",
 ]
@@ -121,12 +112,21 @@ export default function Home() {
     setLang(newLang)
     localStorage.setItem("concierge-lang", newLang)
     window.dispatchEvent(new CustomEvent("lang-change", { detail: newLang }))
+    document.documentElement.lang = newLang
   }
 
   const t = translations[lang]
 
   return (
     <>
+      {/* ── Skip navigation ──────────────────────────────────────────────── */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded focus:bg-background focus:text-foreground focus:font-semibold focus:shadow-lg"
+      >
+        Skip to content
+      </a>
+
       {/* ── Sticky Header ────────────────────────────────────────────────── */}
       <header
         className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-shadow duration-300 bg-background ${
@@ -137,12 +137,13 @@ export default function Home() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <a href="#" className="shrink-0">
-            <span
-              className="text-xl font-bold text-foreground tracking-tight"
-              style={{ fontFamily: "var(--font-poppins)" }}
-            >
-              Concierge
-            </span>
+            <Image
+              src="/concierge-logo.svg"
+              alt="Concierge Buenos Aires"
+              width={232}
+              height={57}
+              priority
+            />
           </a>
 
           {/* Language toggle + CTA */}
@@ -153,7 +154,8 @@ export default function Home() {
                   {i > 0 && <span className="mx-1 opacity-30">|</span>}
                   <button
                     onClick={() => changeLang(l)}
-                    className={`transition-colors duration-150 hover:text-foreground ${
+                    aria-pressed={lang === l}
+                    className={`min-h-[44px] min-w-[44px] transition-colors duration-150 hover:text-foreground ${
                       lang === l
                         ? "text-foreground font-semibold"
                         : "text-muted-foreground"
@@ -191,7 +193,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="min-h-dvh pt-16">
+      <main id="main-content" className="min-h-dvh pt-16">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative min-h-dvh flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
@@ -220,7 +222,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6" style={{ color: "#E8D5C0" }}>
+              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-left" style={{ color: "#E8D5C0" }}>
                 {t.hero.subtitle}
               </p>
 
@@ -280,11 +282,12 @@ export default function Home() {
                     className={`p-8 text-center space-y-4 border-2 border-border hover:${c.ring} transition-colors duration-300 bg-card`}
                   >
                     <div
+                      aria-hidden="true"
                       className={`w-16 h-16 rounded-full ${c.icon} flex items-center justify-center mx-auto`}
                     >
                       <Icon className="w-8 h-8" />
                     </div>
-                    <div className={`text-6xl font-bold ${c.num}`}>
+                    <div aria-hidden="true" className={`text-6xl font-bold ${c.num}`}>
                       0{i + 1}
                     </div>
                     <h3 className="text-xl font-bold text-card-foreground">
@@ -323,7 +326,7 @@ export default function Home() {
                     key={i}
                     className="p-6 space-y-4 border border-border hover:border-primary/50 transition-colors duration-300 bg-card group"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300">
+                    <div aria-hidden="true" className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold text-card-foreground">
@@ -368,11 +371,11 @@ export default function Home() {
                   >
                     &ldquo;
                   </span>
-                  <p className="text-foreground leading-relaxed pt-6 relative z-10">
+                  <p className="text-foreground leading-relaxed pt-6 relative z-10 text-left">
                     &ldquo;{item.quote}&rdquo;
                   </p>
                   <div className="flex items-center gap-3 pt-2 border-t border-border">
-                    <span className="text-2xl">{item.flag}</span>
+                    <span aria-hidden="true" className="text-2xl">{item.flag}</span>
                     <div>
                       <p className="font-semibold text-foreground text-sm">
                         {item.name}
@@ -401,54 +404,17 @@ export default function Home() {
               >
                 {t.about.title}
               </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-muted-foreground leading-relaxed text-left">
                 {t.about.body}
               </p>
               <p className="text-sm text-muted-foreground">
                 <a
-                  href="mailto:hola@concierge.com.ar"
+                  href="mailto:info@concierge.com.ar"
                   className="text-primary hover:underline"
                 >
                   {t.about.contact}
                 </a>
               </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Pricing ──────────────────────────────────────────────────────── */}
-        <section
-          id="pricing"
-          className="py-24 bg-background relative overflow-hidden scroll-mt-20"
-        >
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl mx-auto text-center space-y-8">
-              <h2
-                className="text-4xl md:text-5xl font-bold text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
-                {t.pricing.title}
-              </h2>
-
-              <Card className="p-8 md:p-10 border border-border bg-card space-y-6 text-left">
-                <p className="text-foreground leading-relaxed text-lg">
-                  {t.pricing.body}
-                </p>
-
-                <div className="flex gap-3 p-4 rounded-lg bg-primary/10 border border-primary/20">
-                  <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    {t.pricing.subDetail}
-                  </p>
-                </div>
-
-                <div className="flex gap-3 p-4 rounded-lg bg-muted/10 border border-border">
-                  <CreditCard className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-                  <p className="text-muted-foreground text-sm">
-                    {t.pricing.note}
-                  </p>
-                </div>
-              </Card>
             </div>
           </div>
         </section>
@@ -589,10 +555,10 @@ export default function Home() {
                 Contact
               </p>
               <a
-                href="mailto:hola@concierge.com.ar"
+                href="mailto:info@concierge.com.ar"
                 className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
               >
-                hola@concierge.com.ar
+                info@concierge.com.ar
               </a>
               <a
                 href={t.waLink}
@@ -611,7 +577,8 @@ export default function Home() {
                     {i > 0 && <span className="mr-2 text-border">|</span>}
                     <button
                       onClick={() => changeLang(l)}
-                      className={`text-sm transition-colors duration-150 ${
+                      aria-pressed={lang === l}
+                      className={`min-h-[44px] min-w-[44px] text-sm transition-colors duration-150 ${
                         lang === l
                           ? "text-foreground font-semibold"
                           : "text-muted-foreground hover:text-foreground"

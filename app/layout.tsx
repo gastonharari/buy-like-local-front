@@ -87,7 +87,7 @@ function JsonLd() {
       "@type": "ContactPoint",
       contactType: "customer service",
       telephone: "+5491158637341",
-      email: "hola@concierge.com.ar",
+      email: "info@concierge.com.ar",
       availableLanguage: ["English", "Spanish", "Portuguese"],
     },
     sameAs: ["https://instagram.com/concierge.ok"],

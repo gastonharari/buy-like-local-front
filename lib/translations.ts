@@ -14,7 +14,6 @@ interface LangConfig {
   }
   testimonials: { title: string }
   about: { title: string; body: string; contact: string }
-  pricing: { title: string; body: string; subDetail: string; note: string }
   faq: {
     title: string
     items: Array<{ q: string; a: string }>
@@ -48,7 +47,7 @@ export const translations: Record<Lang, LangConfig> = {
         {
           title: "Message us on WhatsApp",
           description:
-            "Tell us what you need: products, reservations, tickets, online purchases, anything.",
+            "Tell us what you need — event tickets, MercadoLibre orders, or local store purchases.",
         },
         {
           title: "Your local concierge handles everything",
@@ -70,28 +69,14 @@ export const translations: Record<Lang, LangConfig> = {
             "We buy for you on MercadoLibre, Fravega, Farmacity, and any local store",
         },
         {
-          title: "Food & Delivery",
-          description:
-            "We order from PedidosYa, Rappi, or buy directly from local spots",
-        },
-        {
           title: "Experiences",
           description:
-            "Restaurant reservations, tango shows, tours, event tickets",
+            "Tango shows, tours, event tickets",
         },
         {
           title: "Local Products",
           description:
             "Artisan goods, wine, leather, sweets — packaged for travel",
-        },
-        {
-          title: "Payments & Services",
-          description:
-            "QR payments, SUBE card top-ups, and anything needing a local account",
-        },
-        {
-          title: "Whatever You Need",
-          description: "Not on the list? Ask us. We'll do our best.",
         },
       ],
     },
@@ -101,29 +86,18 @@ export const translations: Record<Lang, LangConfig> = {
     about: {
       title: "Who's behind Concierge?",
       body: "We're a local team in Buenos Aires. We know how frustrating it is to visit Argentina and not be able to buy, pay, or book things because of card and account restrictions. We created Concierge to fix that — a simple WhatsApp message connects you with someone who handles everything locally, so you can enjoy your trip.",
-      contact: "Questions? Email us at hola@concierge.com.ar",
-    },
-    pricing: {
-      title: "Transparent pricing",
-      body: "You pay the product price + our service fee. Before we buy anything, we send you an exact quote with the total cost. No surprises, no hidden fees.",
-      subDetail:
-        "Service fee: varies by order (typically 10-20%). You always approve the total before we proceed.",
-      note: "Payment via Mercado Pago, bank transfer, or crypto. All in USD or ARS.",
+      contact: "Questions? Email us at info@concierge.com.ar",
     },
     faq: {
       title: "Frequently asked questions",
       items: [
         {
           q: "How does payment work?",
-          a: "We send you a payment link via Mercado Pago or bank transfer details. You can pay in USD or ARS. You always see the exact total before paying.",
+          a: "We send you a PayPal link. You can pay with credit card, debit card, or PayPal balance. You always see the exact total before paying.",
         },
         {
           q: "Is this safe?",
-          a: "Yes. We're a registered company in Buenos Aires. We send you a detailed quote before charging anything. No payment without your approval.",
-        },
-        {
-          q: "How long does delivery take?",
-          a: "Depends on the order. Food delivery: 1-2 hours. Online purchases: 24-48 hours. Experiences and reservations: usually same day.",
+          a: "Yes. We send you a detailed quote before charging anything. No payment without your approval.",
         },
         {
           q: "What if something goes wrong?",
@@ -139,7 +113,7 @@ export const translations: Record<Lang, LangConfig> = {
         },
         {
           q: "Do I need to create an account?",
-          a: "No. Just WhatsApp. That's it.",
+          a: "No. Just WhatsApp or our chat. That's it.",
         },
         {
           q: "What languages do you speak?",
@@ -154,8 +128,8 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Chat on WhatsApp",
     },
     footer: {
-      tagline: "Every local errand in Buenos Aires, handled.",
-      linkLabels: ["How it works", "Services", "Pricing", "FAQ", "About"],
+      tagline: "Event tickets, MercadoLibre, local stores — handled.",
+      linkLabels: ["How it works", "Services", "FAQ", "About"],
       legal: "© 2026 Concierge. All rights reserved.",
     },
   },
@@ -180,7 +154,7 @@ export const translations: Record<Lang, LangConfig> = {
         {
           title: "Escribinos por WhatsApp",
           description:
-            "Contanos qué necesitás: productos, reservas, entradas, compras online, lo que sea.",
+            "Contanos qué necesitás — entradas para eventos, pedidos en MercadoLibre o compras en tiendas locales.",
         },
         {
           title: "Tu concierge local se encarga de todo",
@@ -203,27 +177,13 @@ export const translations: Record<Lang, LangConfig> = {
             "Compramos por vos en MercadoLibre, Fravega, Farmacity y cualquier tienda local",
         },
         {
-          title: "Food & Delivery",
-          description:
-            "Pedimos por PedidosYa, Rappi, o compramos directo en locales",
-        },
-        {
           title: "Experiencias",
           description:
-            "Reservas en restaurantes, shows de tango, tours, entradas",
+            "Shows de tango, tours, entradas para eventos",
         },
         {
           title: "Productos Locales",
           description: "Artesanías, vinos, cuero, dulces típicos para llevar",
-        },
-        {
-          title: "Pagos y Servicios",
-          description:
-            "Pagos con QR, carga de SUBE, y lo que necesite cuenta local",
-        },
-        {
-          title: "Lo Que Necesites",
-          description: "No está en la lista? Preguntanos. Hacemos lo posible.",
         },
       ],
     },
@@ -233,29 +193,18 @@ export const translations: Record<Lang, LangConfig> = {
     about: {
       title: "Quiénes somos",
       body: "Somos un equipo local en Buenos Aires. Sabemos lo frustrante que es visitar Argentina y no poder comprar, pagar o reservar por restricciones de tarjetas y cuentas. Creamos Concierge para resolver eso — un simple mensaje de WhatsApp te conecta con alguien que gestiona todo localmente, para que vos disfrutes tu viaje.",
-      contact: "Consultas? Escribinos a hola@concierge.com.ar",
-    },
-    pricing: {
-      title: "Precios transparentes",
-      body: "Pagás el precio del producto + nuestra comisión de servicio. Antes de comprar, te mandamos una cotización exacta con el costo total. Sin sorpresas, sin costos ocultos.",
-      subDetail:
-        "Comisión de servicio: varía según el pedido (generalmente 10-20%). Siempre aprobás el total antes de que avancemos.",
-      note: "Pago por Mercado Pago, transferencia bancaria o crypto. Todo en USD o ARS.",
+      contact: "Consultas? Escribinos a info@concierge.com.ar",
     },
     faq: {
       title: "Preguntas frecuentes",
       items: [
         {
           q: "Cómo funciona el pago?",
-          a: "Te mandamos un link de pago por Mercado Pago o datos de transferencia. Podés pagar en USD o ARS. Siempre ves el total exacto antes de pagar.",
+          a: "Te mandamos un link de PayPal. Podés pagar con tarjeta de crédito, débito o saldo de PayPal. Siempre ves el total exacto antes de pagar.",
         },
         {
           q: "Es seguro?",
-          a: "Sí. Somos una empresa registrada en Buenos Aires. Te mandamos cotización detallada antes de cobrar. Sin pago sin tu aprobación.",
-        },
-        {
-          q: "Cuánto tarda la entrega?",
-          a: "Depende del pedido. Food delivery: 1-2 horas. Compras online: 24-48 horas. Experiencias y reservas: generalmente en el día.",
+          a: "Sí. Te mandamos cotización detallada antes de cobrar. Sin pago sin tu aprobación.",
         },
         {
           q: "Qué pasa si hay un problema?",
@@ -271,7 +220,7 @@ export const translations: Record<Lang, LangConfig> = {
         },
         {
           q: "Necesito crear una cuenta?",
-          a: "No. Solo WhatsApp. Nada más.",
+          a: "No. Solo WhatsApp o nuestro chat. Nada más.",
         },
         {
           q: "En qué idiomas trabajan?",
@@ -286,11 +235,10 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Chateá por WhatsApp",
     },
     footer: {
-      tagline: "Cada gestión local en Buenos Aires, resuelta.",
+      tagline: "Entradas, MercadoLibre, tiendas locales — resuelto.",
       linkLabels: [
         "Cómo funciona",
         "Servicios",
-        "Precios",
         "FAQ",
         "Quiénes somos",
       ],
@@ -318,7 +266,7 @@ export const translations: Record<Lang, LangConfig> = {
         {
           title: "Mande mensagem no WhatsApp",
           description:
-            "Diga o que precisa: produtos, reservas, ingressos, compras online, qualquer coisa.",
+            "Diga o que precisa — ingressos para eventos, pedidos no MercadoLibre ou compras em lojas locais.",
         },
         {
           title: "Seu concierge local cuida de tudo",
@@ -341,27 +289,13 @@ export const translations: Record<Lang, LangConfig> = {
             "Compramos pra você no MercadoLibre, Fravega, Farmacity e qualquer loja local",
         },
         {
-          title: "Food & Delivery",
-          description:
-            "Pedimos no PedidosYa, Rappi, ou compramos direto em locais",
-        },
-        {
           title: "Experiências",
           description:
-            "Reservas em restaurantes, shows de tango, tours, ingressos",
+            "Shows de tango, tours, ingressos para eventos",
         },
         {
           title: "Produtos Locais",
           description: "Artesanato, vinhos, couro, doces típicos para levar",
-        },
-        {
-          title: "Pagamentos e Serviços",
-          description:
-            "Pagamentos QR, recarga de SUBE, e tudo que precise de conta local",
-        },
-        {
-          title: "O Que Precisar",
-          description: "Não está na lista? Pergunte. Fazemos o possível.",
         },
       ],
     },
@@ -371,29 +305,18 @@ export const translations: Record<Lang, LangConfig> = {
     about: {
       title: "Quem somos",
       body: "Somos uma equipe local em Buenos Aires. Sabemos como é frustrante visitar a Argentina e não conseguir comprar, pagar ou reservar por restrições de cartões e contas. Criamos o Concierge pra resolver isso — uma simples mensagem no WhatsApp te conecta com alguém que resolve tudo localmente, pra você aproveitar sua viagem.",
-      contact: "Dúvidas? Escreva pra hola@concierge.com.ar",
-    },
-    pricing: {
-      title: "Preços transparentes",
-      body: "Você paga o preço do produto + nossa taxa de serviço. Antes de comprar, enviamos uma cotação exata com o custo total. Sem surpresas, sem taxas ocultas.",
-      subDetail:
-        "Taxa de serviço: varia por pedido (geralmente 10-20%). Você sempre aprova o total antes de prosseguirmos.",
-      note: "Pagamento via Mercado Pago, transferência bancária ou crypto. Tudo em USD ou ARS.",
+      contact: "Dúvidas? Escreva pra info@concierge.com.ar",
     },
     faq: {
       title: "Perguntas frequentes",
       items: [
         {
           q: "Como funciona o pagamento?",
-          a: "Enviamos um link de pagamento via Mercado Pago ou dados de transferência. Pode pagar em USD ou ARS. Sempre vê o total exato antes de pagar.",
+          a: "Enviamos um link do PayPal. Você pode pagar com cartão de crédito, débito ou saldo do PayPal. Sempre vê o total exato antes de pagar.",
         },
         {
           q: "É seguro?",
-          a: "Sim. Somos uma empresa registrada em Buenos Aires. Enviamos cotação detalhada antes de cobrar. Sem pagamento sem sua aprovação.",
-        },
-        {
-          q: "Quanto tempo demora a entrega?",
-          a: "Depende do pedido. Food delivery: 1-2 horas. Compras online: 24-48 horas. Experiências e reservas: geralmente no mesmo dia.",
+          a: "Sim. Enviamos cotação detalhada antes de cobrar. Sem pagamento sem sua aprovação.",
         },
         {
           q: "E se algo der errado?",
@@ -409,7 +332,7 @@ export const translations: Record<Lang, LangConfig> = {
         },
         {
           q: "Preciso criar uma conta?",
-          a: "Não. Só WhatsApp. Só isso.",
+          a: "Não. Só WhatsApp ou nosso chat. Só isso.",
         },
         {
           q: "Em quais idiomas trabalham?",
@@ -424,8 +347,8 @@ export const translations: Record<Lang, LangConfig> = {
       cta: "Fale pelo WhatsApp",
     },
     footer: {
-      tagline: "Cada tarefa local em Buenos Aires, resolvida.",
-      linkLabels: ["Como funciona", "Serviços", "Preços", "FAQ", "Quem somos"],
+      tagline: "Ingressos, MercadoLibre, lojas locais — resolvido.",
+      linkLabels: ["Como funciona", "Serviços", "FAQ", "Quem somos"],
       legal: "© 2026 Concierge. Todos os direitos reservados.",
     },
   },
