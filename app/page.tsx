@@ -1,32 +1,201 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { MessageCircle, Search, ShoppingBag, Sparkles, Globe, Heart, MapPin } from "lucide-react"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
+  MessageCircle,
+  ShoppingBag,
+  Package,
+  ShoppingCart,
+  Ticket,
+  Wine,
+  Instagram,
+} from "lucide-react"
+import { translations, type Lang } from "@/lib/translations"
+
+// ─── Static data ────────────────────────────────────────────────────────────
+
+const STEP_ICONS = [MessageCircle, ShoppingBag, Package]
+
+const SERVICE_ICONS = [
+  ShoppingCart,
+  Ticket,
+  Wine,
+]
+
+// Testimonials are always in English — they're quotes from foreign tourists
+// PLACEHOLDER: swap these with real testimonials when available
+const TESTIMONIALS = [
+  {
+    flag: "🇧🇷",
+    quote:
+      "I needed to buy something on MercadoLibre and couldn't create an account. Concierge handled everything in 2 hours. Incredible.",
+    name: "Lucas M.",
+    country: "Brazil",
+  },
+  {
+    flag: "🇺🇸",
+    quote:
+      "Couldn't pay with my US card anywhere online. One WhatsApp message and they sorted it all out.",
+    name: "Sarah K.",
+    country: "United States",
+  },
+  {
+    flag: "🇺🇾",
+    quote:
+      "Quería comprar una camiseta de Independiente en la página de Puma pero no me dejaba pagar. Concierge la compró por mí.",
+    name: "Matías R.",
+    country: "Uruguay",
+  },
+]
+
+const FOOTER_LINK_HREFS = [
+  "#how-it-works",
+  "#services",
+  "#faq",
+  "#about",
+]
+
+// ─── WhatsApp SVG icon ───────────────────────────────────────────────────────
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.447h.006c6.585 0 11.946-5.336 11.949-11.896 0-3.176-1.24-6.165-3.48-8.45zM12.045 21.785h-.007c-1.773 0-3.513-.476-5.031-1.37l-.361-.214-3.741.981 1.001-3.652-.235-.374c-.986-1.57-1.507-3.385-1.505-5.25C2.169 6.4 6.634 1.95 12.05 1.95c2.62 0 5.08 1.02 6.931 2.87 1.85 1.849 2.867 4.31 2.866 6.929-.003 5.408-4.47 9.836-9.802 9.836zm5.39-7.363c-.294-.147-1.742-.858-2.012-.957-.27-.098-.466-.147-.663.148-.198.294-.76.956-.932 1.154-.173.197-.345.22-.638.073-.294-.147-1.24-.458-2.362-1.458-.872-.779-1.461-1.74-1.633-2.034-.172-.294-.018-.453.129-.6.133-.132.294-.344.441-.516.148-.172.197-.294.295-.49.099-.197.05-.369-.025-.516-.074-.148-.663-1.6-.908-2.19-.24-.577-.483-.498-.663-.508-.172-.007-.369-.008-.565-.008-.197 0-.516.074-.786.369-.27.294-1.03 1.006-1.03 2.453 0 1.448 1.054 2.848 1.201 3.045.147.197 2.072 3.163 5.021 4.434.702.303 1.25.484 1.677.619.705.225 1.347.193 1.854.117.565-.083 1.741-.711 1.987-1.398.245-.688.245-1.277.172-1.399-.074-.123-.27-.197-.565-.344z" />
+    </svg>
+  )
+}
+
+// ─── Main component ──────────────────────────────────────────────────────────
 
 export default function Home() {
-  const whatsappNumber = "5491158637341" // Updated WhatsApp number to the correct one
-  const whatsappMessage = encodeURIComponent("Hi! I'd like to learn more about Buy Like Local")
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
+  const [lang, setLang] = useState<Lang>("en")
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    // Initialize language from localStorage, then browser preference
+    const stored = localStorage.getItem("concierge-lang")
+    if (stored === "en" || stored === "es" || stored === "pt") {
+      setLang(stored)
+    } else {
+      const browserLang = navigator.language.toLowerCase()
+      if (browserLang.startsWith("pt")) setLang("pt")
+      else if (browserLang.startsWith("es")) setLang("es")
+    }
+  }, [])
+
+  useEffect(() => {
+    let raf: number
+    const handleScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setScrolled(window.scrollY > 20))
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => { window.removeEventListener("scroll", handleScroll); cancelAnimationFrame(raf) }
+  }, [])
+
+  const changeLang = (newLang: Lang) => {
+    setLang(newLang)
+    localStorage.setItem("concierge-lang", newLang)
+    window.dispatchEvent(new CustomEvent("lang-change", { detail: newLang }))
+    document.documentElement.lang = newLang
+  }
+
+  const t = translations[lang]
 
   return (
     <>
-      {/* Sticky Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <span className="text-xl font-bold text-foreground">Buy Like Local</span>
-          <Button size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground" asChild>
-            <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4 mr-2" />Chat on WhatsApp
-            </a>
-          </Button>
+      {/* ── Skip navigation ──────────────────────────────────────────────── */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded focus:bg-background focus:text-foreground focus:font-semibold focus:shadow-lg"
+      >
+        Skip to content
+      </a>
+
+      {/* ── Sticky Header ────────────────────────────────────────────────── */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-shadow duration-300 bg-background ${
+          scrolled ? "shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : ""
+        }`}
+        style={{ willChange: "transform" }}
+      >
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <a href="#" className="shrink-0">
+            <Image
+              src="/concierge-logo.svg"
+              alt="Concierge Buenos Aires"
+              width={232}
+              height={57}
+              priority
+            />
+          </a>
+
+          {/* Language toggle + CTA */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              {(["en", "es", "pt"] as Lang[]).map((l, i) => (
+                <span key={l} className="flex items-center">
+                  {i > 0 && <span className="mx-1 opacity-30">|</span>}
+                  <button
+                    onClick={() => changeLang(l)}
+                    aria-pressed={lang === l}
+                    className={`min-h-[44px] min-w-[44px] transition-colors duration-150 hover:text-foreground ${
+                      lang === l
+                        ? "text-foreground font-semibold"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {l.toUpperCase()}
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                className="hover:opacity-90 transition-opacity text-white font-semibold"
+                style={{ backgroundColor: "#25D366" }}
+                asChild
+              >
+                <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                  <WhatsAppIcon className="w-4 h-4 mr-1.5" />
+                  WhatsApp
+                </a>
+              </Button>
+              <Button
+                size="sm"
+                className="hidden sm:flex font-semibold hover:scale-105 transition-transform duration-200"
+                style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+              >
+                <MessageCircle className="w-4 h-4 mr-1.5" />
+                {t.header.cta}
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="min-h-screen pt-16">
-        {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
+      <main id="main-content" className="min-h-dvh pt-16">
+        {/* ── Hero ─────────────────────────────────────────────────────────── */}
+        <section className="relative min-h-dvh flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
@@ -36,431 +205,398 @@ export default function Home() {
               className="object-cover"
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/30 to-background" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
           </div>
 
-          {/* Content */}
-          <div className="relative z-10 container mx-auto px-4 py-20 text-center">
-            <div className="max-w-4xl mx-auto space-y-8">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-balance text-foreground">
-                Shop Buenos Aires like you live there
+          <div className="relative z-10 container mx-auto px-4 py-10 md:py-20 text-center">
+            <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+              <h1
+                className="tracking-tight text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                <span className="block text-4xl md:text-7xl font-bold text-balance">
+                  {t.hero.h1}
+                </span>
+                <span className="block text-2xl md:text-5xl font-semibold text-balance mt-2" style={{ color: "#D4A574" }}>
+                  {t.hero.h1Echo}
+                </span>
               </h1>
 
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">
-                Foreign tourist in Argentina? WhatsApp us and we handle Mercado Pago, QR codes, reservations, and local stores that don&apos;t accept foreign cards.
+              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-left" style={{ color: "#E8D5C0" }}>
+                {t.hero.subtitle}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <div className="flex flex-col items-center gap-3 pt-4">
                 <Button
                   size="lg"
-                  className="text-lg px-8 py-6 bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent/50"
+                  className="text-lg px-10 py-6 font-bold text-white transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
+                  style={{ backgroundColor: "#25D366" }}
                   asChild
                 >
-                  <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="w-5 h-5 mr-2" />
-                    Chat on WhatsApp
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                    <WhatsAppIcon className="w-5 h-5 mr-2" />
+                    {t.hero.cta}
                   </a>
+                </Button>
+                <Button
+                  size="default"
+                  className="font-semibold transition-transform duration-300 hover:scale-105"
+                  style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  {t.hero.chatCta}
                 </Button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className="py-24 bg-card/30 relative overflow-hidden">
+        {/* ── How It Works ─────────────────────────────────────────────────── */}
+        <section
+          id="how-it-works"
+          className="py-24 bg-card/30 relative overflow-hidden scroll-mt-20"
+        >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">How it works</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-                Three simple steps to get what you're looking for
-              </p>
+              <h2
+                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                {t.howItWorks.title}
+              </h2>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <Card className="p-8 text-center space-y-4 border-2 border-border hover:border-accent transition-all duration-300 hover:shadow-lg hover:shadow-accent/20 bg-card">
-                <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto">
-                  <MessageCircle className="w-8 h-8 text-accent" />
-                </div>
-                <div className="text-6xl font-bold text-accent/30">01</div>
-                <h3 className="text-2xl font-bold text-card-foreground">Message us on WhatsApp</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Tell us what you're looking for. Local products, unique experiences, whatever you need.
-                </p>
-              </Card>
-
-              <Card className="p-8 text-center space-y-4 border-2 border-border hover:border-primary transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 bg-card">
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
-                  <Search className="w-8 h-8 text-primary" />
-                </div>
-                <div className="text-6xl font-bold text-primary/30">02</div>
-                <h3 className="text-2xl font-bold text-card-foreground">Our local concierge takes care of everything</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  We research, contact local shops, and manage reservations or purchases for you.
-                </p>
-              </Card>
-
-              <Card className="p-8 text-center space-y-4 border-2 border-border hover:border-muted-foreground transition-all duration-300 hover:shadow-lg hover:shadow-muted-foreground/20 bg-card">
-                <div className="w-16 h-16 rounded-full bg-muted-foreground/20 flex items-center justify-center mx-auto">
-                  <ShoppingBag className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <div className="text-6xl font-bold text-muted-foreground/30">03</div>
-                <h3 className="text-2xl font-bold text-card-foreground">You receive your product or reservation</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  We deliver or send the product to you. Everything is managed directly in the chat.
-                </p>
-              </Card>
+              {t.howItWorks.steps.map((step, i) => {
+                const Icon = STEP_ICONS[i]
+                const colors = [
+                  { ring: "border-accent", icon: "bg-accent/20 text-accent", num: "text-accent/30" },
+                  { ring: "border-primary", icon: "bg-primary/20 text-primary", num: "text-primary/30" },
+                  { ring: "border-muted-foreground", icon: "bg-muted-foreground/20 text-muted-foreground", num: "text-muted-foreground/30" },
+                ]
+                const c = colors[i]
+                return (
+                  <Card
+                    key={i}
+                    className={`p-8 text-center space-y-4 border-2 border-border hover:${c.ring} transition-colors duration-300 bg-card`}
+                  >
+                    <div
+                      aria-hidden="true"
+                      className={`w-16 h-16 rounded-full ${c.icon} flex items-center justify-center mx-auto`}
+                    >
+                      <Icon className="w-8 h-8" />
+                    </div>
+                    <div aria-hidden="true" className={`text-6xl font-bold ${c.num}`}>
+                      0{i + 1}
+                    </div>
+                    <h3 className="text-xl font-bold text-card-foreground">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {step.description}
+                    </p>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
-        <section className="py-24 relative overflow-hidden">
+        {/* ── What We Can Do ───────────────────────────────────────────────── */}
+        <section
+          id="services"
+          className="py-24 bg-background relative overflow-hidden scroll-mt-20"
+        >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">Why choose us</h2>
+              <h2
+                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                {t.services.title}
+              </h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <div className="rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 group">
-                <div className="relative h-40 overflow-hidden">
-                  <Image
-                    src="/nighttime-shopping-in-buenos-aires-argentina.jpg"
-                    alt="Nighttime shopping street in Buenos Aires, Argentina"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                  <div className="absolute bottom-3 left-3 w-10 h-10 rounded-lg bg-primary/80 backdrop-blur-sm flex items-center justify-center">
-                    <Globe className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-                <div className="p-5 space-y-2 bg-card">
-                  <h3 className="text-xl font-bold text-foreground">Bridging digital and physical</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    We break down the barrier between digital and physical. Get unique products that aren't available
-                    online.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 group">
-                <div className="relative h-40 overflow-hidden">
-                  <Image
-                    src="/local-workshop-artisan-argentina.jpg"
-                    alt="Local artisan leather workshop in Buenos Aires, Argentina"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                  <div className="absolute bottom-3 left-3 w-10 h-10 rounded-lg bg-primary/80 backdrop-blur-sm flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-                <div className="p-5 space-y-2 bg-card">
-                  <h3 className="text-xl font-bold text-foreground">Personalized service</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Friendly, personalized attention from local people who know every corner of the city.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 group">
-                <div className="relative h-40 overflow-hidden">
-                  <Image
-                    src="/vibrant-street-scene-in-buenos-aires-argentina-wit.jpg"
-                    alt="Travelers in a vibrant Buenos Aires street scene, Argentina"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                  <div className="absolute bottom-3 left-3 w-10 h-10 rounded-lg bg-primary/80 backdrop-blur-sm flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-                <div className="p-5 space-y-2 bg-card">
-                  <h3 className="text-xl font-bold text-foreground">Local access, zero barriers</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Foreign cards blocked? We handle Mercado Pago, QR codes, and local wallets — so you get full access to Argentina&apos;s digital economy through a single WhatsApp message.
-                  </p>
-                </div>
-              </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {t.services.items.map((item, i) => {
+                const Icon = SERVICE_ICONS[i]
+                return (
+                  <Card
+                    key={i}
+                    className="p-6 space-y-4 border border-border hover:border-primary/50 transition-colors duration-300 bg-card group"
+                  >
+                    <div aria-hidden="true" className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-bold text-card-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-sm">
+                      {item.description}
+                    </p>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         </section>
 
-        {/* Examples Section */}
-        <section className="py-24 bg-card/30 relative overflow-hidden">
+        {/* ── Testimonials ─────────────────────────────────────────────────── */}
+        <section
+          id="testimonials"
+          className="py-24 bg-card/30 relative overflow-hidden scroll-mt-20"
+        >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">What we can do for you</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-                From exclusive products to unforgettable experiences
-              </p>
+              <h2
+                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                {t.testimonials.title}
+              </h2>
             </div>
 
+            {/* PLACEHOLDER testimonials — replace with real ones when available */}
             <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              <Card className="overflow-hidden group hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card border-border hover:border-primary/50">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src="/malbec-wine-from-mendoza-argentina.jpg"
-                    alt="Malbec wine from Mendoza"
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <Badge className="absolute top-3 left-3 bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm">Wine & Spirits</Badge>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2 text-card-foreground">Malbec from Mendoza</h3>
-                  <p className="text-muted-foreground">Boutique Malbec bottles delivered to your hotel or shipped internationally.</p>
-                  <p className="text-xs text-primary font-medium mt-2">From USD 45 / bottle</p>
-                </div>
-              </Card>
-
-              <Card className="overflow-hidden group hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card border-border hover:border-primary/50">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src="/custom-leather-jacket-san-telmo-buenos-aires.jpg"
-                    alt="Custom leather jacket in San Telmo"
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <Badge className="absolute top-3 left-3 bg-accent/90 text-accent-foreground border-0 backdrop-blur-sm">Leather Goods</Badge>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2 text-card-foreground">Custom leather jacket</h3>
-                  <p className="text-muted-foreground">Custom-made leather jackets from San Telmo artisans. Your size, your design.</p>
-                  <p className="text-xs text-primary font-medium mt-2">From USD 150 / jacket</p>
-                </div>
-              </Card>
-
-              <Card className="overflow-hidden group hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 bg-card border-border hover:border-primary/50">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src="/alfajores-dulce-de-leche-argentina.jpg"
-                    alt="Alfajores and dulce de leche"
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <Badge className="absolute top-3 left-3 bg-primary/90 text-primary-foreground border-0 backdrop-blur-sm">Sweet Treats</Badge>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2 text-card-foreground">Sweet treats for home</h3>
-                  <p className="text-muted-foreground">Alfajores, dulce de leche, and artisan sweets. Vacuum-sealed for travel.</p>
-                  <p className="text-xs text-primary font-medium mt-2">From USD 25 / box</p>
-                </div>
-              </Card>
+              {TESTIMONIALS.map((item, i) => (
+                <Card
+                  key={i}
+                  className="p-8 space-y-6 border border-border bg-card relative"
+                >
+                  {/* Large quotation mark */}
+                  <span
+                    className="absolute top-4 left-6 text-6xl leading-none text-primary/20 font-serif select-none"
+                    aria-hidden="true"
+                  >
+                    &ldquo;
+                  </span>
+                  <p className="text-foreground leading-relaxed pt-6 relative z-10 text-left">
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3 pt-2 border-t border-border">
+                    <span aria-hidden="true" className="text-2xl">{item.flag}</span>
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">
+                        {item.name}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {item.country}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Discover Argentina Section */}
-        <section className="py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">Discover Argentina</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-                From iconic landmarks to hidden gems, explore the authentic side of Argentina
+        {/* ── About Us ─────────────────────────────────────────────────────── */}
+        <section
+          id="about"
+          className="py-24 bg-card relative overflow-hidden scroll-mt-20"
+        >
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-3xl mx-auto text-center space-y-6">
+              <h2
+                className="text-4xl md:text-5xl font-bold text-balance text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                {t.about.title}
+              </h2>
+              <p className="text-lg text-muted-foreground leading-relaxed text-left">
+                {t.about.body}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <a
+                  href="mailto:info@concierge.com.ar"
+                  className="text-primary hover:underline"
+                >
+                  {t.about.contact}
+                </a>
               </p>
             </div>
+          </div>
+        </section>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4 max-w-7xl mx-auto">
-              {/* Large tile: col-span-2, row-span-2 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer md:col-span-2 md:row-span-2">
-                <Image
-                  src="/obelisco-daytime-buenos-aires.jpg"
-                  alt="Obelisco during daytime"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">Obelisco, Buenos Aires</span>
-                  </div>
-                </div>
-              </div>
+        {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+        <section
+          id="faq"
+          className="py-24 bg-card/30 relative overflow-hidden scroll-mt-20"
+        >
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <h2
+                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                {t.faq.title}
+              </h2>
+            </div>
 
-              {/* col 3, row 1 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer">
-                <Image
-                  src="/san-telmo-market-buenos-aires.jpg"
-                  alt="San Telmo market"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">San Telmo Market</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* col 4, row 1 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer">
-                <Image
-                  src="/colorful-la-boca-neighborhood.jpg"
-                  alt="Colorful La Boca neighborhood"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">La Boca</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* col 3, row 2 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer">
-                <Image
-                  src="/tango-dancers-buenos-aires.jpg"
-                  alt="Tango dancers"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">Tango, Buenos Aires</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* col 4, row 2 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer">
-                <Image
-                  src="/recoleta-cemetery-buenos-aires.jpg"
-                  alt="Recoleta Cemetery"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">Recoleta Cemetery</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* col 1, row 3 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer">
-                <Image
-                  src="/argentine-asado-grill.jpg"
-                  alt="Argentine asado"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">Argentine Asado</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* col 2, row 3 */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer">
-                <Image
-                  src="/argentine-mate-culture.jpg"
-                  alt="Argentine mate culture"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">Mate Culture</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* cols 3-4, row 3 (col-span-2) */}
-              <div className="relative overflow-hidden rounded-xl group cursor-pointer md:col-span-2">
-                <Image
-                  src="/palermo-soho-street-art.jpg"
-                  alt="Palermo Soho street art"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center gap-1.5 text-white">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span className="font-semibold text-xs">Palermo Soho</span>
-                  </div>
-                </div>
-              </div>
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="space-y-3">
+                {t.faq.items.map((item, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`item-${i}`}
+                    className="border border-border rounded-xl bg-card px-6 data-[state=open]:border-primary/40 transition-colors duration-200"
+                  >
+                    <AccordionTrigger className="text-left text-foreground font-semibold hover:no-underline py-5">
+                      {item.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                      {item.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
           </div>
         </section>
 
-        {/* Final CTA Section */}
+        {/* ── Final CTA ────────────────────────────────────────────────────── */}
         <section className="py-32 relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <Image
-              src="/buenos-aires-street-scene-evening.jpg"
-              alt="Buenos Aires street scene evening"
+              src="/buenos-aires-obelisco-night.jpg"
+              alt="Buenos Aires Obelisco at night"
               fill
               className="object-cover"
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/60 to-background/85" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
           </div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-8">
-              <h2 className="text-4xl md:text-6xl font-bold text-balance text-foreground">Start shopping like a local</h2>
-              <p className="text-xl text-muted-foreground text-balance leading-relaxed">
-                It's as simple as starting a conversation. Tell us what you're looking for and we'll take care of the
-                rest.
-              </p>
-              <Button
-                size="lg"
-                className="text-lg px-8 py-6 bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent/50"
-                asChild
+              <h2
+                className="text-4xl md:text-6xl font-bold text-balance text-foreground"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
-                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Chat on WhatsApp
-                </a>
-              </Button>
+                {t.finalCta.h2}
+              </h2>
+              <p className="text-xl text-muted-foreground text-balance leading-relaxed">
+                {t.finalCta.subtitle}
+              </p>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  size="lg"
+                  className="text-lg px-10 py-6 font-bold text-white transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
+                  style={{ backgroundColor: "#25D366" }}
+                  asChild
+                >
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                    <WhatsAppIcon className="w-5 h-5 mr-2" />
+                    {t.finalCta.cta}
+                  </a>
+                </Button>
+                <Button
+                  size="default"
+                  className="font-semibold transition-transform duration-300 hover:scale-105"
+                  style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  {t.finalCta.chatCta}
+                </Button>
+              </div>
             </div>
           </div>
         </section>
+      </main>
 
-        {/* Footer */}
-        <footer className="py-12 border-t border-border">
-          <div className="container mx-auto px-4">
-            <div className="text-center space-y-4">
-              <h3 className="text-2xl font-bold text-foreground">Buy Like Local</h3>
-              <p className="text-muted-foreground">Your local concierge in Argentina</p>
-              <p className="text-sm text-muted-foreground">© 2025 Buy Like Local. All rights reserved.</p>
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer className="bg-card border-t border-border py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-10 md:gap-6 mb-10">
+            {/* Brand */}
+            <div className="space-y-3">
+              <span
+                className="text-2xl font-bold text-foreground block"
+                style={{ fontFamily: "var(--font-poppins)" }}
+              >
+                Concierge
+              </span>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {t.footer.tagline}
+              </p>
+              <a
+                href="https://instagram.com/concierge.ok"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+              >
+                <Instagram className="w-4 h-4" />
+                @concierge.ok
+              </a>
+            </div>
+
+            {/* Nav links */}
+            <div className="space-y-3">
+              <p className="text-foreground font-semibold text-sm uppercase tracking-wider">
+                Navigation
+              </p>
+              <nav className="space-y-2">
+                {t.footer.linkLabels.map((label, i) => (
+                  <a
+                    key={i}
+                    href={FOOTER_LINK_HREFS[i]}
+                    className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+
+            {/* Contact + language */}
+            <div className="space-y-3">
+              <p className="text-foreground font-semibold text-sm uppercase tracking-wider">
+                Contact
+              </p>
+              <a
+                href="mailto:info@concierge.com.ar"
+                className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
+              >
+                info@concierge.com.ar
+              </a>
+              <a
+                href={t.waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+              >
+                <WhatsAppIcon className="w-4 h-4" />
+                WhatsApp
+              </a>
+
+              {/* Language selector */}
+              <div className="flex items-center gap-2 pt-2">
+                {(["en", "es", "pt"] as Lang[]).map((l, i) => (
+                  <span key={l} className="flex items-center">
+                    {i > 0 && <span className="mr-2 text-border">|</span>}
+                    <button
+                      onClick={() => changeLang(l)}
+                      aria-pressed={lang === l}
+                      className={`min-h-[44px] min-w-[44px] text-sm transition-colors duration-150 ${
+                        lang === l
+                          ? "text-foreground font-semibold"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </footer>
-      </main>
+
+          <div className="border-t border-border pt-6 text-center">
+            <p className="text-xs text-muted-foreground">{t.footer.legal}</p>
+          </div>
+        </div>
+      </footer>
     </>
   )
 }

@@ -45,7 +45,7 @@ export function CookieBanner() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card" style={{ willChange: "transform" }}>
       <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           We use Google Analytics to understand how visitors use this site.{" "}
