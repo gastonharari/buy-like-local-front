@@ -127,7 +127,6 @@ export function ChatWidget() {
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 200ms ease",
-          willChange: "opacity",
         }}
         onClick={() => setOpen(false)}
       />
@@ -144,7 +143,6 @@ export function ChatWidget() {
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 200ms ease, transform 200ms ease",
           boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,165,116,0.25)",
-          willChange: "opacity, transform",
         }}
       >
         {/* Toolbar */}
