@@ -195,7 +195,7 @@ export default function Home() {
       <main id="main-content" className="min-h-dvh pt-16">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative min-h-dvh flex items-center justify-center overflow-clip">
-          <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
               alt="Buenos Aires Obelisco at night"
@@ -456,7 +456,7 @@ export default function Home() {
 
         {/* ── Final CTA ────────────────────────────────────────────────────── */}
         <section className="py-32 relative overflow-clip">
-          <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
               alt="Buenos Aires Obelisco at night"
