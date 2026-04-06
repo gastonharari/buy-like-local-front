@@ -192,16 +192,15 @@ export function ChatWidget() {
         style={{
           opacity: (revealed || open) ? 1 : 0,
           transform: (revealed || open) ? "translateY(0)" : "translateY(16px)",
-          pointerEvents: (revealed || open) ? "auto" : "none",
+          pointerEvents: "none",
           transition: "opacity 300ms ease, transform 300ms ease",
-          willChange: "opacity, transform",
         }}
       >
         {!open && (
           <button
             onClick={() => { setOpen(true); setUnread(false) }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg cursor-pointer"
-            style={{ background: "#112E2F", color: "#D4A574", border: "1px solid rgba(212,165,116,0.3)" }}
+            style={{ background: "#112E2F", color: "#D4A574", border: "1px solid rgba(212,165,116,0.3)", pointerEvents: (revealed || open) ? "auto" : "none" }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#D4A574" }} />
             {i18n.label}
@@ -216,6 +215,7 @@ export function ChatWidget() {
             color: "#0D0D0D",
             boxShadow: "0 4px 20px rgba(212,165,116,0.35)",
             transition: "transform 150ms ease, box-shadow 150ms ease",
+            pointerEvents: (revealed || open) ? "auto" : "none",
           }}
           onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.08)"; e.currentTarget.style.boxShadow = "0 6px 28px rgba(212,165,116,0.5)" }}
           onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(212,165,116,0.35)" }}
