@@ -128,4 +128,7 @@
     @apply bg-background text-foreground;
     overscroll-behavior: none;
   }
+  button, a {
+    touch-action: manipulation;
+  }
 }
