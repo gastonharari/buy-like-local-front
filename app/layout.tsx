@@ -7,6 +7,7 @@ import Script from "next/script"
 import { Suspense } from "react"
 import { CookieBanner } from "@/components/cookie-banner"
 import { ChatWidget } from "@/components/chat-widget"
+import { PreventPullToRefresh } from "@/components/prevent-pull-to-refresh"
 import "./globals.css"
 
 const inter = Inter({
@@ -250,6 +251,7 @@ export default function RootLayout({
           `}
         </Script>
 
+        <PreventPullToRefresh />
         <Suspense fallback={null}>{children}</Suspense>
         <CookieBanner />
         <ChatWidget />
