@@ -132,7 +132,6 @@ export default function Home() {
         className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-shadow duration-300 bg-background ${
           scrolled ? "shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : ""
         }`}
-        style={{ willChange: "transform" }}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           {/* Logo */}

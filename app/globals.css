@@ -131,4 +131,7 @@
   button, a {
     touch-action: manipulation;
   }
+  header, footer {
+    touch-action: pan-y;
+  }
 }
