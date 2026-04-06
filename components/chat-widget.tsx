@@ -77,8 +77,20 @@ export function ChatWidget() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
+    if (open) {
+      const y = window.scrollY
+      document.body.style.overflow = "hidden"
+      document.body.dataset.scrollLockY = String(y)
+    } else {
+      const y = parseInt(document.body.dataset.scrollLockY ?? "0", 10)
+      document.body.style.overflow = ""
+      delete document.body.dataset.scrollLockY
+      if (y) window.scrollTo(0, y)
+    }
+    return () => {
+      document.body.style.overflow = ""
+      delete document.body.dataset.scrollLockY
+    }
   }, [open])
 
   useEffect(() => {
