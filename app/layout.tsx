@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter, Poppins } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
@@ -7,7 +7,6 @@ import Script from "next/script"
 import { Suspense } from "react"
 import { CookieBanner } from "@/components/cookie-banner"
 import { ChatWidget } from "@/components/chat-widget"
-import { PreventPullToRefresh } from "@/components/prevent-pull-to-refresh"
 import "./globals.css"
 
 const inter = Inter({
@@ -20,6 +19,12 @@ const poppins = Poppins({
   weight: ["600", "700", "800"],
   variable: "--font-poppins",
 })
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+}
 
 export const metadata: Metadata = {
   title: "Concierge — Your Local Concierge in Buenos Aires | Buy, Book & Deliver",
@@ -251,7 +256,6 @@ export default function RootLayout({
           `}
         </Script>
 
-        <PreventPullToRefresh />
         <Suspense fallback={null}>{children}</Suspense>
         <CookieBanner />
         <ChatWidget />

@@ -505,7 +505,7 @@ export default function Home() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="bg-card border-t border-border py-12">
+      <footer className="bg-card border-t border-border pt-12" style={{ paddingBottom: "calc(3rem + env(safe-area-inset-bottom))" }}>
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-10 md:gap-6 mb-10">
             {/* Brand */}

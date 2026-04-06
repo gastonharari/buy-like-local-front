@@ -134,8 +134,9 @@ export function ChatWidget() {
       {/* Popup */}
       <div
         aria-hidden={!open}
-        className="fixed bottom-24 right-6 z-50 flex flex-col rounded-2xl overflow-hidden"
+        className="fixed right-6 z-50 flex flex-col rounded-2xl overflow-hidden"
         style={{
+          bottom: "calc(6rem + env(safe-area-inset-bottom))",
           width: "min(420px, calc(100vw - 48px))",
           background: "#111f20",
           opacity: open ? 1 : 0,
@@ -186,8 +187,9 @@ export function ChatWidget() {
 
       {/* Floating button + label — hidden until user scrolls past hero */}
       <div
-        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
+        className="fixed right-6 z-50 flex flex-col items-end gap-2"
         style={{
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
           opacity: (revealed || open) ? 1 : 0,
           transform: (revealed || open) ? "translateY(0)" : "translateY(16px)",
           pointerEvents: "none",
