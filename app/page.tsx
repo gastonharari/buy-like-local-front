@@ -133,20 +133,21 @@ export default function Home() {
           scrolled ? "shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : ""
         }`}
       >
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <a href="#" className="shrink-0">
             <Image
               src="/concierge-logo.svg"
               alt="Concierge Buenos Aires"
               width={232}
-              height={57}
+              height={61}
+              className="h-auto max-h-[48px] w-auto"
               priority
             />
           </a>
 
           {/* Language toggle + CTA */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               {(["en", "es", "pt"] as Lang[]).map((l, i) => (
                 <span key={l} className="flex items-center">
@@ -154,7 +155,7 @@ export default function Home() {
                   <button
                     onClick={() => changeLang(l)}
                     aria-pressed={lang === l}
-                    className={`min-h-[44px] min-w-[44px] transition-colors duration-150 hover:text-foreground ${
+                    className={`min-h-[44px] min-w-[36px] sm:min-w-[44px] transition-colors duration-150 hover:text-foreground ${
                       lang === l
                         ? "text-foreground font-semibold"
                         : "text-muted-foreground"
@@ -174,8 +175,8 @@ export default function Home() {
                 asChild
               >
                 <a href={t.waLink} target="_blank" rel="noopener noreferrer">
-                  <WhatsAppIcon className="w-4 h-4 mr-1.5" />
-                  WhatsApp
+                  <WhatsAppIcon className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">WhatsApp</span>
                 </a>
               </Button>
               <Button

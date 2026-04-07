@@ -59,7 +59,8 @@ Any time there are two CTAs (WhatsApp + chat):
 
 - Floating button bottom-right, sand background, pulse animation for 4s on load
 - **Scroll-based reveal**: button hidden (opacity 0, pointerEvents none) until user scrolls past 70% of viewport height. Smooth 300ms ease-out transition.
-- **Backdrop overlay**: fixed `inset-0 z-40` div with `rgba(0,0,0,0.4)` appears behind the popup (z-50) when open — gives chat visual prominence.
+- **Backdrop overlay**: conditionally rendered (`{open && ...}`) `fixed inset-0 z-40` div with `rgba(0,0,0,0.4)` — only mounted when chat is open. Never leave a full-viewport fixed element in the DOM when hidden; iOS Safari's compositor blocks touch scrolling despite `pointer-events: none`.
+- **Popup visibility**: uses `visibility: hidden` (not just `opacity: 0` / `pointer-events: none`) when closed — iOS respects `visibility` for hit-test exclusion more reliably than `pointer-events`.
 - **Body scroll lock**: `document.body.style.overflow = "hidden"` when open, restored on close.
 - **Language sync**: iframe receives `postMessage({ type: "set-lang", lang })` on load and whenever lang changes — iframe is on a different domain and can't read landing's localStorage.
 - Page CTAs open it via: `window.dispatchEvent(new CustomEvent("open-chat"))` — also sets `revealed = true`
@@ -92,3 +93,4 @@ NEXT_PUBLIC_CHAT_URL=https://concierge-crm.vercel.app/chat   # optional fallback
 - Testimonials are always in English (they're foreign tourist quotes) — do not translate them.
 - Meta Pixel ID is `TODO_PIXEL_ID` in `layout.tsx` — placeholder, not wired yet.
 - `bg-card/30` alternating sections create subtle teal warmth over obsidian bg — intentional.
+- **iOS scroll rule**: never leave fixed-position overlays in the DOM when hidden. iOS Safari ignores `pointer-events: none` on compositing layers created by `transition`, `transform`, or `willChange`. Use conditional rendering or `visibility: hidden` instead. Avoid `willChange: "transform"` on fixed elements.
