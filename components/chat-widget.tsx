@@ -119,17 +119,14 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div
-        className="fixed inset-0 z-40"
-        style={{
-          background: "rgba(0,0,0,0.4)",
-          opacity: open ? 1 : 0,
-          pointerEvents: open ? "auto" : "none",
-          transition: "opacity 200ms ease",
-        }}
-        onClick={() => setOpen(false)}
-      />
+      {/* Backdrop overlay — conditionally rendered to avoid iOS fixed-element scroll blocking */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40"
+          style={{ background: "rgba(0,0,0,0.4)" }}
+          onClick={() => setOpen(false)}
+        />
+      )}
 
       {/* Popup */}
       <div
@@ -139,6 +136,7 @@ export function ChatWidget() {
           bottom: "calc(6rem + env(safe-area-inset-bottom))",
           width: "min(420px, calc(100vw - 48px))",
           background: "#111f20",
+          visibility: open ? "visible" : "hidden",
           opacity: open ? 1 : 0,
           transform: open ? "translateY(0) scale(1)" : "translateY(14px) scale(0.96)",
           pointerEvents: open ? "auto" : "none",
