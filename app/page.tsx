@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -20,6 +20,7 @@ import {
   Instagram,
 } from "lucide-react"
 import { translations, type Lang } from "@/lib/translations"
+import { trackEvent } from "@/lib/analytics"
 
 // ─── Static data ────────────────────────────────────────────────────────────
 
@@ -108,11 +109,52 @@ export default function Home() {
     return () => { window.removeEventListener("scroll", handleScroll); cancelAnimationFrame(raf) }
   }, [])
 
+  // Track section visibility
+  const sectionsTracked = useRef(new Set<string>())
+  useEffect(() => {
+    const SECTION_IDS = ["hero", "how-it-works", "services", "testimonials", "about", "faq", "final-cta"]
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.getAttribute("data-section") ?? entry.target.id
+          if (entry.isIntersecting && id && !sectionsTracked.current.has(id)) {
+            sectionsTracked.current.add(id)
+            trackEvent("section_view", { section: id })
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+    SECTION_IDS.forEach((id) => {
+      const el = document.querySelector(`[data-section="${id}"], #${id}`)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  // Track scroll depth milestones
+  const depthTracked = useRef(new Set<number>())
+  useEffect(() => {
+    const MILESTONES = [25, 50, 75, 100]
+    function handleScroll() {
+      const scrollPct = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100)
+      MILESTONES.forEach((m) => {
+        if (scrollPct >= m && !depthTracked.current.has(m)) {
+          depthTracked.current.add(m)
+          trackEvent("scroll_depth", { percent: String(m) })
+        }
+      })
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   const changeLang = (newLang: Lang) => {
     setLang(newLang)
     localStorage.setItem("concierge-lang", newLang)
     window.dispatchEvent(new CustomEvent("lang-change", { detail: newLang }))
     document.documentElement.lang = newLang
+    trackEvent("language_change", { language: newLang })
   }
 
   const t = translations[lang]
@@ -135,7 +177,7 @@ export default function Home() {
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
-          <a href="#" className="shrink-0">
+          <a href="#" className="shrink-0" onClick={() => trackEvent("logo_click")}>
             <Image
               src="/concierge-logo.svg"
               alt="Concierge Buenos Aires"
@@ -173,7 +215,7 @@ export default function Home() {
                 style={{ backgroundColor: "#25D366" }}
                 asChild
               >
-                <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "header" })}>
                   <WhatsAppIcon className="w-4 h-4 mr-1.5" />
                   WhatsApp
                 </a>
@@ -182,7 +224,7 @@ export default function Home() {
                 size="sm"
                 className="hidden sm:flex font-semibold hover:scale-105 transition-transform duration-200"
                 style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
-                onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                onClick={() => { trackEvent("chat_open", { location: "header" }); window.dispatchEvent(new CustomEvent("open-chat")) }}
               >
                 <MessageCircle className="w-4 h-4 mr-1.5" />
                 {t.header.cta}
@@ -194,7 +236,7 @@ export default function Home() {
 
       <main id="main-content" className="min-h-dvh pt-16">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="relative min-h-dvh flex items-center justify-center overflow-clip">
+        <section data-section="hero" className="relative min-h-dvh flex items-center justify-center overflow-clip">
           <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
@@ -232,7 +274,7 @@ export default function Home() {
                   style={{ backgroundColor: "#25D366" }}
                   asChild
                 >
-                  <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "hero" })}>
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.hero.cta}
                   </a>
@@ -241,7 +283,7 @@ export default function Home() {
                   size="default"
                   className="font-semibold transition-transform duration-300 hover:scale-105"
                   style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
-                  onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                  onClick={() => { trackEvent("chat_open", { location: "hero" }); window.dispatchEvent(new CustomEvent("open-chat")) }}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   {t.hero.chatCta}
@@ -410,6 +452,7 @@ export default function Home() {
                 <a
                   href="mailto:info@concierge.com.ar"
                   className="text-primary hover:underline"
+                  onClick={() => trackEvent("email_click", { location: "about" })}
                 >
                   {t.about.contact}
                 </a>
@@ -434,7 +477,7 @@ export default function Home() {
             </div>
 
             <div className="max-w-3xl mx-auto">
-              <Accordion type="single" collapsible className="space-y-3">
+              <Accordion type="single" collapsible className="space-y-3" onValueChange={(value) => { if (value) { const idx = parseInt(value.replace("item-", ""), 10); trackEvent("faq_expand", { question: t.faq.items[idx]?.q?.slice(0, 100) ?? value }) } }}>
                 {t.faq.items.map((item, i) => (
                   <AccordionItem
                     key={i}
@@ -455,7 +498,7 @@ export default function Home() {
         </section>
 
         {/* ── Final CTA ────────────────────────────────────────────────────── */}
-        <section className="py-32 relative overflow-clip">
+        <section data-section="final-cta" className="py-32 relative overflow-clip">
           <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
@@ -484,7 +527,7 @@ export default function Home() {
                   style={{ backgroundColor: "#25D366" }}
                   asChild
                 >
-                  <a href={t.waLink} target="_blank" rel="noopener noreferrer">
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "final_cta" })}>
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.finalCta.cta}
                   </a>
@@ -493,7 +536,7 @@ export default function Home() {
                   size="default"
                   className="font-semibold transition-transform duration-300 hover:scale-105"
                   style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
-                  onClick={() => window.dispatchEvent(new CustomEvent("open-chat"))}
+                  onClick={() => { trackEvent("chat_open", { location: "final_cta" }); window.dispatchEvent(new CustomEvent("open-chat")) }}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   {t.finalCta.chatCta}
@@ -524,6 +567,7 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+                onClick={() => trackEvent("social_click", { platform: "instagram" })}
               >
                 <Instagram className="w-4 h-4" />
                 @concierge.ok
@@ -541,6 +585,7 @@ export default function Home() {
                     key={i}
                     href={FOOTER_LINK_HREFS[i]}
                     className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
+                    onClick={() => trackEvent("footer_nav_click", { destination: FOOTER_LINK_HREFS[i] })}
                   >
                     {label}
                   </a>
@@ -556,6 +601,7 @@ export default function Home() {
               <a
                 href="mailto:info@concierge.com.ar"
                 className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
+                onClick={() => trackEvent("email_click", { location: "footer" })}
               >
                 info@concierge.com.ar
               </a>
@@ -564,6 +610,7 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+                onClick={() => trackEvent("whatsapp_click", { location: "footer" })}
               >
                 <WhatsAppIcon className="w-4 h-4" />
                 WhatsApp

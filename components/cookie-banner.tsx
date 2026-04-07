@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { trackEvent } from "@/lib/analytics"
 
 declare global {
   interface Window {
@@ -34,11 +35,13 @@ export function CookieBanner() {
       ad_personalization: "granted",
     })
     localStorage.setItem("cookie_consent", "granted")
+    trackEvent("cookie_consent", { action: "accept" })
     setVisible(false)
   }
 
   const decline = () => {
     localStorage.setItem("cookie_consent", "denied")
+    trackEvent("cookie_consent", { action: "decline" })
     setVisible(false)
   }
 
