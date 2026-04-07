@@ -147,15 +147,15 @@ export default function Home() {
           </a>
 
           {/* Language toggle + CTA */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-0.5 sm:gap-1 text-sm text-muted-foreground">
               {(["en", "es", "pt"] as Lang[]).map((l, i) => (
                 <span key={l} className="flex items-center">
-                  {i > 0 && <span className="mx-1 opacity-30">|</span>}
+                  {i > 0 && <span className="mx-0.5 sm:mx-1 opacity-30">|</span>}
                   <button
                     onClick={() => changeLang(l)}
                     aria-pressed={lang === l}
-                    className={`min-h-[44px] min-w-[36px] sm:min-w-[44px] transition-colors duration-150 hover:text-foreground ${
+                    className={`min-h-[44px] min-w-[28px] sm:min-w-[44px] transition-colors duration-150 hover:text-foreground ${
                       lang === l
                         ? "text-foreground font-semibold"
                         : "text-muted-foreground"
@@ -222,7 +222,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-left" style={{ color: "#E8D5C0" }}>
+              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6" style={{ color: "#E8D5C0" }}>
                 {t.hero.subtitle}
               </p>
 
