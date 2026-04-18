@@ -26,11 +26,7 @@ import { trackEvent } from "@/lib/analytics"
 
 const STEP_ICONS = [MessageCircle, ShoppingBag, Package]
 
-const SERVICE_ICONS = [
-  ShoppingCart,
-  Ticket,
-  Wine,
-]
+const SERVICE_ICONS = [ShoppingCart, Ticket, Wine]
 
 // Testimonials are always in English — they're quotes from foreign tourists
 // PLACEHOLDER: swap these with real testimonials when available
@@ -58,12 +54,7 @@ const TESTIMONIALS = [
   },
 ]
 
-const FOOTER_LINK_HREFS = [
-  "#how-it-works",
-  "#services",
-  "#faq",
-  "#about",
-]
+const FOOTER_LINK_HREFS = ["#how-it-works", "#services", "#faq", "#about"]
 
 // ─── WhatsApp SVG icon ───────────────────────────────────────────────────────
 
@@ -88,7 +79,6 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    // Initialize language from localStorage, then browser preference
     const stored = localStorage.getItem("concierge-lang")
     if (stored === "en" || stored === "es" || stored === "pt") {
       setLang(stored)
@@ -106,7 +96,10 @@ export default function Home() {
       raf = requestAnimationFrame(() => setScrolled(window.scrollY > 20))
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => { window.removeEventListener("scroll", handleScroll); cancelAnimationFrame(raf) }
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      cancelAnimationFrame(raf)
+    }
   }, [])
 
   // Track section visibility
@@ -175,28 +168,29 @@ export default function Home() {
           scrolled ? "shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : ""
         }`}
       >
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <a href="#" className="shrink-0" onClick={() => trackEvent("logo_click")}>
             <Image
               src="/concierge-logo.svg"
               alt="Concierge Buenos Aires"
               width={232}
-              height={57}
+              height={61}
+              className="h-auto max-h-[48px] w-auto"
               priority
             />
           </a>
 
           {/* Language toggle + CTA */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-0.5 sm:gap-1 text-sm text-muted-foreground">
               {(["en", "es", "pt"] as Lang[]).map((l, i) => (
                 <span key={l} className="flex items-center">
-                  {i > 0 && <span className="mx-1 opacity-30">|</span>}
+                  {i > 0 && <span className="mx-0.5 sm:mx-1 opacity-30">|</span>}
                   <button
                     onClick={() => changeLang(l)}
                     aria-pressed={lang === l}
-                    className={`min-h-[44px] min-w-[44px] transition-colors duration-150 hover:text-foreground ${
+                    className={`min-h-[44px] min-w-[28px] sm:min-w-[44px] transition-colors duration-150 hover:text-foreground ${
                       lang === l
                         ? "text-foreground font-semibold"
                         : "text-muted-foreground"
@@ -211,19 +205,18 @@ export default function Home() {
             <div className="flex items-center gap-2 shrink-0">
               <Button
                 size="sm"
-                className="hover:opacity-90 transition-opacity text-white font-semibold"
-                style={{ backgroundColor: "#25D366" }}
+                className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold"
                 asChild
               >
                 <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "header" })}>
-                  <WhatsAppIcon className="w-4 h-4 mr-1.5" />
-                  WhatsApp
+                  <WhatsAppIcon className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">WhatsApp</span>
                 </a>
               </Button>
               <Button
+                variant="ghost"
                 size="sm"
-                className="hidden sm:flex font-semibold hover:scale-105 transition-transform duration-200"
-                style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                className="hidden sm:flex font-semibold hover:scale-105 transition-transform duration-200 border border-primary text-primary hover:bg-primary/10 hover:text-primary"
                 onClick={() => { trackEvent("chat_open", { location: "header" }); window.dispatchEvent(new CustomEvent("open-chat")) }}
               >
                 <MessageCircle className="w-4 h-4 mr-1.5" />
@@ -251,38 +244,34 @@ export default function Home() {
 
           <div className="relative z-10 container mx-auto px-4 py-10 md:py-20 text-center">
             <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
-              <h1
-                className="tracking-tight text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h1 className="font-display tracking-tight text-foreground">
                 <span className="block text-4xl md:text-7xl font-bold text-balance">
                   {t.hero.h1}
                 </span>
-                <span className="block text-2xl md:text-5xl font-semibold text-balance mt-2" style={{ color: "#D4A574" }}>
+                <span className="block text-2xl md:text-5xl font-semibold text-balance mt-2 text-primary">
                   {t.hero.h1Echo}
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-left" style={{ color: "#E8D5C0" }}>
+              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-cream-suave">
                 {t.hero.subtitle}
               </p>
 
               <div className="flex flex-col items-center gap-3 pt-4">
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-6 font-bold text-white transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
-                  style={{ backgroundColor: "#25D366" }}
+                  className="text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   asChild
                 >
-                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "hero" })}>
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "hero" }); (window as any).fbq?.('track', 'Lead') }}>
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.hero.cta}
                   </a>
                 </Button>
                 <Button
+                  variant="ghost"
                   size="default"
-                  className="font-semibold transition-transform duration-300 hover:scale-105"
-                  style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                  className="font-semibold transition-transform duration-300 hover:scale-105 border border-primary text-primary hover:bg-primary/10 hover:text-primary"
                   onClick={() => { trackEvent("chat_open", { location: "hero" }); window.dispatchEvent(new CustomEvent("open-chat")) }}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
@@ -300,10 +289,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2
-                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
                 {t.howItWorks.title}
               </h2>
             </div>
@@ -351,10 +337,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2
-                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
                 {t.services.title}
               </h2>
             </div>
@@ -367,7 +350,10 @@ export default function Home() {
                     key={i}
                     className="p-6 space-y-4 border border-border hover:border-primary/50 transition-colors duration-300 bg-card group"
                   >
-                    <div aria-hidden="true" className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300">
+                    <div
+                      aria-hidden="true"
+                      className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300"
+                    >
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold text-card-foreground">
@@ -390,10 +376,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2
-                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
                 {t.testimonials.title}
               </h2>
             </div>
@@ -407,7 +390,7 @@ export default function Home() {
                 >
                   {/* Large quotation mark */}
                   <span
-                    className="absolute top-4 left-6 text-6xl leading-none text-primary/20 font-serif select-none"
+                    className="absolute top-4 left-6 text-6xl leading-none text-primary/20 font-display select-none"
                     aria-hidden="true"
                   >
                     &ldquo;
@@ -416,7 +399,9 @@ export default function Home() {
                     &ldquo;{item.quote}&rdquo;
                   </p>
                   <div className="flex items-center gap-3 pt-2 border-t border-border">
-                    <span aria-hidden="true" className="text-2xl">{item.flag}</span>
+                    <span aria-hidden="true" className="text-2xl">
+                      {item.flag}
+                    </span>
                     <div>
                       <p className="font-semibold text-foreground text-sm">
                         {item.name}
@@ -439,10 +424,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-6">
-              <h2
-                className="text-4xl md:text-5xl font-bold text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h2 className="text-4xl md:text-5xl font-bold text-balance text-foreground font-display">
                 {t.about.title}
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed text-left">
@@ -468,10 +450,7 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2
-                className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
                 {t.faq.title}
               </h2>
             </div>
@@ -511,10 +490,7 @@ export default function Home() {
           </div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-8">
-              <h2
-                className="text-4xl md:text-6xl font-bold text-balance text-foreground"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <h2 className="text-4xl md:text-6xl font-bold text-balance text-foreground font-display">
                 {t.finalCta.h2}
               </h2>
               <p className="text-xl text-muted-foreground text-balance leading-relaxed">
@@ -523,19 +499,18 @@ export default function Home() {
               <div className="flex flex-col items-center gap-3">
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-6 font-bold text-white transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
-                  style={{ backgroundColor: "#25D366" }}
+                  className="text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   asChild
                 >
-                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "final_cta" })}>
+                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "final_cta" }); (window as any).fbq?.('track', 'Lead') }}>
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.finalCta.cta}
                   </a>
                 </Button>
                 <Button
+                  variant="ghost"
                   size="default"
-                  className="font-semibold transition-transform duration-300 hover:scale-105"
-                  style={{ backgroundColor: "transparent", color: "#D4A574", border: "1.5px solid #D4A574" }}
+                  className="font-semibold transition-transform duration-300 hover:scale-105 border border-primary text-primary hover:bg-primary/10 hover:text-primary"
                   onClick={() => { trackEvent("chat_open", { location: "final_cta" }); window.dispatchEvent(new CustomEvent("open-chat")) }}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
@@ -548,15 +523,15 @@ export default function Home() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="bg-card border-t border-border pt-12" style={{ paddingBottom: "calc(3rem + env(safe-area-inset-bottom))" }}>
+      <footer
+        className="bg-card border-t border-border pt-12"
+        style={{ paddingBottom: "calc(3rem + env(safe-area-inset-bottom))" }}
+      >
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-10 md:gap-6 mb-10">
             {/* Brand */}
             <div className="space-y-3">
-              <span
-                className="text-2xl font-bold text-foreground block"
-                style={{ fontFamily: "var(--font-poppins)" }}
-              >
+              <span className="text-2xl font-bold text-foreground font-display block">
                 Concierge
               </span>
               <p className="text-muted-foreground text-sm leading-relaxed">
