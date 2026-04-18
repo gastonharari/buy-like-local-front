@@ -9,7 +9,7 @@ Landing page pública de Concierge. Multilenguaje (EN/ES/PT), Next.js 15 App Rou
 | Framework | Next.js 15 App Router |
 | Styling | Tailwind CSS v4 + shadcn/Radix UI |
 | Fonts | Inter (body) + Poppins (headings) + Geist Mono |
-| Analytics | Vercel Analytics + Google Analytics 4 (`G-JK2YHFCTCD`) |
+| Analytics | Vercel Analytics + Google Analytics 4 (`G-JK2YHFCTCD`) + Meta Pixel (`1272933548278550`) |
 | Hosting | Vercel |
 
 ## Local dev
@@ -91,6 +91,6 @@ NEXT_PUBLIC_CHAT_URL=https://concierge-crm.vercel.app/chat   # optional fallback
 - Always proceed autonomously (no confirmation needed for local changes).
 - No light mode — site is always dark.
 - Testimonials are always in English (they're foreign tourist quotes) — do not translate them.
-- Meta Pixel ID is `TODO_PIXEL_ID` in `layout.tsx` — placeholder, not wired yet.
+- Meta Pixel ID is `1272933548278550` (wired in `layout.tsx`). Fires `PageView` on every page load. Hero and final CTA WhatsApp buttons fire `fbq('track', 'Lead')` on click via `onClick` in `page.tsx`.
 - `bg-card/30` alternating sections create subtle teal warmth over obsidian bg — intentional.
 - **iOS scroll rule**: never leave fixed-position overlays in the DOM when hidden. iOS Safari ignores `pointer-events: none` on compositing layers created by `transition`, `transform`, or `willChange`. Use conditional rendering or `visibility: hidden` instead. Avoid `willChange: "transform"` on fixed elements.
