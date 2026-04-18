@@ -29,7 +29,7 @@ interface LangConfig {
 export const translations: Record<Lang, LangConfig> = {
   en: {
     waLink:
-      "https://wa.me/5491158637341?text=Hi!%20I%20saw%20Concierge%20and%20I'd%20like%20to%20place%20an%20order",
+      "https://wa.me/5491158637341?text=Hi!%20Spending%20some%20time%20in%20BA%20and%20need%20someone%20local%20to%20help%20me%20out",
     header: {
       cta: "Chat with us",
     },
@@ -136,7 +136,7 @@ export const translations: Record<Lang, LangConfig> = {
 
   es: {
     waLink:
-      "https://wa.me/5491158637341?text=Hola!%20Vi%20Concierge%20y%20quiero%20hacer%20un%20pedido",
+      "https://wa.me/5491158637341?text=Hola!%20Voy%20a%20estar%20un%20tiempo%20en%20BA%20y%20necesito%20alguien%20local%20que%20me%20d%C3%A9%20una%20mano",
     header: {
       cta: "Chatear con nosotros",
     },
@@ -248,7 +248,7 @@ export const translations: Record<Lang, LangConfig> = {
 
   pt: {
     waLink:
-      "https://wa.me/5491158637341?text=Oi!%20Vi%20o%20Concierge%20e%20quero%20fazer%20um%20pedido",
+      "https://wa.me/5491158637341?text=Oi!%20Vou%20ficar%20um%20tempo%20em%20BA%20e%20preciso%20de%20algu%C3%A9m%20local%20que%20me%20d%C3%AA%20uma%20m%C3%A3o",
     header: {
       cta: "Falar conosco",
     },
