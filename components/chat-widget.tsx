@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ExternalLink, MessageCircle, X } from "lucide-react"
 import type { Lang } from "@/lib/translations"
+import { trackEvent } from "@/lib/analytics"
 
 const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL ?? "https://concierge-crm.vercel.app/chat"
 
@@ -108,6 +109,7 @@ export function ChatWidget() {
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
       if (e.data?.type !== "new-message") return
+      trackEvent("chat_message_received")
       playNotificationSound()
       setUnread(prev => (!open ? true : prev))
     }
@@ -124,7 +126,7 @@ export function ChatWidget() {
         <div
           className="fixed inset-0 z-40"
           style={{ background: "rgba(0,0,0,0.4)" }}
-          onClick={() => setOpen(false)}
+          onClick={() => { trackEvent("chat_widget_close", { trigger: "backdrop" }); setOpen(false) }}
         />
       )}
 
@@ -161,6 +163,7 @@ export function ChatWidget() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={i18n.openInTab}
+            onClick={() => trackEvent("chat_open_new_tab")}
             className="flex items-center gap-1 text-xs"
             style={{ color: "#D4A574", transition: "opacity 150ms ease" }}
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.7")}
@@ -196,7 +199,7 @@ export function ChatWidget() {
       >
         {!open && (
           <button
-            onClick={() => { setOpen(true); setUnread(false) }}
+            onClick={() => { trackEvent("chat_widget_open", { trigger: "label" }); setOpen(true); setUnread(false) }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg cursor-pointer"
             style={{ background: "#112E2F", color: "#D4A574", border: "1px solid rgba(212,165,116,0.3)", pointerEvents: (revealed || open) ? "auto" : "none" }}
           >
@@ -205,7 +208,7 @@ export function ChatWidget() {
           </button>
         )}
         <button
-          onClick={() => { setOpen((v) => !v); setUnread(false) }}
+          onClick={() => { const wasOpen = open; trackEvent(wasOpen ? "chat_widget_close" : "chat_widget_open", { trigger: "button" }); setOpen((v) => !v); setUnread(false) }}
           aria-label={open ? "Close chat" : "Open chat"}
           className={`relative flex h-14 w-14 items-center justify-center rounded-full focus:outline-none ${pulsing && !open ? "animate-pulse" : ""}`}
           style={{
