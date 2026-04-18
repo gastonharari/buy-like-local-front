@@ -29,7 +29,7 @@ interface LangConfig {
 export const translations: Record<Lang, LangConfig> = {
   en: {
     waLink:
-      "https://wa.me/5491158637341?text=Hi!%20Spending%20some%20time%20in%20BA%20and%20need%20someone%20local%20to%20help%20me%20out",
+      "https://wa.me/5491158637341?text=Hi!%20I'm%20spending%20some%20time%20in%20BA%20and%20need%20someone%20local%20to%20help%20me%20out",
     header: {
       cta: "Chat with us",
     },
