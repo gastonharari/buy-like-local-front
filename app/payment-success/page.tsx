@@ -16,28 +16,39 @@ function PaymentSuccessContent() {
       return
     }
     let cancelled = false
-    const run = async () => {
-      try {
-        await fetch(`${API_URL}/api/payments/paypal/capture?token=${encodeURIComponent(token)}`, {
-          method: "POST",
-        })
-      } catch (err) {
-        console.error("payment capture failed", err)
-      } finally {
-        if (!cancelled) router.replace("/")
-      }
-    }
-    run()
+    fetch(`${API_URL}/api/payments/paypal/capture?token=${encodeURIComponent(token)}`, {
+      method: "POST",
+    }).catch((err) => {
+      console.error("payment capture failed", err)
+    })
+    const timer = setTimeout(() => {
+      if (!cancelled) router.replace("/")
+    }, 6000)
     return () => {
       cancelled = true
+      clearTimeout(timer)
     }
   }, [token, router])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
-        <p className="text-base text-foreground/80">Procesando tu pago…</p>
+      <div className="flex max-w-md flex-col items-center gap-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-8 w-8"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-semibold text-foreground">¡Pago confirmado!</h1>
+        <p className="text-base text-foreground/70">Te llevamos al inicio en unos segundos…</p>
       </div>
     </div>
   )
