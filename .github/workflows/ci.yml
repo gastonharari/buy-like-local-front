@@ -8,12 +8,16 @@ on:
 
 permissions:
   contents: read
+  models: read        # deploy-summary step calls GitHub Models with the GITHUB_TOKEN (free, no API key)
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so the deploy-summary step can list the push's commits.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -24,3 +28,95 @@ jobs:
         run: npm run lint --if-present
       - name: Build
         run: npm run build
+
+      # ── Discord deploy notification (only on merge to main) ──────────
+      # The landing page is deployed by Vercel, not by this workflow — so
+      # these steps fire when CI passes on a push to main, i.e. right as
+      # Vercel is deploying the same commit. On pull_request runs every
+      # step below is skipped (`github.event_name == 'push'`). The summary
+      # is written by GitHub Models (free — built-in GITHUB_TOKEN) and
+      # posted to the same #deploys channel as the backend. Every notify
+      # step is continue-on-error and never reds the run; the failure step
+      # uses `failure()`, untouched by continue-on-error step failures.
+      - name: Collect commits in this deploy
+        id: commits
+        if: github.event_name == 'push' && success()
+        continue-on-error: true
+        env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+             || ! git rev-parse --verify --quiet "${BEFORE}^{commit}" >/dev/null; then
+            range="${SHA}~1..${SHA}"          # first push of the branch: fall back to the last commit
+          else
+            range="${BEFORE}..${SHA}"
+          fi
+          git log "$range" --no-merges --pretty=format:'- %s%n%b' 2>/dev/null \
+            | head -c 6000 > deploy-commits.txt || true
+          [ -s deploy-commits.txt ] || git log -1 --pretty=format:'- %s%n%b' > deploy-commits.txt
+
+      - name: Generate functional summary (GitHub Models — free)
+        id: summary
+        if: github.event_name == 'push' && success()
+        continue-on-error: true
+        uses: actions/ai-inference@v1
+        with:
+          model: openai/gpt-4o-mini
+          max-completion-tokens: 400
+          temperature: 0.3
+          system-prompt: |
+            Sos el asistente de release notes de un equipo de producto. Recibís
+            los commits de un deploy de la landing page de Concierge y escribís
+            un resumen MUY conciso y funcional para un canal de Discord, para
+            gente no técnica.
+            Reglas:
+            - Español rioplatense.
+            - Máximo 5 viñetas, una por línea, empezando con "- ".
+            - Cada viñeta arranca con un verbo en pasado, primera persona del
+              plural: "Agregamos...", "Arreglamos...", "Mejoramos...".
+            - Describí QUÉ cambió para el usuario o el negocio, sin jerga técnica
+              (nada de archivos, funciones ni nombres de código).
+            - Agrupá lo puramente técnico (refactors, tests, bumps) en una sola
+              viñeta "Mejoras internas", o omitilo si es trivial.
+            - Sin título ni introducción ni cierre. Solo las viñetas.
+          prompt-file: deploy-commits.txt
+
+      - name: Notify Discord — landing deploy OK
+        if: github.event_name == 'push' && success()
+        continue-on-error: true
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+          SUMMARY: ${{ steps.summary.outputs.response }}
+          COMPARE_URL: ${{ github.server_url }}/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.sha }}
+          SHORT_SHA: ${{ github.sha }}
+        run: |
+          if [ -n "$SUMMARY" ]; then
+            printf '%s' "$SUMMARY" > deploy-desc.txt
+          else
+            { echo "⚠️ Resumen automático no disponible. Cambios:"; cat deploy-commits.txt; } > deploy-desc.txt
+          fi
+          head -c 3900 deploy-desc.txt > deploy-desc.capped.txt
+          jq -n \
+            --rawfile desc deploy-desc.capped.txt \
+            --arg url "$COMPARE_URL" \
+            --arg footer "landing · ${SHORT_SHA:0:7}" \
+            '{embeds:[{title:"🌐 Deploy de la landing",url:$url,description:$desc,color:13935988,footer:{text:$footer}}]}' \
+            > deploy-discord.json
+          curl -sS -X POST -H "Content-Type: application/json" -d @deploy-discord.json "$WEBHOOK"
+
+      - name: Notify Discord — landing deploy failed
+        if: github.event_name == 'push' && failure()
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+          SHORT_SHA: ${{ github.sha }}
+        run: |
+          jq -n \
+            --arg msg "${HEAD_MSG%%$'\n'*}" \
+            --arg run "$RUN_URL" \
+            --arg footer "landing · ${SHORT_SHA:0:7}" \
+            '{embeds:[{title:"❌ Deploy de la landing falló",description:($msg + "\n\n[Ver el run en GitHub Actions](" + $run + ")"),color:15548997,footer:{text:$footer}}]}' \
+            > deploy-discord.json
+          curl -sS -X POST -H "Content-Type: application/json" -d @deploy-discord.json "$WEBHOOK"
