@@ -84,7 +84,14 @@ Key fields:
 
 ```
 NEXT_PUBLIC_CHAT_URL=https://concierge-crm.vercel.app/chat   # optional fallback already hardcoded
+CRM_API_URL=https://s2xovhuoq0.execute-api.us-east-1.amazonaws.com/prod   # backend API GW — NO trailing slash
+INTERNAL_API_TOKEN=<shared secret>   # must match SSM /buy-like-local-prod/INTERNAL_API_TOKEN on the backend
 ```
+
+`CRM_API_URL` + `INTERNAL_API_TOKEN` son **obligatorias** para el flujo de referidos (`/r/[code]`
++ `/api/r/start-whatsapp`). Son server-only (sin prefijo `NEXT_PUBLIC_`) y se setean en Vercel
+(scope Production) — no están en ningún `.env` commiteado. Si falta cualquiera de las dos,
+`/api/r/start-whatsapp` devuelve 500 y el modal de WhatsApp muestra "No pudimos conectar".
 
 ## Key conventions
 
