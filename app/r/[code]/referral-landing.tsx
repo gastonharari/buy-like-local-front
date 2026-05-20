@@ -111,8 +111,17 @@ export function ReferralLanding({ partner }: { partner: PartnerData }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setLang(detectLang())
+    const detected = detectLang()
+    setLang(detected)
+    document.documentElement.lang = detected
   }, [])
+
+  function changeLang(newLang: Lang) {
+    setLang(newLang)
+    localStorage.setItem("concierge-lang", newLang)
+    document.documentElement.lang = newLang
+    window.dispatchEvent(new CustomEvent("lang-change", { detail: newLang }))
+  }
 
   const t = COPY[lang]
   const headline = partner.headline ?? t.defaultHeadline(partner.name)
@@ -146,7 +155,27 @@ export function ReferralLanding({ partner }: { partner: PartnerData }) {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 bg-background text-foreground">
+    <main className="relative min-h-dvh flex flex-col items-center justify-center px-6 py-12 bg-background text-foreground">
+      {/* Language selector — manual override of the auto-detected language */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        {(["en", "es", "pt"] as Lang[]).map((l, i) => (
+          <span key={l} className="flex items-center">
+            {i > 0 && <span className="mr-2 text-border">|</span>}
+            <button
+              onClick={() => changeLang(l)}
+              aria-pressed={lang === l}
+              className={`min-h-[44px] min-w-[44px] text-sm transition-colors duration-150 ${
+                lang === l
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {l.toUpperCase()}
+            </button>
+          </span>
+        ))}
+      </div>
+
       <div className="w-full max-w-xl flex flex-col items-center text-center gap-8">
         <div className="space-y-3">
           <p className="text-[#D4A574] uppercase tracking-widest text-sm font-semibold">
