@@ -120,3 +120,68 @@ jobs:
             '{embeds:[{title:"❌ Deploy de la landing falló",description:($msg + "\n\n[Ver el run en GitHub Actions](" + $run + ")"),color:15548997,footer:{text:$footer}}]}' \
             > deploy-discord.json
           curl -sS -X POST -H "Content-Type: application/json" -d @deploy-discord.json "$WEBHOOK"
+
+  # Playwright e2e smoke test. `npm ci` picks up legacy-peer-deps from the
+  # repo-root .npmrc automatically (same as the build job). The Playwright
+  # webServer option boots `next dev -p 3001` itself — no manual server step.
+  # Caches the Chromium binary keyed on the lockfile; installs browser-only on
+  # a cache hit.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install
+        run: npm ci
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - name: Install Playwright (browser + OS deps, cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install Playwright (browser only, cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install chromium
+      - name: Run Playwright e2e smoke
+        run: npm run test:e2e
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # e2e coverage gate — WARN ONLY, never blocks a merge. Flags PRs that change
+  # product code without touching e2e/**. Logic lives in
+  # .github/scripts/check-e2e-coverage.sh; always exits 0. Guarded to
+  # pull_request events because this workflow also runs on push to main, where
+  # there is no PR to comment on.
+  e2e-coverage:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    # Job-level permissions REPLACE the workflow default.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check e2e coverage (warn only)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          SKIP_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'skip-e2e') }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/check-e2e-coverage.sh
