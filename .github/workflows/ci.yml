@@ -10,6 +10,12 @@ permissions:
   contents: read
   models: read        # deploy-summary step calls GitHub Models with the GITHUB_TOKEN (free, no API key)
 
+# Opt into Node.js 24 for JS-based actions (actions/github-script, checkout,
+# setup-node, …). GitHub forces this on 2026-06-02 and removes Node 20 on
+# 2026-09-16; opting in now validates on Node 24 in every PR before the cutover.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     runs-on: ubuntu-latest
