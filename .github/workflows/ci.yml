@@ -161,10 +161,12 @@ jobs:
           retention-days: 7
 
   # e2e coverage gate — WARN ONLY, never blocks a merge. Flags PRs that change
-  # product code without touching e2e/**. Logic lives in
-  # .github/scripts/check-e2e-coverage.sh; always exits 0. Guarded to
-  # pull_request events because this workflow also runs on push to main, where
-  # there is no PR to comment on.
+  # product code without adding/updating a test under e2e/**. Implemented as a
+  # single actions/github-script step (GitHub's first-party action): reads the
+  # PR's changed files via the REST API — no checkout, no git, no gh/jq — and
+  # writes the warning with the Actions toolkit + Octokit. The whole body is
+  # wrapped in try/catch so the job always succeeds. Guarded to pull_request
+  # events (this workflow also runs on push to main, where there is no PR).
   e2e-coverage:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -173,15 +175,105 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
         with:
-          fetch-depth: 0
-      - name: Check e2e coverage (warn only)
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          SKIP_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'skip-e2e') }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/check-e2e-coverage.sh
+          script: |
+            // e2e coverage gate — WARN ONLY. Never fails CI, never blocks a merge.
+            // Runs entirely on the GitHub API: no checkout, no git, no gh/jq.
+            try {
+              const MARKER = '<!-- e2e-coverage-gate -->';
+              const E2E_DESC = 'e2e/**';
+              const { owner, repo } = context.repo;
+              const pr = context.payload.pull_request;
+
+              // Classify a path — precedence: exempt -> e2e -> product -> ignored.
+              const isExempt = (f) =>
+                /\.(md|css|svg|docx)$/.test(f) ||
+                f.startsWith('.github/') ||
+                f.endsWith('package.json') || f.endsWith('package-lock.json') ||
+                f.startsWith('public/') || f.startsWith('assets/') || f.startsWith('styles/') ||
+                ['next.config.mjs', 'postcss.config.mjs', 'components.json', 'tsconfig.json', 'next-env.d.ts', 'playwright.config.ts'].includes(f);
+              const isE2e = (f) => f.startsWith('e2e/');
+              const isProduct = (f) =>
+                f.startsWith('app/') ||
+                f.startsWith('components/') ||
+                f.startsWith('lib/') ||
+                f.startsWith('hooks/');
+
+              // 1. The PR's changed files — straight from the REST API (paginated).
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner, repo, pull_number: pr.number, per_page: 100,
+              });
+              const product = [];
+              let e2e = 0;
+              for (const { filename } of files) {
+                if (isExempt(filename)) continue;
+                if (isE2e(filename)) { e2e++; continue; }
+                if (isProduct(filename)) product.push(filename);
+              }
+              core.info(`PR: ${files.length} file(s) — product ${product.length}, e2e ${e2e}`);
+
+              // 2. Escape hatch: `skip-e2e` label or `[skip-e2e]` in the title.
+              const labels = (pr.labels || []).map((l) => l.name);
+              let skip = '';
+              if (labels.includes('skip-e2e')) skip = 'el label `skip-e2e`';
+              else if ((pr.title || '').includes('[skip-e2e]')) skip = '`[skip-e2e]` en el título';
+
+              // 3. Decide, then build the sticky-comment body (both carry MARKER).
+              const warn = product.length > 0 && e2e === 0 && !skip;
+              let body;
+              if (warn) {
+                body = [
+                  MARKER,
+                  '### ⚠️ Cobertura e2e — este PR no agrega tests e2e',
+                  '',
+                  `Este PR cambia **código de producto** pero no agrega ni actualiza ningún test e2e en \`${E2E_DESC}\`.`,
+                  '',
+                  'Es una **advertencia, no un bloqueo** — CI sigue verde y podés mergear. Pero la convención del repo es que cada feature viaja con su test e2e.',
+                  '',
+                  `<details><summary>Archivos de producto sin cobertura e2e (${product.length})</summary>`,
+                  '',
+                  ...product.map((f) => `- \`${f}\``),
+                  '',
+                  '</details>',
+                  '',
+                  `**Para limpiar este aviso:** agregá/actualizá un test en \`${E2E_DESC}\`, o poné el label \`skip-e2e\`, o \`[skip-e2e]\` en el título del PR.`,
+                  '',
+                  '_Se re-evalúa en cada push; este comentario se actualiza solo._',
+                ].join('\n');
+              } else {
+                const ok = skip
+                  ? `Chequeo de cobertura e2e salteado vía ${skip}.`
+                  : product.length === 0
+                    ? 'Este PR no cambia código de producto — no requiere test e2e.'
+                    : `Este PR actualiza tests e2e en \`${E2E_DESC}\` (${e2e} archivo/s). ¡Gracias!`;
+                body = [MARKER, '### ✅ Cobertura e2e — OK', '', ok].join('\n');
+              }
+
+              // 4. Warning annotation + job summary (always visible).
+              if (warn) {
+                core.warning(
+                  `El PR cambia código de producto sin tests e2e en ${E2E_DESC}. Solo aviso — CI sigue verde.`,
+                  { title: 'Cobertura e2e' },
+                );
+              }
+              await core.summary.addRaw(body.slice(MARKER.length + 1)).write();
+
+              // 5. Sticky PR comment — find by marker, update in place or create once.
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: pr.number, per_page: 100,
+              });
+              const prev = comments.find((c) => c.body && c.body.includes(MARKER));
+              if (prev) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: prev.id, body });
+                core.info(`Sticky comment updated (#${prev.id}).`);
+              } else if (warn) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+                core.info('Sticky warning comment created.');
+              } else {
+                core.info('Clean PR, no prior comment — nothing to post.');
+              }
+            } catch (err) {
+              // WARN ONLY: a gate failure must never red the PR.
+              core.warning(`e2e-coverage gate skipped (non-fatal): ${err.message}`);
+            }
