@@ -27,9 +27,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Concierge — Your Local Concierge in Buenos Aires | Buy, Book & Deliver",
+  title: "Concierge — Your Personal Shopper in Buenos Aires | Products & Show Tickets",
   description:
-    "Can't buy with foreign cards in Argentina? Concierge handles MercadoLibre, local stores, food delivery, and reservations for you. Just WhatsApp us.",
+    "Can't buy with foreign cards in Argentina? We buy products and get show tickets for you in Buenos Aires when foreign cards don't work. Just WhatsApp us.",
   metadataBase: new URL("https://www.concierge.com.ar"),
   alternates: {
     canonical: "https://www.concierge.com.ar",
@@ -40,16 +40,16 @@ export const metadata: Metadata = {
     "buy MercadoLibre tourist",
     "Buenos Aires personal shopper",
     "WhatsApp concierge Argentina",
-    "PedidosYa foreign card",
+    "show tickets buenos aires",
     "Argentina tourist shopping",
     "buy like local Buenos Aires",
-    "Mercado Pago tourist",
+    "personal shopper buenos aires",
     "Argentina expat shopping",
   ],
   openGraph: {
     title: "Concierge — Shop Buenos Aires Like a Local",
     description:
-      "Foreign tourist in Argentina? We buy, book, and deliver for you. One WhatsApp message is all it takes.",
+      "Foreign tourist in Argentina? We buy products and get show tickets for you in Buenos Aires when foreign cards don't work. Just WhatsApp us.",
     url: "https://www.concierge.com.ar",
     siteName: "Concierge",
     locale: "en_US",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Concierge — Shop Buenos Aires Like a Local",
     description:
-      "Foreign tourist in Argentina? We buy, book, and deliver for you. One WhatsApp message is all it takes.",
+      "Foreign tourist in Argentina? We buy products and get show tickets for you in Buenos Aires when foreign cards don't work. Just WhatsApp us.",
     images: ["/buenos-aires-obelisco-night.jpg"],
   },
   robots: {
@@ -83,7 +83,7 @@ function JsonLd() {
     name: "Concierge",
     url: "https://www.concierge.com.ar",
     description:
-      "Concierge is a WhatsApp-based local concierge service in Buenos Aires that helps foreign tourists buy, book, and receive orders when foreign cards and local accounts are blocked.",
+      "Concierge is a WhatsApp-based personal shopper in Buenos Aires that helps foreign tourists buy products and get show tickets when foreign cards and local accounts are blocked.",
     areaServed: "Buenos Aires, Argentina",
     foundingLocation: {
       "@type": "Place",
@@ -104,7 +104,7 @@ function JsonLd() {
     "@type": "Service",
     name: "Concierge — Buenos Aires Local Concierge",
     description:
-      "WhatsApp-based concierge service for foreign tourists in Buenos Aires. We buy on MercadoLibre, order food delivery, make reservations, handle QR payments, and deliver to your hotel or Airbnb.",
+      "WhatsApp-based personal shopper for foreign tourists in Buenos Aires. We buy on MercadoLibre and in local stores on your behalf, and get tickets to shows and concerts — even sold-out ones. Your order is waiting where you stay.",
     provider: {
       "@type": "Organization",
       name: "Concierge",
@@ -118,7 +118,7 @@ function JsonLd() {
       "@type": "Offer",
       priceCurrency: "USD",
       description:
-        "Service fee typically 10-20% of order value. Exact quote sent before purchase. Payment via Mercado Pago, bank transfer, or crypto.",
+        "Service fee typically 10-20% of order value. Exact quote sent before purchase. Payment via PayPal — credit card, debit card, or PayPal balance.",
     },
   }
 
@@ -131,7 +131,7 @@ function JsonLd() {
         name: "How does payment work?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "We send you a payment link via Mercado Pago or bank transfer details. You can pay in USD or ARS. You always see the exact total before paying.",
+          text: "We send you a PayPal payment link — pay with credit card, debit card, or PayPal balance. You always see the exact total before paying.",
         },
       },
       {
@@ -144,18 +144,10 @@ function JsonLd() {
       },
       {
         "@type": "Question",
-        name: "How long does delivery take?",
+        name: "Where do I get my order?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Depends on the order. Food delivery: 1-2 hours. Online purchases: 24-48 hours. Experiences and reservations: usually same day.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do you deliver to hotels or Airbnbs?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes, anywhere in Buenos Aires. Just send us the address.",
+          text: "It'll be waiting where you stay — hotel or Airbnb, anywhere in Buenos Aires.",
         },
       },
       {
