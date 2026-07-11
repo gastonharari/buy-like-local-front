@@ -64,10 +64,10 @@ export function ChatMockup({ chat }: ChatMockupProps) {
               const isLast = i === lastIndex
 
               return (
-                <div key={i} className="flex flex-col gap-2.5">
+                <div key={i} className="relative flex flex-col gap-2.5">
                   {message.from === "concierge" && (
                     <div
-                      className="cg-typing-row self-start rounded-2xl rounded-bl-sm bg-secondary/70 px-3.5 py-2.5"
+                      className="cg-typing-row absolute left-0 top-0 rounded-2xl rounded-bl-sm bg-secondary/70 px-3.5 py-2.5"
                       style={{ "--d": `${typingDelay}s` } as React.CSSProperties}
                     >
                       <span

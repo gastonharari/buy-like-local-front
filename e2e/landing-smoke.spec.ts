@@ -23,4 +23,7 @@ test('landing page renders hero with both CTAs', async ({ page }) => {
   //    Secondary = the "chat here" button that opens the chat widget.
   await expect(hero.locator('a[href*="wa.me"]').first()).toBeVisible();
   await expect(hero.locator('button').first()).toBeVisible();
+
+  // 4. Trust band renders right after the hero.
+  await expect(page.locator('[data-section="trust"]')).toBeVisible();
 });
