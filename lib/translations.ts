@@ -69,9 +69,9 @@ export const translations: Record<Lang, LangConfig> = {
             "We buy for you on MercadoLibre, Fravega, Farmacity, and any local store",
         },
         {
-          title: "Experiences",
+          title: "Show & Concert Tickets",
           description:
-            "Tango shows, tours, event tickets",
+            "The ones locals can get and you can't",
         },
         {
           title: "Local Products",
@@ -101,7 +101,7 @@ export const translations: Record<Lang, LangConfig> = {
         },
         {
           q: "What if something goes wrong?",
-          a: "We handle returns and claims on your behalf. If there's an issue, the risk is on us.",
+          a: "We handle returns and claims on your behalf. If we can't deliver what you paid for, you get a full refund — up to the amount you paid.",
         },
         {
           q: "Do you deliver to my hotel or Airbnb?",
@@ -177,9 +177,9 @@ export const translations: Record<Lang, LangConfig> = {
             "Compramos por vos en MercadoLibre, Fravega, Farmacity y cualquier tienda local",
         },
         {
-          title: "Experiencias",
+          title: "Entradas a Shows y Recitales",
           description:
-            "Shows de tango, tours, entradas para eventos",
+            "Las que los locales consiguen y vos no",
         },
         {
           title: "Productos Locales",
@@ -208,7 +208,7 @@ export const translations: Record<Lang, LangConfig> = {
         },
         {
           q: "Qué pasa si hay un problema?",
-          a: "Gestionamos devoluciones y reclamos por vos. Si hay un problema, el riesgo es nuestro.",
+          a: "Gestionamos devoluciones y reclamos por vos. Si no entregamos lo que pagaste, te devolvemos el 100% — hasta el monto que pagaste.",
         },
         {
           q: "Entregan a mi hotel o Airbnb?",
@@ -289,9 +289,9 @@ export const translations: Record<Lang, LangConfig> = {
             "Compramos pra você no MercadoLibre, Fravega, Farmacity e qualquer loja local",
         },
         {
-          title: "Experiências",
+          title: "Ingressos para Shows e Recitais",
           description:
-            "Shows de tango, tours, ingressos para eventos",
+            "Os que os locais conseguem e você não",
         },
         {
           title: "Produtos Locais",
@@ -320,7 +320,7 @@ export const translations: Record<Lang, LangConfig> = {
         },
         {
           q: "E se algo der errado?",
-          a: "Cuidamos de devoluções e reclamações por você. Se houver problema, o risco é nosso.",
+          a: "Cuidamos de devoluções e reclamações por você. Se a gente não entregar o que você pagou, devolvemos 100% — até o valor pago.",
         },
         {
           q: "Entregam no meu hotel ou Airbnb?",

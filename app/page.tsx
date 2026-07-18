@@ -29,30 +29,9 @@ const STEP_ICONS = [MessageCircle, ShoppingBag, Package]
 const SERVICE_ICONS = [ShoppingCart, Ticket, Wine]
 
 // Testimonials are always in English — they're quotes from foreign tourists
-// PLACEHOLDER: swap these with real testimonials when available
-const TESTIMONIALS = [
-  {
-    flag: "🇧🇷",
-    quote:
-      "I needed to buy something on MercadoLibre and couldn't create an account. Concierge handled everything in 2 hours. Incredible.",
-    name: "Lucas M.",
-    country: "Brazil",
-  },
-  {
-    flag: "🇺🇸",
-    quote:
-      "Couldn't pay with my US card anywhere online. One WhatsApp message and they sorted it all out.",
-    name: "Sarah K.",
-    country: "United States",
-  },
-  {
-    flag: "🇺🇾",
-    quote:
-      "Quería comprar una camiseta de Independiente en la página de Puma pero no me dejaba pagar. Concierge la compró por mí.",
-    name: "Matías R.",
-    country: "Uruguay",
-  },
-]
+// Real, client-approved quotes only (BRAND rule: no unverifiable social proof).
+// The section stays hidden while this array is empty.
+const TESTIMONIALS: { flag: string; quote: string; name: string; country: string }[] = []
 
 const FOOTER_LINK_HREFS = ["#how-it-works", "#services", "#faq", "#about"]
 
@@ -369,7 +348,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Testimonials ─────────────────────────────────────────────────── */}
+        {/* ── Testimonials (hidden until there are real, approved quotes) ──── */}
+        {TESTIMONIALS.length > 0 && (
         <section
           id="testimonials"
           className="py-24 bg-card/30 relative overflow-hidden scroll-mt-20"
@@ -381,7 +361,6 @@ export default function Home() {
               </h2>
             </div>
 
-            {/* PLACEHOLDER testimonials — replace with real ones when available */}
             <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {TESTIMONIALS.map((item, i) => (
                 <Card
@@ -416,6 +395,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ── About Us ─────────────────────────────────────────────────────── */}
         <section
