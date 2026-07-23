@@ -1,103 +1,81 @@
-# Concierge — Marketing Landing Page (`/front`)
+# Concierge landing — working notes
 
-Landing page pública de Concierge. Multilenguaje (EN/ES/PT), Next.js 15 App Router, dark brand palette.
+Public marketing site for Concierge (concierge.com.ar). Multilingual EN/ES/PT, Next.js 15 App
+Router, always dark. Hands visitors off to WhatsApp or the CRM's web chat.
 
-## Stack
+> Directory `front/`, GitHub repo **`buy-like-local-front`**. They don't match.
 
-| Layer | Tech |
-|-------|------|
-| Framework | Next.js 15 App Router |
-| Styling | Tailwind CSS v4 + shadcn/Radix UI |
-| Fonts | Inter (body) + Poppins (headings) + Geist Mono |
-| Analytics | Vercel Analytics + Google Analytics 4 (`G-JK2YHFCTCD`) + Meta Pixel (`1272933548278550`) |
-| Hosting | Vercel |
+## Docs
+
+`docs/` is the full reference — read the relevant file instead of re-reading the code.
+
+| Doc | For |
+|---|---|
+| [docs/pages.md](docs/pages.md) | routes, landing sections, components, i18n, copy scope |
+| [docs/design-system.md](docs/design-system.md) | token layers, CTA hierarchy, iOS rules |
+| [docs/referrals.md](docs/referrals.md) | `/r/[code]`, the KV click outbox, the CRM contract |
+| [docs/operations.md](docs/operations.md) | env vars, analytics, SEO, CI, Vercel deploy |
+
+`design-system-SKILL.md` is the canonical token reference and auto-loads for UI work. The CRM is a
+**separate repo** (`../buy-like-local/`) — its API, data model and referral rules are documented
+there.
+
+**Docs move with the code.** Any PR changing product code updates the matching `docs/` file in the
+same PR. The `docs-coverage` CI job comments when one looks missing — it never blocks. Mapping
+table: [docs/README.md](docs/README.md).
 
 ## Local dev
 
 ```bash
-cd front
-npm run dev   # port 3001
+npm run dev   # port 3001 — the CRM frontend owns 3000
 ```
 
-## Key files
+Works with **no env vars**: the chat widget falls back to the prod CRM URL, KV becomes a no-op, and
+`/r/[code]` renders its generic fallback. Only the referral path needs configuration.
 
-- `app/page.tsx` — main landing page (hero, how it works, services, testimonials, about, pricing, FAQ, final CTA, footer). Hero uses `min-h-dvh` (not `min-h-screen`) for correct mobile Safari sizing. Mobile: `py-10`, `text-4xl`/`text-2xl` for h1/echo; desktop: `md:py-20`, `md:text-7xl`/`md:text-5xl`.
-- `app/layout.tsx` — root layout: fonts, metadata, GA4, Meta Pixel, ChatWidget, CookieBanner
-- `lib/translations.ts` — all copy in EN/ES/PT (`LangConfig` interface)
-- `components/chat-widget.tsx` — floating chat bubble (bottom-right)
-- `app/globals.css` — brand design tokens
+## Stack note
 
-## Brand palette (CSS tokens)
+This repo is on **Next 15.5.x**. The CRM is on **Next 16**. They are *not* pinned together — don't
+"align" them casually, and don't let `npm audit fix --force` move either one.
 
-| Token | Hex | Role |
-|-------|-----|------|
-| `--background` | `#0D0D0D` | Obsidian page bg |
-| `--foreground` | `#F5F0EB` | Warm white text |
-| `--card` | `#111f20` | Dark teal card surfaces |
-| `--primary` | `#D4A574` | Sand — icon accents, borders, ring |
-| `--primary-foreground` | `#0D0D0D` | Dark text on sand bg |
-| `--muted-foreground` | `#8a8072` | Warm gray secondary text |
-| `--border` | `#1e3637` | Teal border |
-| `--accent` | `#25d366` | WhatsApp green (step icons) |
+## Pitfalls
 
-Hardcoded brand colors used inline (not as tokens):
-- `#25D366` — WhatsApp CTA button background
-- `#D4A574` — sand for outlined secondary CTAs
-- `#112E2F` — chat widget label background
-- `#E8D5C0` — hero subtitle text
+- **iOS scroll rule.** Never leave a fixed-position overlay in the DOM while hidden. iOS Safari
+  ignores `pointer-events: none` on compositing layers created by `transition`, `transform` or
+  `willChange`, and the invisible element blocks touch scrolling. Use conditional rendering, or
+  `visibility: hidden`. Avoid `willChange: "transform"` on fixed elements.
+- **`min-h-dvh`, not `min-h-screen`** for full-height sections — mobile Safari's `vh` excludes the
+  URL bar and overflows.
+- **The chat iframe is cross-origin** and cannot read this site's `localStorage`. Language reaches
+  it only via `postMessage({type:"set-lang", lang})`, sent on load *and* on every change.
+- **`CRM_API_URL` / `INTERNAL_API_TOKEN` are server-only** (no `NEXT_PUBLIC_`) and mandatory for
+  referrals. Missing → `/r/[code]` silently renders the generic page and `/api/r/start-whatsapp`
+  500s. `CRM_API_URL` takes **no trailing slash**.
+- **The KV click outbox has no consumer.** Comments in `app/r/[code]/page.tsx` reference
+  `reconcile-clicks` / `reconcile-partners` jobs that **don't exist**. Failed click posts sit in KV
+  until the 30d TTL expires. See [docs/referrals.md](docs/referrals.md).
+- **Can't verify prod from here.** Vercel SSO + PIN and Bot Protection block datacenter IPs, so
+  the deployed site isn't visible to an agent. Verify locally, or hand the commands to a human.
 
-## CTA hierarchy
+## Conventions
 
-Any time there are two CTAs (WhatsApp + chat):
-- **Primary**: large solid green button (`background: #25D366, color: white`)
-- **Secondary**: outlined sand button (`border: 1.5px solid #D4A574, backgroundColor: transparent, color: #D4A574`)
-- Primary uses `size="lg"`, secondary uses `size="default"` to keep visual hierarchy clear
+- **Proceed autonomously.** No confirmation needed for local changes.
+- No light mode. `:root` tokens *are* the dark theme; no `class="dark"` is applied anywhere.
+- **Never hardcode a hex** — go through the Tailwind semantic classes.
+- **WhatsApp green `#25D366` is only for the WhatsApp CTA.** Never a general accent, never in the
+  CRM. Brand teal is `#112E2F` / `#1e3637`.
+- **Dual CTA hierarchy**: primary = solid green (`size="lg"`), secondary = outlined sand
+  (`size="default"`). The size gap is part of the hierarchy.
+- **Testimonials stay in English** — they're foreign-tourist quotes, and they're deliberately not
+  in `LangConfig`. Don't translate them.
+- `bg-card/30` on alternating sections is intentional warmth, not a leftover.
+- Adding copy means adding it to `LangConfig` **and** all three languages in `lib/translations.ts`.
 
-## Chat widget
+## Brand scope — check before writing copy
 
-`components/chat-widget.tsx` — embeds `https://concierge-crm.vercel.app/chat` in a 420px wide iframe popup.
+Canonical: [`../BRAND.md`](../BRAND.md), mirrored in the `cmo-concierge` skill.
 
-- Floating button bottom-right, sand background, pulse animation for 4s on load
-- **Scroll-based reveal**: button hidden (opacity 0, pointerEvents none) until user scrolls past 70% of viewport height. Smooth 300ms ease-out transition.
-- **Backdrop overlay**: conditionally rendered (`{open && ...}`) `fixed inset-0 z-40` div with `rgba(0,0,0,0.4)` — only mounted when chat is open. Never leave a full-viewport fixed element in the DOM when hidden; iOS Safari's compositor blocks touch scrolling despite `pointer-events: none`.
-- **Popup visibility**: uses `visibility: hidden` (not just `opacity: 0` / `pointer-events: none`) when closed — iOS respects `visibility` for hit-test exclusion more reliably than `pointer-events`.
-- **Body scroll lock**: `document.body.style.overflow = "hidden"` when open, restored on close.
-- **Language sync**: iframe receives `postMessage({ type: "set-lang", lang })` on load and whenever lang changes — iframe is on a different domain and can't read landing's localStorage.
-- Page CTAs open it via: `window.dispatchEvent(new CustomEvent("open-chat"))` — also sets `revealed = true`
-- `NEXT_PUBLIC_CHAT_URL` env var (optional — has fallback to the CRM URL)
-- Iframe height: `min(540px, calc(100dvh - 210px))`, min 300px
-
-## Translations
-
-`lib/translations.ts` exports `translations: Record<Lang, LangConfig>` and `type Lang = "en" | "es" | "pt"`.
-
-Language is detected from `localStorage("concierge-lang")` then `navigator.language`, defaulting to EN.
-
-Key fields:
-- `waLink` — WhatsApp deep link (lang-specific pre-filled message)
-- `hero.cta` — WhatsApp CTA label
-- `hero.chatCta` — web chat CTA label ("No WhatsApp? Chat here")
-- `header.cta` — header chat button label
-- `finalCta.cta` / `finalCta.chatCta` — same pattern as hero
-
-## Env vars
-
-```
-NEXT_PUBLIC_CHAT_URL=https://concierge-crm.vercel.app/chat   # optional fallback already hardcoded
-CRM_API_URL=https://s2xovhuoq0.execute-api.us-east-1.amazonaws.com/prod   # backend API GW — NO trailing slash
-INTERNAL_API_TOKEN=<shared secret>   # must match SSM /buy-like-local-prod/INTERNAL_API_TOKEN on the backend
-```
-
-`CRM_API_URL` + `INTERNAL_API_TOKEN` son **obligatorias** para el flujo de referidos (`/r/[code]`
-+ `/api/r/start-whatsapp`). Son server-only (sin prefijo `NEXT_PUBLIC_`) y se setean en Vercel
-(scope Production) — no están en ningún `.env` commiteado. Si falta cualquiera de las dos,
-`/api/r/start-whatsapp` devuelve 500 y el modal de WhatsApp muestra "No pudimos conectar".
-
-## Key conventions
-
-- Always proceed autonomously (no confirmation needed for local changes).
-- No light mode — site is always dark.
-- Testimonials are always in English (they're foreign tourist quotes) — do not translate them.
-- Meta Pixel ID is `1272933548278550` (wired in `layout.tsx`). Fires `PageView` on every page load. Hero and final CTA WhatsApp buttons fire `fbq('track', 'Lead')` on click via `onClick` in `page.tsx`.
-- `bg-card/30` alternating sections create subtle teal warmth over obsidian bg — intentional.
-- **iOS scroll rule**: never leave fixed-position overlays in the DOM when hidden. iOS Safari ignores `pointer-events: none` on compositing layers created by `transition`, `transform`, or `willChange`. Use conditional rendering or `visibility: hidden` instead. Avoid `willChange: "transform"` on fixed elements.
+- ✅ **Physical products** (we buy them for you) and **tickets to shows/concerts**, sold-out included.
+- ❌ **Restaurant/bar reservations** ("te conseguimos mesa") — no. Also no general experience
+  fixing, food delivery, currency exchange, or DNI/bank/migration help.
+- The barrier we sell against is the local **account/identity**, not only the foreign card.
