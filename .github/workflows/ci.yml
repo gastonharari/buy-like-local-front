@@ -283,3 +283,130 @@ jobs:
               // WARN ONLY: a gate failure must never red the PR.
               core.warning(`e2e-coverage gate skipped (non-fatal): ${err.message}`);
             }
+
+  # Same shape and contract as e2e-coverage above: WARN ONLY, always succeeds,
+  # do NOT add to Required Status Checks. Reminds a PR that changed product code
+  # to update the matching file under docs/ in the same PR.
+  #
+  # Deliberately loose: touching ANY file under docs/ satisfies the check. An
+  # exact path match would nag on one-line typo fixes and train people to ignore
+  # the bot. The per-area mapping is guidance in the comment about WHICH doc is
+  # most likely stale — not something CI enforces literally.
+  docs-coverage:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    # Job-level permissions REPLACE the workflow default.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const MARKER = '<!-- docs-coverage-gate -->';
+              const { owner, repo } = context.repo;
+              const pr = context.payload.pull_request;
+
+              // Product path -> the doc that most likely needs updating.
+              // Order matters: first match wins, so specific before generic.
+              const AREAS = [
+                { doc: 'docs/referrals.md',     test: (f) => f.startsWith('app/r/') || f.startsWith('app/api/r/') || f === 'lib/kv.ts' },
+                { doc: 'docs/design-system.md', test: (f) => f === 'app/globals.css' || f === 'styles/globals.css' },
+                { doc: 'docs/operations.md',    test: (f) => f === 'app/layout.tsx' || f === 'lib/analytics.ts' || f.startsWith('.github/workflows/') },
+                { doc: 'docs/pages.md',         test: (f) => f.startsWith('app/') || f.startsWith('components/') || f.startsWith('lib/') || f.startsWith('hooks/') },
+              ];
+
+              // Never ask a doc update for these.
+              const isExempt = (f) =>
+                /\.(md|svg|docx|png|jpe?g)$/.test(f) ||
+                f.startsWith('e2e/') ||
+                f.startsWith('public/') || f.startsWith('assets/') ||
+                f.startsWith('components/ui/') ||
+                f.endsWith('package.json') || f.endsWith('package-lock.json');
+
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner, repo, pull_number: pr.number, per_page: 100,
+              });
+
+              const docsTouched = files.filter((f) => f.filename.startsWith('docs/')).length;
+
+              const hits = new Map();   // doc -> [files]
+              for (const { filename } of files) {
+                if (isExempt(filename)) continue;
+                const area = AREAS.find((a) => a.test(filename));
+                if (!area) continue;
+                if (!hits.has(area.doc)) hits.set(area.doc, []);
+                hits.get(area.doc).push(filename);
+              }
+              core.info(`PR: ${files.length} file(s) — areas ${hits.size}, docs touched ${docsTouched}`);
+
+              // Escape hatch: `skip-docs` label or `[skip-docs]` in the title.
+              const labels = (pr.labels || []).map((l) => l.name);
+              let skip = '';
+              if (labels.includes('skip-docs')) skip = 'el label `skip-docs`';
+              else if ((pr.title || '').includes('[skip-docs]')) skip = '`[skip-docs]` en el título';
+
+              const warn = hits.size > 0 && docsTouched === 0 && !skip;
+              let body;
+              if (warn) {
+                const lines = [];
+                for (const [doc, fs] of hits) {
+                  lines.push(`- **\`${doc}\`** — porque tocaste:`);
+                  for (const f of fs.slice(0, 8)) lines.push(`  - \`${f}\``);
+                  if (fs.length > 8) lines.push(`  - _…y ${fs.length - 8} archivo/s más_`);
+                }
+                body = [
+                  MARKER,
+                  '### 📝 Documentación — este PR no actualiza ningún doc',
+                  '',
+                  'Este PR cambia **código de producto** pero no toca ningún archivo bajo `docs/`.',
+                  '',
+                  'Es una **advertencia, no un bloqueo** — CI sigue verde y podés mergear. La convención del repo es que la documentación viaja en el mismo PR que el código, así una sesión nueva no tiene que releer todo el código para entender el sistema.',
+                  '',
+                  '<details open><summary>Docs que probablemente quedaron desactualizados</summary>',
+                  '',
+                  ...lines,
+                  '',
+                  '</details>',
+                  '',
+                  '**Para limpiar este aviso:** actualizá el/los doc/s de arriba, o poné el label `skip-docs`, o `[skip-docs]` en el título del PR.',
+                  '',
+                  '_Alcanza con tocar cualquier archivo bajo `docs/` — el mapeo de arriba es una guía de cuál, no una regla que CI verifique._',
+                  '',
+                  '_Se re-evalúa en cada push; este comentario se actualiza solo._',
+                ].join('\n');
+              } else {
+                const ok = skip
+                  ? `Chequeo de documentación salteado vía ${skip}.`
+                  : hits.size === 0
+                    ? 'Este PR no cambia código de producto — no requiere actualizar docs.'
+                    : `Este PR actualiza \`docs/\` (${docsTouched} archivo/s). ¡Gracias!`;
+                body = [MARKER, '### ✅ Documentación — OK', '', ok].join('\n');
+              }
+
+              if (warn) {
+                core.warning(
+                  'El PR cambia código de producto sin actualizar docs/. Solo aviso — CI sigue verde.',
+                  { title: 'Documentación' },
+                );
+              }
+              await core.summary.addRaw(body.slice(MARKER.length + 1)).write();
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: pr.number, per_page: 100,
+              });
+              const prev = comments.find((c) => c.body && c.body.includes(MARKER));
+              if (prev) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: prev.id, body });
+                core.info(`Sticky comment updated (#${prev.id}).`);
+              } else if (warn) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+                core.info('Sticky warning comment created.');
+              } else {
+                core.info('Clean PR, no prior comment — nothing to post.');
+              }
+            } catch (err) {
+              // WARN ONLY: a gate failure must never red the PR.
+              core.warning(`docs-coverage gate skipped (non-fatal): ${err.message}`);
+            }
