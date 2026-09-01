@@ -1,6 +1,6 @@
 # Pages, components and i18n
 
-Next.js 15 App Router. Five routes, one of them an API route. Always dark, no theme toggle.
+Next.js 15 App Router. Six routes, one of them an API route. Always dark, no theme toggle.
 
 > Stack note: this repo is on **Next 15**, while the CRM is on **Next 16**. They are not pinned
 > together — don't "align" them casually, and don't let `npm audit fix --force` move either.
@@ -14,6 +14,7 @@ Next.js 15 App Router. Five routes, one of them an API route. Always dark, no th
 | `/payment-success` | page | where PayPal returns the traveler after paying |
 | `/privacy` | static server page, English only | privacy policy. Required by **Meta App Review** for the WhatsApp app ("Buy Like Local"): the app's Privacy Policy URL is `/privacy` and its Data Deletion URL is `/privacy#data-deletion` — keep that anchor id stable. Legal copy is deliberately outside the EN/ES/PT i18n (one canonical version). Linked from the landing footer nav. |
 | `/api/r/start-whatsapp` | route handler, `runtime: nodejs` | server-to-server hop into the CRM |
+| `/wa-connect` | server shell + client component, English only | **internal tool**, `noindex, nofollow`, not linked from anywhere. Launches Meta's WhatsApp **Embedded Signup (Coexistence)** so the business admin can connect the company WhatsApp number to Cloud API. Takes `?config_id=<Embedded Signup configuration id>` (button stays disabled without it), loads the FB JS SDK, calls `FB.login` with the coexistence extras, and renders the `WA_EMBEDDED_SIGNUP` session-info payload (`waba_id`, `phone_number_id` when present) plus the `FB.login` authorization `code` verbatim for the operator. Like `/privacy`, its copy is deliberately outside the EN/ES/PT i18n. |
 
 `/r/[code]` sets `dynamic = "force-dynamic"` and `revalidate = 0` deliberately — the page must
 render per-request to log the click and read live partner data.
