@@ -129,7 +129,7 @@ export const translations: Record<Lang, LangConfig> = {
     },
     footer: {
       tagline: "Event tickets, MercadoLibre, local stores — handled.",
-      linkLabels: ["How it works", "Services", "FAQ", "About"],
+      linkLabels: ["How it works", "Services", "FAQ", "About", "Privacy Policy"],
       legal: "© 2026 Concierge. All rights reserved.",
     },
   },
@@ -241,6 +241,7 @@ export const translations: Record<Lang, LangConfig> = {
         "Servicios",
         "FAQ",
         "Quiénes somos",
+        "Política de privacidad",
       ],
       legal: "© 2026 Concierge. Todos los derechos reservados.",
     },
@@ -348,7 +349,7 @@ export const translations: Record<Lang, LangConfig> = {
     },
     footer: {
       tagline: "Ingressos, MercadoLibre, lojas locais — resolvido.",
-      linkLabels: ["Como funciona", "Serviços", "FAQ", "Quem somos"],
+      linkLabels: ["Como funciona", "Serviços", "FAQ", "Quem somos", "Política de privacidade"],
       legal: "© 2026 Concierge. Todos os direitos reservados.",
     },
   },

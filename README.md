@@ -48,6 +48,7 @@ npx playwright test    # e2e/landing-smoke.spec.ts
 | `/` | the landing — hero, how it works, services, testimonials, about, FAQ, final CTA |
 | `/r/[code]` | partner referral landing, co-branded, logs the click and hands off to WhatsApp |
 | `/payment-success` | where PayPal returns the traveler after paying |
+| `/privacy` | privacy policy (English) — Meta App Review's Privacy Policy URL; `#data-deletion` is the Data Deletion URL |
 | `/api/r/start-whatsapp` | server-to-server hop into the CRM to attribute the referral |
 
 ## Layout
@@ -58,6 +59,7 @@ app/
   layout.tsx                  fonts, metadata, JSON-LD, GA4, Meta Pixel, widget, cookie banner
   globals.css                 brand design tokens
   r/[code]/                   referral landing + its client component
+  privacy/                    privacy policy (static, English) — Meta App Review URLs
   api/r/start-whatsapp/       CRM handoff
 components/
   chat-widget.tsx             floating bubble → CRM chat in an iframe
