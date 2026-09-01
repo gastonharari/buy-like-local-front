@@ -253,10 +253,10 @@ export default function PrivacyPolicyPage() {
               <li>
                 Email{" "}
                 <a
-                  href="mailto:consiergeai@gmail.com"
+                  href="mailto:info@concierge.com.ar"
                   className="text-primary hover:underline"
                 >
-                  consiergeai@gmail.com
+                  info@concierge.com.ar
                 </a>{" "}
                 with the subject &ldquo;Data deletion request&rdquo;, from the
                 phone number or with the WhatsApp number you used with us.
@@ -279,10 +279,10 @@ export default function PrivacyPolicyPage() {
               </Link>
               , or by email at{" "}
               <a
-                href="mailto:consiergeai@gmail.com"
+                href="mailto:info@concierge.com.ar"
                 className="text-primary hover:underline"
               >
-                consiergeai@gmail.com
+                info@concierge.com.ar
               </a>
               .
             </p>
