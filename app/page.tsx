@@ -54,7 +54,7 @@ const TESTIMONIALS = [
   },
 ]
 
-const FOOTER_LINK_HREFS = ["#how-it-works", "#services", "#faq", "#about"]
+const FOOTER_LINK_HREFS = ["#how-it-works", "#services", "#faq", "#about", "/privacy"]
 
 // ─── WhatsApp SVG icon ───────────────────────────────────────────────────────
 
