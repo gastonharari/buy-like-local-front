@@ -51,6 +51,10 @@ This repo is on **Next 15.5.x**. The CRM is on **Next 16**. They are *not* pinne
 - **`CRM_API_URL` / `INTERNAL_API_TOKEN` are server-only** (no `NEXT_PUBLIC_`) and mandatory for
   referrals. Missing → `/r/[code]` silently renders the generic page and `/api/r/start-whatsapp`
   500s. `CRM_API_URL` takes **no trailing slash**.
+- **`/wa-connect` is browser → CRM API, not via a route handler**: `NEXT_PUBLIC_WA_CONFIG_ID`
+  (Meta Embedded Signup configuration id) and `NEXT_PUBLIC_CRM_API_URL` (defaults to the prod API
+  Gateway) are public; the internal token is typed by the operator, never an env var here. The
+  CRM's CORS allows `X-Internal-Token` from `www.concierge.com.ar` for exactly this page.
 - **The KV click outbox has no consumer.** Comments in `app/r/[code]/page.tsx` reference
   `reconcile-clicks` / `reconcile-partners` jobs that **don't exist**. Failed click posts sit in KV
   until the 30d TTL expires. See [docs/referrals.md](docs/referrals.md).
