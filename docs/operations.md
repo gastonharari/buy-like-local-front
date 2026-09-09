@@ -23,6 +23,7 @@ configuration.
 | `INTERNAL_API_TOKEN` | server | **yes, for referrals** | shared secret; must equal SSM `/buy-like-local-prod/INTERNAL_API_TOKEN`; also used by `/api/wa-onboarding` |
 | `NEXT_PUBLIC_CHAT_URL` | client | no | chat iframe URL; falls back to `https://concierge-crm.vercel.app/chat` |
 | `NEXT_PUBLIC_WA_CONFIG_ID` | client | no | Meta Embedded Signup configuration id used by `/wa-connect` (can also be passed as `?config_id=`) |
+| `NEXT_PUBLIC_FB_APP_ID` | client | no | Meta app id `/wa-connect` passes to `FB.init`; falls back to the Concierge app id |
 | `KV_REST_API_URL` | server | no | injected by Vercel when the KV integration is connected |
 | `KV_REST_API_TOKEN` | server | no | same |
 

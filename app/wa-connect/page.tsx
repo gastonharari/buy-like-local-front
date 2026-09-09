@@ -14,6 +14,10 @@ import WaConnect from "./wa-connect"
 export const metadata: Metadata = {
   title: "WhatsApp Connect — Concierge (internal)",
   robots: { index: false, follow: false },
+  // Without this, the page inherits the root layout's canonical (the
+  // homepage) — a noindex page pointing its canonical at an indexed one is
+  // a conflicting signal search engines warn about. Self-canonical instead.
+  alternates: { canonical: "/wa-connect" },
 }
 
 export default function WaConnectPage() {
