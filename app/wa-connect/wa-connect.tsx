@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
+import Script from "next/script"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 
 // Internal tool: launches Meta's WhatsApp Embedded Signup (Coexistence
 // variant) so the business admin can connect the company's own WhatsApp
@@ -9,19 +12,23 @@ import { useSearchParams } from "next/navigation"
 // Cloud API, and hands the result to the CRM backend.
 //
 // Flow:
-//   1. The Facebook JS SDK is loaded and FB.init'd with our app id.
+//   1. The Facebook JS SDK is loaded (next/script) and FB.init'd with our app id.
 //   2. "Connect WhatsApp" calls FB.login with the config_id (env or URL) and
 //      the coexistence extras (featureType whatsapp_business_app_onboarding).
+//      This is Meta's Embedded Signup v2 launch shape (extras-based). Meta
+//      retires v2 on 2026-10-15 — migrating to the v4 contract (empty
+//      extras, version selected on the Login for Business config) needs its
+//      own verified change before then, not a blind swap here.
 //   3. Meta's popup posts `message` events back to this window while the
 //      flow runs; the last one, FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING,
 //      carries the waba_id (and phone_number_id when present).
 //   4. The FB.login callback returns an authorization `code` (30-second TTL).
-//      It's sent right away, together with the ids, to
-//      POST {CRM_API}/api/internal/whatsapp/onboarding, which exchanges it
+//      It's sent right away, together with the ids, to this repo's own
+//      POST /api/wa-onboarding, which forwards it server-side — using the
+//      server-only INTERNAL_API_TOKEN already required for referrals — to
+//      the CRM's POST /api/internal/whatsapp/onboarding, which exchanges it
 //      for a business token, subscribes the app to the WABA and requests
 //      the contacts + history sync. See concierge-crm docs/whatsapp.md.
-//
-// The internal API token is typed by the operator and kept in memory only.
 //
 // English only + outside lib/translations.ts on purpose: internal operator
 // tool, not marketing copy (same rationale as /privacy).
@@ -30,13 +37,22 @@ const FB_APP_ID = process.env.NEXT_PUBLIC_FB_APP_ID ?? "809120058372328"
 const FB_SDK_URL = "https://connect.facebook.net/en_US/sdk.js"
 // Keep in sync with graphAPIVersion in the backend (internal/whatsapp/meta/graph.go).
 const FB_SDK_VERSION = "v24.0"
-const CRM_API_URL = (process.env.NEXT_PUBLIC_CRM_API_URL ?? "https://s2xovhuoq0.execute-api.us-east-1.amazonaws.com/prod").replace(/\/$/, "")
 const ENV_CONFIG_ID = process.env.NEXT_PUBLIC_WA_CONFIG_ID ?? ""
 
-// Session-info messages are only trusted from Facebook's own origins.
-const FB_MESSAGE_ORIGINS = ["https://www.facebook.com", "https://web.facebook.com"]
-
 const COEXISTENCE_FINISH = "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING"
+
+// Session-info messages are only trusted from Facebook's own origins — any
+// https://*.facebook.com host, since Meta doesn't commit to a fixed
+// subdomain (their own sample checks `origin.endsWith('facebook.com')`;
+// this does the same thing without the "notfacebook.com" substring trap).
+function isTrustedFacebookOrigin(origin: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(origin)
+    return protocol === "https:" && (hostname === "facebook.com" || hostname.endsWith(".facebook.com"))
+  } catch {
+    return false
+  }
+}
 
 interface FbLoginResponse {
   status?: string
@@ -94,7 +110,6 @@ declare global {
         options?: Record<string, unknown>,
       ) => void
     }
-    fbAsyncInit?: () => void
   }
 }
 
@@ -105,8 +120,8 @@ export default function WaConnect() {
   const configId = searchParams.get("config_id") ?? ENV_CONFIG_ID
 
   const [sdkReady, setSdkReady] = useState(false)
+  const [sdkError, setSdkError] = useState(false)
   const [status, setStatus] = useState<{ text: string; tone: "info" | "ok" | "err" } | null>(null)
-  const [internalToken, setInternalToken] = useState("")
   const [signupPayload, setSignupPayload] = useState<WaSignupMessage | null>(null)
   const [pendingCode, setPendingCode] = useState<string | null>(null)
   const [result, setResult] = useState<OnboardingResult | null>(null)
@@ -114,10 +129,23 @@ export default function WaConnect() {
   const [log, setLog] = useState<LogLine[]>([])
 
   // The message listener and the login callback both need the latest
-  // session info / token without re-subscribing — refs, not state closures.
+  // session info without re-subscribing — a ref, not a state closure.
   const signupRef = useRef<WaSignupMessage | null>(null)
-  const tokenRef = useRef("")
-  tokenRef.current = internalToken
+  // Synchronous reentry guard for sendToBackend — `sending` state can't be
+  // read reliably from a setTimeout-scheduled call, only from render.
+  const sendingRef = useRef(false)
+  // Handle of the pending "wait for session info, then send anyway" retry —
+  // cleared on relaunch and on unmount so a stale attempt never fires.
+  const trySendTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearPendingRetry = useCallback(() => {
+    if (trySendTimeoutRef.current) {
+      clearTimeout(trySendTimeoutRef.current)
+      trySendTimeoutRef.current = null
+    }
+  }, [])
+
+  useEffect(() => clearPendingRetry, [clearPendingRetry])
 
   const appendLog = useCallback((label: string, body: unknown) => {
     const line: LogLine = {
@@ -129,36 +157,17 @@ export default function WaConnect() {
     console.log("[wa-connect]", label, body)
   }, [])
 
-  // Load the Facebook JS SDK once and init it.
+  // If the SDK is already on the page (e.g. client-side nav back here) it's
+  // already init'd — just flip the ready flag. Otherwise the <Script> below
+  // loads it and calls FB.init from its onLoad.
   useEffect(() => {
-    if (window.FB) {
-      setSdkReady(true)
-      return
-    }
-    window.fbAsyncInit = () => {
-      window.FB?.init({
-        appId: FB_APP_ID,
-        autoLogAppEvents: true,
-        xfbml: true,
-        version: FB_SDK_VERSION,
-      })
-      setSdkReady(true)
-    }
-    if (!document.getElementById("facebook-jssdk")) {
-      const script = document.createElement("script")
-      script.id = "facebook-jssdk"
-      script.src = FB_SDK_URL
-      script.async = true
-      script.defer = true
-      script.crossOrigin = "anonymous"
-      document.body.appendChild(script)
-    }
+    if (window.FB) setSdkReady(true)
   }, [])
 
   // Session-info listener — this is what actually returns the asset ids.
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
-      if (!FB_MESSAGE_ORIGINS.includes(event.origin)) return
+      if (!isTrustedFacebookOrigin(event.origin)) return
       try {
         const data: WaSignupMessage = JSON.parse(event.data)
         if (data.type !== "WA_EMBEDDED_SIGNUP") return
@@ -183,18 +192,18 @@ export default function WaConnect() {
   }, [appendLog])
 
   const sendToBackend = useCallback(async (body: Record<string, unknown>, label: string) => {
-    const token = tokenRef.current.trim()
-    if (!token) {
-      setStatus({ text: "Missing internal API token — paste it and retry.", tone: "err" })
+    if (sendingRef.current) {
+      appendLog("skip (already sending)", body)
       return
     }
+    sendingRef.current = true
     setSending(true)
     setStatus({ text: `${label}…`, tone: "info" })
-    appendLog(`POST ${CRM_API_URL}/api/internal/whatsapp/onboarding`, { ...body, code: body.code ? "(sent)" : undefined })
+    appendLog("POST /api/wa-onboarding", { ...body, code: body.code ? "(sent)" : undefined })
     try {
-      const res = await fetch(`${CRM_API_URL}/api/internal/whatsapp/onboarding`, {
+      const res = await fetch("/api/wa-onboarding", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Internal-Token": token },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
       const json = (await res.json().catch(() => ({ error: `HTTP ${res.status} without a JSON body` }))) as OnboardingResult
@@ -212,6 +221,7 @@ export default function WaConnect() {
     } catch (err) {
       setStatus({ text: `❌ Could not reach the backend: ${String(err)}`, tone: "err" })
     } finally {
+      sendingRef.current = false
       setSending(false)
     }
   }, [appendLog])
@@ -224,6 +234,7 @@ export default function WaConnect() {
       return
     }
     setPendingCode(code)
+    clearPendingRetry()
     // The session-info message normally lands before this callback; give it
     // a beat if it hasn't, then send regardless — the backend can discover
     // the WABA from the token when waba_id is missing, and the code only
@@ -231,6 +242,7 @@ export default function WaConnect() {
     const trySend = (attempt: number) => {
       const info = signupRef.current
       if (info?.event === COEXISTENCE_FINISH || attempt >= 4) {
+        trySendTimeoutRef.current = null
         if (info && info.event !== COEXISTENCE_FINISH) {
           setStatus({ text: `Got a code, but the flow ended with ${info.event ?? "no event"} instead of ${COEXISTENCE_FINISH}. Not sending automatically — use "Send code anyway" only if you know why.`, tone: "err" })
           return
@@ -238,10 +250,10 @@ export default function WaConnect() {
         void sendToBackend({ code, waba_id: info?.data?.waba_id ?? "", phone_number_id: info?.data?.phone_number_id ?? "" }, "Exchanging the code and subscribing the WABA")
         return
       }
-      setTimeout(() => trySend(attempt + 1), 500)
+      trySendTimeoutRef.current = setTimeout(() => trySend(attempt + 1), 500)
     }
     trySend(0)
-  }, [appendLog, sendToBackend])
+  }, [appendLog, sendToBackend, clearPendingRetry])
 
   const launchSignup = useCallback(() => {
     if (!configId) return
@@ -249,6 +261,7 @@ export default function WaConnect() {
       setStatus({ text: "Facebook SDK is not loaded yet — wait a moment and try again.", tone: "err" })
       return
     }
+    clearPendingRetry()
     setResult(null)
     setPendingCode(null)
     signupRef.current = null
@@ -265,22 +278,36 @@ export default function WaConnect() {
         sessionInfoVersion: "3",
       },
     })
-  }, [configId, appendLog, fbLoginCallback])
+  }, [configId, appendLog, fbLoginCallback, clearPendingRetry])
 
   const resync = useCallback(() => {
-    const wabaId = signupRef.current?.data?.waba_id ?? result?.waba_id ?? ""
+    const wabaId = signupRef.current?.data?.waba_id ?? result?.waba_id ?? searchParams.get("waba_id") ?? ""
     if (!wabaId) {
       setStatus({ text: "No waba_id known yet — run the flow first, or paste the WABA id in the URL as ?waba_id=…", tone: "err" })
       return
     }
     void sendToBackend({ waba_id: wabaId, phone_number_id: result?.phone_number_id ?? "" }, "Re-requesting the contacts + history sync with the system-user token")
-  }, [result, sendToBackend])
+  }, [result, sendToBackend, searchParams])
 
-  const canLaunch = Boolean(configId) && internalToken.trim().length > 0 && !sending
+  const canLaunch = Boolean(configId) && !sending
   const toneClass = status?.tone === "ok" ? "text-accent" : status?.tone === "err" ? "text-primary" : "text-muted-foreground"
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Script
+        src={FB_SDK_URL}
+        strategy="afterInteractive"
+        onLoad={() => {
+          window.FB?.init({
+            appId: FB_APP_ID,
+            autoLogAppEvents: true,
+            xfbml: true,
+            version: FB_SDK_VERSION,
+          })
+          setSdkReady(true)
+        }}
+        onError={() => setSdkError(true)}
+      />
       <main className="container mx-auto max-w-3xl px-4 py-12 space-y-8">
         <header className="space-y-2">
           <p className="text-sm uppercase tracking-widest text-primary">
@@ -294,7 +321,7 @@ export default function WaConnect() {
           </p>
         </header>
 
-        <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <Card className="p-6 space-y-4">
           {configId ? (
             <p className="text-sm text-muted-foreground">
               Using configuration{" "}
@@ -302,7 +329,7 @@ export default function WaConnect() {
                 {configId}
               </code>
               {" "}· app <code className="font-mono">{FB_APP_ID}</code> · SDK {FB_SDK_VERSION} · backend{" "}
-              <code className="font-mono break-all">{CRM_API_URL}</code>
+              <code className="font-mono">/api/wa-onboarding</code> (this repo, proxied server-side)
             </p>
           ) : (
             <p className="text-sm text-primary">
@@ -313,49 +340,33 @@ export default function WaConnect() {
             </p>
           )}
 
-          <label className="block text-sm text-muted-foreground">
-            Internal API token (kept in memory only)
-            <input
-              type="password"
-              autoComplete="off"
-              value={internalToken}
-              onChange={(e) => setInternalToken(e.target.value)}
-              placeholder="X-Internal-Token of the CRM backend"
-              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-foreground"
-            />
-          </label>
-
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={launchSignup}
-              disabled={!canLaunch}
-              className="rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            <Button type="button" size="lg" onClick={launchSignup} disabled={!canLaunch}>
               Connect WhatsApp
-            </button>
-            <button
-              type="button"
-              onClick={resync}
-              disabled={sending || internalToken.trim().length === 0}
-              className="rounded-md border border-primary px-6 py-3 font-semibold text-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            </Button>
+            <Button type="button" size="lg" variant="outline" onClick={resync} disabled={sending}>
               Re-run sync (no code)
-            </button>
-            {pendingCode && signupPayload && signupPayload.event !== COEXISTENCE_FINISH && (
-              <button
+            </Button>
+            {pendingCode && (
+              <Button
                 type="button"
-                onClick={() => void sendToBackend({ code: pendingCode, waba_id: signupPayload.data?.waba_id ?? "", phone_number_id: signupPayload.data?.phone_number_id ?? "" }, "Sending the code anyway")}
+                size="lg"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => void sendToBackend({ code: pendingCode, waba_id: signupPayload?.data?.waba_id ?? "", phone_number_id: signupPayload?.data?.phone_number_id ?? "" }, "Sending the code anyway")}
                 disabled={sending}
-                className="rounded-md border border-border px-6 py-3 font-semibold text-muted-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
               >
                 Send code anyway
-              </button>
+              </Button>
             )}
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {sdkReady ? "Facebook SDK loaded." : "Loading Facebook SDK…"}
+            {sdkReady
+              ? "Facebook SDK loaded."
+              : sdkError
+                ? "Facebook SDK failed to load — check your network/ad blocker and reload the page."
+                : "Loading Facebook SDK…"}
           </p>
           {status && <p className={`text-sm font-semibold ${toneClass}`}>{status.text}</p>}
 
@@ -366,10 +377,10 @@ export default function WaConnect() {
             <p>3. Enter the number → the phone gets a message from the Facebook Business account → <em>Connect to the Business Platform</em> → <em>Confirm</em> (share history) → paste the text code shown by the app into the popup. There is no QR.</p>
             <p>4. When the popup closes, the code is sent automatically; the contacts + history sync must happen within 24 hours of this moment.</p>
           </div>
-        </section>
+        </Card>
 
         {result && (
-          <section className={`rounded-lg border p-6 space-y-3 bg-card ${result.error ? "border-primary/60" : "border-accent/50"}`}>
+          <Card className={`p-6 space-y-3 ${result.error ? "border-primary/60" : "border-accent/50"}`}>
             <h2 className="text-xl font-bold">{result.error ? "Backend error" : "Backend result"}</h2>
             {!result.error && (
               <dl className="grid gap-1 text-sm">
@@ -394,26 +405,26 @@ export default function WaConnect() {
                 {result.warnings.map((w) => <li key={w}>{w}</li>)}
               </ul>
             )}
-          </section>
+          </Card>
         )}
 
         {signupPayload && (
-          <section className="rounded-lg border border-border bg-card p-6 space-y-3">
+          <Card className="p-6 space-y-3">
             <h2 className="text-xl font-bold">Session info (WA_EMBEDDED_SIGNUP)</h2>
             <dl className="grid gap-1 text-sm">
               <Row k="event" v={`${signupPayload.event ?? "(absent)"}${signupPayload.event !== COEXISTENCE_FINISH ? ` — expected ${COEXISTENCE_FINISH}` : ""}`} />
               <Row k="waba_id" v={signupPayload.data?.waba_id ?? "(absent)"} />
               <Row k="phone_number_id" v={signupPayload.data?.phone_number_id ?? "(absent — normal for the coexistence FINISH event; the backend looks it up)"} />
             </dl>
-          </section>
+          </Card>
         )}
 
-        <section className="rounded-lg border border-border bg-card p-6 space-y-3">
+        <Card className="p-6 space-y-3">
           <h2 className="text-xl font-bold">Events</h2>
           <pre className="overflow-x-auto rounded bg-background p-4 text-xs leading-relaxed whitespace-pre-wrap break-all min-h-[60px]">
             {log.length === 0 ? "waiting…" : log.map((l) => `[${l.ts}] ${l.label}\n${l.body}`).join("\n\n")}
           </pre>
-        </section>
+        </Card>
       </main>
     </div>
   )
