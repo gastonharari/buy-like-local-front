@@ -115,6 +115,18 @@ declare global {
 
 type LogLine = { ts: string; label: string; body: string }
 
+// `token_expires_in_seconds` needs `0` and "absent" to read differently — 0
+// is how Meta reports a non-expiring business/system-user token, not "the
+// backend didn't say" — and a sub-day TTL shouldn't round down to "0 days".
+function formatTokenExpiry(seconds?: number): string {
+  if (typeof seconds !== "number") return ""
+  if (seconds <= 0) return " · never expires"
+  const days = Math.round(seconds / 86400)
+  if (days >= 1) return ` · expires in ${days} day${days === 1 ? "" : "s"}`
+  const hours = Math.max(1, Math.round(seconds / 3600))
+  return ` · expires in ${hours} hour${hours === 1 ? "" : "s"}`
+}
+
 export default function WaConnect() {
   const searchParams = useSearchParams()
   const configId = searchParams.get("config_id") ?? ENV_CONFIG_ID
@@ -130,6 +142,8 @@ export default function WaConnect() {
 
   // The message listener and the login callback both need the latest
   // session info without re-subscribing — a ref, not a state closure.
+  // Written only through setSignupInfo below, so the ref and the state it
+  // mirrors can't drift apart across the two places that used to set them.
   const signupRef = useRef<WaSignupMessage | null>(null)
   // Synchronous reentry guard for sendToBackend — `sending` state can't be
   // read reliably from a setTimeout-scheduled call, only from render.
@@ -146,6 +160,11 @@ export default function WaConnect() {
   }, [])
 
   useEffect(() => clearPendingRetry, [clearPendingRetry])
+
+  const setSignupInfo = useCallback((data: WaSignupMessage | null) => {
+    signupRef.current = data
+    setSignupPayload(data)
+  }, [])
 
   const appendLog = useCallback((label: string, body: unknown) => {
     const line: LogLine = {
@@ -171,8 +190,7 @@ export default function WaConnect() {
       try {
         const data: WaSignupMessage = JSON.parse(event.data)
         if (data.type !== "WA_EMBEDDED_SIGNUP") return
-        signupRef.current = data
-        setSignupPayload(data)
+        setSignupInfo(data)
         appendLog(`WA_EMBEDDED_SIGNUP · ${data.event ?? "(no event)"}`, data)
         if (data.event === COEXISTENCE_FINISH) {
           setStatus({ text: `Flow finished (coexistence). waba_id=${data.data?.waba_id ?? "?"} — waiting for the authorization code…`, tone: "ok" })
@@ -189,7 +207,7 @@ export default function WaConnect() {
     }
     window.addEventListener("message", onMessage)
     return () => window.removeEventListener("message", onMessage)
-  }, [appendLog])
+  }, [appendLog, setSignupInfo])
 
   const sendToBackend = useCallback(async (body: Record<string, unknown>, label: string) => {
     if (sendingRef.current) {
@@ -264,8 +282,7 @@ export default function WaConnect() {
     clearPendingRetry()
     setResult(null)
     setPendingCode(null)
-    signupRef.current = null
-    setSignupPayload(null)
+    setSignupInfo(null)
     setStatus({ text: "Waiting for the Meta signup popup to finish…", tone: "info" })
     appendLog("FB.login", { config_id: configId, featureType: "whatsapp_business_app_onboarding", sessionInfoVersion: "3", sdk: FB_SDK_VERSION })
     window.FB.login(fbLoginCallback, {
@@ -278,7 +295,7 @@ export default function WaConnect() {
         sessionInfoVersion: "3",
       },
     })
-  }, [configId, appendLog, fbLoginCallback, clearPendingRetry])
+  }, [configId, appendLog, fbLoginCallback, clearPendingRetry, setSignupInfo])
 
   const resync = useCallback(() => {
     const wabaId = signupRef.current?.data?.waba_id ?? result?.waba_id ?? searchParams.get("waba_id") ?? ""
@@ -293,15 +310,17 @@ export default function WaConnect() {
   const toneClass = status?.tone === "ok" ? "text-accent" : status?.tone === "err" ? "text-primary" : "text-muted-foreground"
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh bg-background text-foreground">
       <Script
         src={FB_SDK_URL}
         strategy="afterInteractive"
         onLoad={() => {
           window.FB?.init({
             appId: FB_APP_ID,
-            autoLogAppEvents: true,
-            xfbml: true,
+            // No FB analytics beacons and no XFBML scan from an internal,
+            // unlisted, single-operator tool that only calls FB.login.
+            autoLogAppEvents: false,
+            xfbml: false,
             version: FB_SDK_VERSION,
           })
           setSdkReady(true)
@@ -391,7 +410,7 @@ export default function WaConnect() {
                 <Row k="subscribed_apps" v={String(result.subscribed)} />
                 <Row k="contacts sync request" v={result.contacts_sync_request_id ?? "(not requested)"} />
                 <Row k="history sync request" v={result.history_sync_request_id ?? "(not requested)"} />
-                <Row k="token" v={`${result.token_source ?? "?"}${result.token_expires_in_seconds ? ` · expires in ${Math.round(result.token_expires_in_seconds / 86400)} days` : ""}`} />
+                <Row k="token" v={`${result.token_source ?? "?"}${formatTokenExpiry(result.token_expires_in_seconds)}`} />
               </dl>
             )}
             {result.error && (
