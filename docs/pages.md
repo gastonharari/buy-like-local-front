@@ -1,6 +1,6 @@
 # Pages, components and i18n
 
-Next.js 15 App Router. Six routes, one of them an API route. Always dark, no theme toggle.
+Next.js 15 App Router. Seven routes, two of them API routes. Always dark, no theme toggle.
 
 > Stack note: this repo is on **Next 15**, while the CRM is on **Next 16**. They are not pinned
 > together — don't "align" them casually, and don't let `npm audit fix --force` move either.
@@ -14,7 +14,8 @@ Next.js 15 App Router. Six routes, one of them an API route. Always dark, no the
 | `/payment-success` | page | where PayPal returns the traveler after paying |
 | `/privacy` | static server page, English only | privacy policy. Required by **Meta App Review** for the WhatsApp app ("Buy Like Local"): the app's Privacy Policy URL is `/privacy` and its Data Deletion URL is `/privacy#data-deletion` — keep that anchor id stable. Legal copy is deliberately outside the EN/ES/PT i18n (one canonical version). Linked from the landing footer nav. |
 | `/api/r/start-whatsapp` | route handler, `runtime: nodejs` | server-to-server hop into the CRM |
-| `/wa-connect` | server shell + client component, English only | **internal tool**, `noindex, nofollow`, not linked from anywhere. Launches Meta's WhatsApp **Embedded Signup (Coexistence)** so the business admin can connect the company WhatsApp number to Cloud API. Takes `?config_id=<Embedded Signup configuration id>` (button stays disabled without it), loads the FB JS SDK, calls `FB.login` with the coexistence extras, and renders the `WA_EMBEDDED_SIGNUP` session-info payload (`waba_id`, `phone_number_id` when present) plus the `FB.login` authorization `code` verbatim for the operator. Like `/privacy`, its copy is deliberately outside the EN/ES/PT i18n. |
+| `/wa-connect` | server shell + client component, English only | **internal tool**, `noindex, nofollow`, not linked from anywhere. Launches Meta's WhatsApp **Embedded Signup v2 (Coexistence, `featureType: whatsapp_business_app_onboarding`)** — Meta retires the v2 launch shape on 2026-10-15, so this needs a verified migration to v4 before then — so the business admin can connect the company WhatsApp number — the one in the WhatsApp Business app — to Cloud API. Configuration id from `NEXT_PUBLIC_WA_CONFIG_ID` (or `?config_id=…` to override). When the popup posts `FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING`, the `FB.login` authorization `code` (30 s TTL) plus `waba_id`/`phone_number_id` are POSTed to this repo's own `/api/wa-onboarding`, which forwards them server-side (`CRM_API_URL`/`INTERNAL_API_TOKEN`, already required for referrals) to the CRM's `POST /api/internal/whatsapp/onboarding`, which subscribes the WABA and requests the contacts + history sync. A "Re-run sync" button repeats the call without a code (system-user token on the backend). Like `/privacy`, its copy is deliberately outside the EN/ES/PT i18n. |
+| `/api/wa-onboarding` | route handler, `runtime: nodejs` | server-to-server hop into the CRM for `/wa-connect`'s onboarding POST — same shape as `/api/r/start-whatsapp`, reuses `CRM_API_URL`/`INTERNAL_API_TOKEN` |
 
 `/r/[code]` sets `dynamic = "force-dynamic"` and `revalidate = 0` deliberately — the page must
 render per-request to log the click and read live partner data.
