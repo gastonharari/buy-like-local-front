@@ -25,6 +25,9 @@ const nextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          // Additive hardening that can't break inline GA/Pixel scripts or the
+          // embedded CRM chat: blocks plugin/base-tag injection and clickjacking.
+          { key: "Content-Security-Policy", value: "object-src 'none'; base-uri 'self'; frame-ancestors 'self'" },
         ],
       },
     ]
