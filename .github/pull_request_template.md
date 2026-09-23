@@ -2,6 +2,9 @@
 
 <!-- Una o dos líneas: qué hace este PR y por qué. -->
 
+Closes CON-NN
+<!-- Reemplazá NN por el issue de Linear (team CON) que este PR cierra. Si no cierra ninguno, usá "Refs CON-NN" o borrá la línea. -->
+
 ## Checklist
 
 - [ ] **Docs actualizados** — si tocaste código de producto, actualizaste el archivo que corresponde bajo [`docs/`](../docs/README.md). Si no aplica, poné `[skip-docs]` en el título o el label `skip-docs`.

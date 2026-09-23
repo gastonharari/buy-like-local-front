@@ -24,6 +24,19 @@ there.
 same PR. The `docs-coverage` CI job comments when one looks missing — it never blocks. Mapping
 table: [docs/README.md](docs/README.md).
 
+## Linear
+
+Workspace `conciergecom`, team **`CON`** (single team, single project `Concierge`) — shared with the
+CRM repo. Ticket IDs look like `CON-123`.
+
+- **Branch names carry the id**: `<type>/con-123-short-desc` (e.g. `fix/con-123-hero-copy`) —
+  doesn't change the type prefixes, just adds the id.
+- **PR body links the ticket**: `Closes CON-123` (or `Refs CON-123` if it doesn't close it) — see
+  the PR template. GitHub↔Linear auto-links and moves the ticket when the PR merges, once the
+  Linear GitHub integration is authorized for this repo (Linear → Settings → Integrations →
+  GitHub).
+- No ticket exists for ad-hoc work (a stray fix, a docs tweak) — that's fine, just omit the line.
+
 ## Local dev
 
 ```bash
