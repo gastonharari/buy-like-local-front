@@ -34,6 +34,10 @@ jobs:
         run: npm run lint --if-present
       - name: Build
         run: npm run build
+      # Offline tests for scripts/palmera-deploy.sh (palmera-deploy job below).
+      - name: Palmera-deploy script tests
+        if: github.event_name == 'pull_request'
+        run: bash scripts/palmera-deploy.test.sh
 
       # ── Discord deploy notification (only on merge to main) ──────────
       # The landing page is deployed by Vercel, not by this workflow — so
@@ -126,6 +130,50 @@ jobs:
             '{embeds:[{title:"❌ Deploy de la landing falló",description:($msg + "\n\n[Ver el run en GitHub Actions](" + $run + ")"),color:15548997,footer:{text:$footer}}]}' \
             > deploy-discord.json
           curl -sS -X POST -H "Content-Type: application/json" -d @deploy-discord.json "$WEBHOOK"
+
+  # ── palmera.deploy ───────────────────────────────────────────────────
+  # When uvolman merges to main (Vercel deploys that commit), record the
+  # deploy (commit hash + merge date) in palmera.deploy. main only takes PRs
+  # (ruleset, no bypass), so scripts/palmera-deploy.sh opens — or refreshes —
+  # ONE PR with the change, pushed and opened with PALMERA_GH_TOKEN (a token of
+  # gastonharari): the PR is in the owner's name and, unlike GITHUB_TOKEN, its
+  # push triggers CI. Merging that PR is a push by someone else, so this job
+  # skips it: no loop. Same job in concierge-crm and buy-like-local.
+  # Docs: docs/operations.md, "palmera.deploy".
+  palmera-deploy:
+    needs: build
+    # Same login as PALMERA_ACTOR below (the script re-checks it).
+    if: github.event_name == 'push' && github.actor == 'uvolman'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: palmera-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # The fallback only lets the next step fail with a clear message.
+          token: ${{ secrets.PALMERA_GH_TOKEN || github.token }}
+      - name: Validate required secrets
+        env:
+          PALMERA_GH_TOKEN: ${{ secrets.PALMERA_GH_TOKEN }}
+        run: |
+          if [ -z "$PALMERA_GH_TOKEN" ]; then
+            echo "::error::Missing required secret: PALMERA_GH_TOKEN"
+            exit 1
+          fi
+      - name: Record palmera.deploy (PR)
+        env:
+          GH_TOKEN: ${{ secrets.PALMERA_GH_TOKEN }}
+          ACTOR: ${{ github.actor }}
+          PALMERA_ACTOR: uvolman
+          SHA: ${{ github.sha }}
+          BASE_REF: ${{ github.ref_name }}
+          PALMERA_AUTHOR_NAME: Gaston Harari
+          PALMERA_AUTHOR_EMAIL: harari.gaston@gmail.com
+        run: bash "$GITHUB_WORKSPACE/scripts/palmera-deploy.sh"
 
   # Playwright e2e smoke test. `npm ci` picks up legacy-peer-deps from the
   # repo-root .npmrc automatically (same as the build job). The Playwright
