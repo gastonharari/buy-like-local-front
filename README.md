@@ -92,7 +92,8 @@ CI job comments when one looks missing; it never blocks the merge.
 - No light mode. The site is always dark; `:root` tokens *are* the dark theme.
 - **Never hardcode a hex** — use the Tailwind semantic classes. Tokens live in `app/globals.css`.
 - WhatsApp green `#25D366` is for the WhatsApp CTA only, never as a general brand colour.
-- Testimonials stay in English — they're quotes from foreign tourists. Don't translate them.
+- Testimonials stay in English — they're quotes from foreign tourists. Don't translate them. Real,
+  client-approved quotes only; while there are none the section is hidden (see `docs/pages.md`).
 - Never leave a fixed-position overlay in the DOM while hidden; iOS Safari ignores
   `pointer-events: none` on composited layers and it eats touch scrolling.
 - Brand scope (what we can and can't promise) is in [`../BRAND.md`](../BRAND.md). Products and

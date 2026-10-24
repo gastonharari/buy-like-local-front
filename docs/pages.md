@@ -106,6 +106,9 @@ Two things to know:
   you change the business number, change it in all three.
 - **Testimonials are always English** and are *not* in `LangConfig`. They're quotes from foreign
   tourists; translating them would be fabricating them. Don't add them to the translation object.
+- **Testimonials must be real, client-approved quotes** (BRAND.md: never invent proof). Until there
+  is one, `TESTIMONIALS` in `app/page.tsx` stays empty and the section does not render at all
+  (`e2e/landing-smoke.spec.ts` asserts it). Adding the first approved quote brings the section back.
 
 Adding a field means adding it to `LangConfig` and to all three language objects — TypeScript will
 tell you if you miss one, which is the whole reason it's a typed record.

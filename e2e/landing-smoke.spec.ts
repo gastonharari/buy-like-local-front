@@ -24,3 +24,12 @@ test('landing page renders hero with both CTAs', async ({ page }) => {
   await expect(hero.locator('a[href*="wa.me"]').first()).toBeVisible();
   await expect(hero.locator('button').first()).toBeVisible();
 });
+
+// BRAND.md: never invent proof. There are no client-approved testimonials yet,
+// so the section must not render. When the first real quote lands in
+// TESTIMONIALS (app/page.tsx), update this test along with it.
+test('landing page shows no testimonials until there are real ones', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-section="hero"]')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#testimonials')).toHaveCount(0);
+});
