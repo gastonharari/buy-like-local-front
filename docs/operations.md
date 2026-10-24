@@ -95,7 +95,7 @@ Runs on PRs to `main` and on pushes to `main`.
 | Job | Does |
 |---|---|
 | `build` | `next build` |
-| `e2e` | Playwright smoke (`e2e/landing-smoke.spec.ts`) |
+| `e2e` | Playwright smoke (`e2e/landing-smoke.spec.ts`). Pinned to `ubuntu-24.04` — Playwright has no Chromium for 26.04 yet |
 | `e2e-coverage` | **warn only** — sticky PR comment when product code changed without an e2e test |
 | `docs-coverage` | **warn only** — sticky PR comment when product code changed without a `docs/` update |
 
