@@ -115,9 +115,12 @@ tell you if you miss one, which is the whole reason it's a typed record.
 The brand's scope rules are in `../BRAND.md` (canonical) and mirrored in the `cmo-concierge`
 skill. The two that bite when writing landing copy:
 
-- ✅ In scope: **physical products** (we buy them for you) and **tickets to shows/concerts**,
-  including sold-out ones.
-- ❌ Out of scope: **restaurant/bar reservations** ("te conseguimos mesa" — no), general "any
-  experience" fixing, food delivery, currency exchange, DNI/bank/migration help.
+- ✅ In scope: **physical products** (we buy them for you; bulky items too, without
+  install/assembly) and **tickets to shows/concerts**, including sold-out ones and palcos. Gifts
+  bought from abroad for someone in BA are in the audience ("waiting for them").
+- ⚠️ **Reservations only as a loss leader** (BRAND.md ruling 2026-09-15): never a differentiator,
+  never "guaranteed table" — no landing copy built around "te conseguimos mesa".
+- ❌ Out of scope: general "any experience" fixing, food delivery, currency exchange,
+  DNI/bank/migration help.
 
 The real barrier being sold against is the local **account/identity**, not just the foreign card.

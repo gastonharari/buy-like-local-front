@@ -29,3 +29,6 @@ next-env.d.ts
 # playwright
 /playwright-report/
 /test-results/
+# macOS + Claude Code worktrees (live inside the checkout)
+.DS_Store
+.claude/worktrees/
