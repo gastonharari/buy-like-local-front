@@ -95,7 +95,10 @@ This repo is on **Next 15.5.x**. The CRM is on **Next 16**. They are *not* pinne
 
 Canonical: [`../BRAND.md`](../BRAND.md), mirrored in the `cmo-concierge` skill.
 
-- ✅ **Physical products** (we buy them for you) and **tickets to shows/concerts**, sold-out included.
-- ❌ **Restaurant/bar reservations** ("te conseguimos mesa") — no. Also no general experience
-  fixing, food delivery, currency exchange, or DNI/bank/migration help.
+- ✅ **Physical products** (we buy them for you; bulky items too, no install/assembly) and
+  **tickets to shows/concerts** (sold-out and palcos included). Gifts bought from abroad for
+  someone in BA are in the audience ("waiting for them").
+- ⚠️ **Reservations only as a loss leader** (BRAND.md ruling 2026-09-15): never a differentiator,
+  never "guaranteed table" — don't build landing copy around "te conseguimos mesa".
+- ❌ No general experience fixing, food delivery, currency exchange, or DNI/bank/migration help.
 - The barrier we sell against is the local **account/identity**, not only the foreign card.
