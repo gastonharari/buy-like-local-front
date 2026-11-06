@@ -350,4 +350,4 @@ Then add `--font-serif: var(--font-playfair)` to `@theme inline`. Use `font-seri
 | Translations | `/front/lib/translations.ts` |
 | Utils (cn) | `/front/lib/utils.ts` |
 | Brand memory | `~/.claude/projects/.../memory/project_brand.md` |
-| CMO skill | `/concierge/agents/performance/Instagram-Posts/cmo-concierge-SKILL.md` |
+| CMO skill | `/concierge/.claude/skills/cmo-concierge/SKILL.md` (brand source of truth: `/concierge/BRAND.md`) |
