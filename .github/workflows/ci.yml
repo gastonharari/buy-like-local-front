@@ -132,8 +132,11 @@ jobs:
   # webServer option boots `next dev -p 3001` itself — no manual server step.
   # Caches the Chromium binary keyed on the lockfile; installs browser-only on
   # a cache hit.
+  # Pinned to ubuntu-24.04: ubuntu-latest moved to 26.04, where Playwright has no
+  # Chromium build yet ("Playwright does not support chromium on ubuntu26.04-x64").
+  # Same fix as concierge-crm #108. Unpin once Playwright ships 26.04 support.
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
