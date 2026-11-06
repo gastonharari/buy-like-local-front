@@ -15,5 +15,5 @@ export type TrackingOrder = {
 }
 
 export const TRACKING_ORDERS: Record<string, TrackingOrder> = {
-  "b99bf0af-33c1-4e5f-9405-c9804e0379c2": { current: 1 },
+  "b99bf0af-33c1-4e5f-9405-c9804e0379c2": { current: 2 },
 }
