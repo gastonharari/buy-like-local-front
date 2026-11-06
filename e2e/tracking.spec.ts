@@ -6,7 +6,7 @@ test('tracking page shows the current status', async ({ page }) => {
   const response = await page.goto(`/track/${id}`);
   expect(response?.status()).toBe(200);
   await expect(page.getByTestId('tracking-number')).toHaveText(id);
-  await expect(page.getByTestId('tracking-status')).toHaveText('In preparation');
+  await expect(page.getByTestId('tracking-status')).toHaveText('Received');
 });
 
 test('unknown tracking number is a 404', async ({ page }) => {
