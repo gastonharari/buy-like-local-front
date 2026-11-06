@@ -45,23 +45,34 @@ export default async function TrackingPage({ params }: { params: Promise<{ id: s
 
           <ol className="mt-6 space-y-5">
             {TRACKING_STEPS.map((step, i) => {
-              const done = i < order.current
+              // A status is a milestone: once reached it's ticked, the current one included.
+              const done = i <= order.current
               const active = i === order.current
               return (
-                <li key={step} className="flex items-center gap-3" aria-current={active ? "step" : undefined}>
+                <li
+                  key={step}
+                  data-step-done={done}
+                  className="flex items-center gap-3"
+                  aria-current={active ? "step" : undefined}
+                >
                   <span
                     className={[
                       "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                      done && "border-primary bg-primary text-primary-foreground",
-                      active && "border-primary text-primary",
-                      !done && !active && "border-border text-muted-foreground",
+                      done ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground",
+                      active && "ring-2 ring-primary/40 ring-offset-2 ring-offset-card",
                     ]
                       .filter(Boolean)
                       .join(" ")}
                   >
                     {done ? "✓" : i + 1}
                   </span>
-                  <span className={done || active ? "text-foreground" : "text-muted-foreground"}>{step}</span>
+                  <span
+                    className={[done ? "text-foreground" : "text-muted-foreground", active && "font-semibold"]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    {step}
+                  </span>
                 </li>
               )
             })}
