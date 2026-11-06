@@ -116,6 +116,30 @@ the workflow requests `models: read`.
 Domain: `www.concierge.com.ar` (also `concierge.com.ar`). Both are in the CRM backend's
 `allowedOrigins`.
 
+### `palmera.deploy`
+
+When **`uvolman`** merges a PR to `main`, the `palmera-deploy` job in `ci.yml` (push only, after
+`build` passes, i.e. as Vercel deploys that commit) records the deploy in `palmera.deploy` at the
+repo root:
+
+```
+commit=<full hash of the merge commit>
+date=<merge time, UTC, ISO 8601>
+```
+
+- **Why a PR and not a push:** the `main protegida` ruleset requires a PR and has no bypass actors.
+  `scripts/palmera-deploy.sh` rebuilds the `chore/palmera-deploy` branch on top of the latest
+  `main`, commits as Gaston Harari, force-pushes it and opens the PR, or edits the one already
+  open. There is only ever one, carrying the latest deploy.
+- **Token:** pushed and opened with the `PALMERA_GH_TOKEN` secret, a fine-grained token of
+  `gastonharari` (Contents + Pull requests read/write). That puts the PR in the owner's name, and,
+  unlike `GITHUB_TOKEN`, its push triggers CI. Missing secret → the job fails at "Validate required
+  secrets"; `build`, `e2e` and the Discord notice are unaffected.
+- **No loop:** merging the palmera PR is a push by someone other than `uvolman`, so the job skips.
+
+Same job and script in `concierge-crm` and `buy-like-local`. Offline tests (stubbed `gh`, bare
+local origin): `bash scripts/palmera-deploy.test.sh`, run by the `build` job on PRs.
+
 ### Verification is blocked for automated agents
 
 The deployment sits behind **Vercel SSO + PIN**, and Vercel's Bot Protection returns `403` to
