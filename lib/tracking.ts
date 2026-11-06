@@ -7,6 +7,7 @@ export const TRACKING_STEPS = [
   "In preparation",
   "Received",
   "Shipped to customer",
+  "Received by customer",
 ] as const
 
 export type TrackingOrder = {

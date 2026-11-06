@@ -9,7 +9,7 @@ test('tracking page shows the current status', async ({ page }) => {
   await expect(page.getByTestId('tracking-status')).toHaveText('Shipped to customer');
   // Every reached step is ticked, the current one included; later steps are not.
   await expect(page.locator('li[data-step-done="true"]')).toHaveCount(4);
-  await expect(page.locator('li[data-step-done="false"]')).toHaveCount(0);
+  await expect(page.locator('li[data-step-done="false"]')).toHaveCount(1);
 });
 
 test('unknown tracking number is a 404', async ({ page }) => {
