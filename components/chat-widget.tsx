@@ -135,7 +135,7 @@ export function ChatWidget() {
         aria-hidden={!open}
         className="fixed right-6 z-50 flex flex-col rounded-2xl overflow-hidden"
         style={{
-          bottom: "calc(6rem + env(safe-area-inset-bottom))",
+          bottom: "calc(6rem + env(safe-area-inset-bottom) + var(--cg-ctabar, 0px))",
           width: "min(420px, calc(100vw - 48px))",
           background: "#111f20",
           visibility: open ? "visible" : "hidden",
@@ -190,7 +190,7 @@ export function ChatWidget() {
       <div
         className="fixed right-6 z-50 flex flex-col items-end gap-2"
         style={{
-          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom) + var(--cg-ctabar, 0px))",
           opacity: (revealed || open) ? 1 : 0,
           transform: (revealed || open) ? "translateY(0)" : "translateY(16px)",
           pointerEvents: "none",

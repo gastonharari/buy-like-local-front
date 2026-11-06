@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import {
   Accordion,
   AccordionContent,
@@ -18,13 +17,20 @@ import {
   Ticket,
   Wine,
   Instagram,
+  type LucideIcon,
 } from "lucide-react"
 import { translations, type Lang } from "@/lib/translations"
 import { trackEvent } from "@/lib/analytics"
+import { ChatMockup } from "@/components/landing/chat-mockup"
+import { StepFlow } from "@/components/landing/step-flow"
+import { TrustBand } from "@/components/landing/trust-band"
+import { ProductsMarquee } from "@/components/landing/products-marquee"
+import { CtaBar } from "@/components/landing/cta-bar"
+import { useRevealAll, usePointerGlow } from "@/hooks/use-reveal"
 
 // ─── Static data ────────────────────────────────────────────────────────────
 
-const STEP_ICONS = [MessageCircle, ShoppingBag, Package]
+const STEP_ICONS: LucideIcon[] = [MessageCircle, ShoppingBag, Package]
 
 const SERVICE_ICONS = [ShoppingCart, Ticket, Wine]
 
@@ -77,6 +83,11 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export default function Home() {
   const [lang, setLang] = useState<Lang>("en")
   const [scrolled, setScrolled] = useState(false)
+  const [showCtaBar, setShowCtaBar] = useState(false)
+  const heroRef = useRef<HTMLElement | null>(null)
+
+  useRevealAll()
+  usePointerGlow(heroRef)
 
   useEffect(() => {
     const stored = localStorage.getItem("concierge-lang")
@@ -105,7 +116,7 @@ export default function Home() {
   // Track section visibility
   const sectionsTracked = useRef(new Set<string>())
   useEffect(() => {
-    const SECTION_IDS = ["hero", "how-it-works", "services", "testimonials", "about", "faq", "final-cta"]
+    const SECTION_IDS = ["hero", "trust", "how-it-works", "services", "testimonials", "about", "faq", "final-cta"]
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -124,6 +135,43 @@ export default function Home() {
     })
     return () => observer.disconnect()
   }, [])
+
+  // Sticky CTA bar visibility — the section_view observer above unobserves
+  // each section after its first view, so it can't drive an always-on bar.
+  // This is a separate, continuously-watching observer over just hero + final-cta.
+  useEffect(() => {
+    const heroEl = heroRef.current
+    const finalCtaEl = document.querySelector('[data-section="final-cta"]')
+    if (!heroEl || !finalCtaEl) return
+
+    const inView: Record<string, boolean> = { hero: true, "final-cta": false }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.getAttribute("data-section")
+          if (id) inView[id] = entry.isIntersecting
+        })
+        setShowCtaBar(!inView.hero && !inView["final-cta"])
+      },
+      { threshold: 0.2 }
+    )
+    observer.observe(heroEl)
+    observer.observe(finalCtaEl)
+    return () => observer.disconnect()
+  }, [])
+
+  // Reserve space for the sticky CTA bar so the chat widget's FAB doesn't
+  // sit underneath it (consumed by components/chat-widget.tsx).
+  useEffect(() => {
+    if (showCtaBar) {
+      document.documentElement.style.setProperty("--cg-ctabar", "64px")
+    } else {
+      document.documentElement.style.removeProperty("--cg-ctabar")
+    }
+    return () => {
+      document.documentElement.style.removeProperty("--cg-ctabar")
+    }
+  }, [showCtaBar])
 
   // Track scroll depth milestones
   const depthTracked = useRef(new Set<number>())
@@ -164,7 +212,7 @@ export default function Home() {
 
       {/* ── Sticky Header ────────────────────────────────────────────────── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-shadow duration-300 bg-background ${
+        className={`fixed top-0 left-0 right-0 z-40 border-b border-border/40 transition-shadow duration-300 bg-background/85 backdrop-blur-md ${
           scrolled ? "shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : ""
         }`}
       >
@@ -229,8 +277,13 @@ export default function Home() {
 
       <main id="main-content" className="min-h-dvh pt-16">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section data-section="hero" className="relative min-h-dvh flex items-center justify-center overflow-clip">
-          <div className="absolute inset-0 z-0 pointer-events-none">
+        <section
+          ref={heroRef}
+          data-section="hero"
+          className="relative flex min-h-dvh items-center overflow-hidden"
+        >
+          {/* Background stack */}
+          <div aria-hidden="true" className="absolute inset-0 pointer-events-none cg-kenburns">
             <Image
               src="/buenos-aires-obelisco-night.jpg"
               alt="Buenos Aires Obelisco at night"
@@ -239,28 +292,68 @@ export default function Home() {
               className="object-cover"
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
           </div>
+          <div aria-hidden="true" className="absolute inset-0 pointer-events-none bg-gradient-to-b from-background/70 via-background/45 to-background" />
+          <div aria-hidden="true" className="cg-grid-overlay absolute inset-0 pointer-events-none" />
+          <div
+            aria-hidden="true"
+            className="cg-drift pointer-events-none absolute -left-24 top-24 h-96 w-96 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(212,165,116,.14), transparent 70%)" }}
+          />
+          <div
+            aria-hidden="true"
+            className="cg-drift-2 pointer-events-none absolute -right-24 bottom-24 h-96 w-96 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(78,156,148,.12), transparent 70%)" }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "radial-gradient(400px circle at var(--mx, 50%) var(--my, 40%), rgba(212,165,116,.07), transparent 70%)" }}
+          />
+          <div aria-hidden="true" className="cg-noise absolute inset-0 pointer-events-none" />
 
-          <div className="relative z-10 container mx-auto px-4 py-10 md:py-20 text-center">
-            <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
-              <h1 className="font-display tracking-tight text-foreground">
+          <div className="container relative z-10 mx-auto grid items-center gap-10 px-4 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+            {/* Copy column */}
+            <div className="text-center lg:text-left">
+              <p
+                className="cg-rise font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+                style={{ "--rise-delay": "0s" } as React.CSSProperties}
+              >
+                — {t.hero.eyebrow} —
+              </p>
+
+              <h1
+                className="cg-rise font-display tracking-tight text-foreground mt-4"
+                style={{ "--rise-delay": ".1s" } as React.CSSProperties}
+              >
                 <span className="block text-4xl md:text-7xl font-bold text-balance">
                   {t.hero.h1}
                 </span>
-                <span className="block text-2xl md:text-5xl font-semibold text-balance mt-2 text-primary">
+                <span className="cg-shimmer block text-2xl md:text-5xl font-semibold text-balance mt-2">
                   {t.hero.h1Echo}
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-cream-suave">
+              <div
+                aria-hidden="true"
+                className="cg-rise mx-auto mt-5 h-[3px] w-[120px] bg-primary lg:mx-0"
+                style={{ "--rise-delay": ".2s" } as React.CSSProperties}
+              />
+
+              <p
+                className="cg-rise text-lg md:text-xl max-w-2xl mx-auto text-balance leading-relaxed mt-6 text-cream-suave lg:mx-0"
+                style={{ "--rise-delay": ".3s" } as React.CSSProperties}
+              >
                 {t.hero.subtitle}
               </p>
 
-              <div className="flex flex-col items-center gap-3 pt-4">
+              <div
+                className="cg-rise flex flex-col items-center lg:items-start gap-3 pt-4"
+                style={{ "--rise-delay": ".4s" } as React.CSSProperties}
+              >
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
+                  className="cg-sheen text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   asChild
                 >
                   <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "hero" }); (window as any).fbq?.('track', 'Lead') }}>
@@ -278,55 +371,71 @@ export default function Home() {
                   {t.hero.chatCta}
                 </Button>
               </div>
+
+              <p
+                className="cg-rise mt-3 text-xs text-muted-foreground"
+                style={{ "--rise-delay": ".5s" } as React.CSSProperties}
+              >
+                {t.hero.ctaNote}
+              </p>
+            </div>
+
+            {/* Chat mockup column */}
+            <div className="cg-rise mt-4 lg:mt-0" style={{ "--rise-delay": ".45s" } as React.CSSProperties}>
+              <ChatMockup chat={t.hero.chat} />
             </div>
           </div>
         </section>
+
+        {/* ── Trust Band ───────────────────────────────────────────────────── */}
+        <TrustBand items={t.trust.items} />
 
         {/* ── How It Works ─────────────────────────────────────────────────── */}
         <section
           id="how-it-works"
           className="py-24 bg-card/30 relative overflow-hidden scroll-mt-20"
         >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-32 top-1/3 h-80 w-80 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(78,156,148,.12), transparent 70%)" }}
+          />
           <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
+            <div data-reveal className="cg-reveal text-center mb-16">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                — {t.howItWorks.eyebrow} —
+              </p>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 mt-4 text-balance text-foreground font-display">
                 {t.howItWorks.title}
               </h2>
+              <div aria-hidden="true" className="mx-auto h-[3px] w-[120px] bg-primary" />
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {t.howItWorks.steps.map((step, i) => {
-                const Icon = STEP_ICONS[i]
-                const colors = [
-                  { ring: "border-accent", icon: "bg-accent/20 text-accent", num: "text-accent/30" },
-                  { ring: "border-primary", icon: "bg-primary/20 text-primary", num: "text-primary/30" },
-                  { ring: "border-muted-foreground", icon: "bg-muted-foreground/20 text-muted-foreground", num: "text-muted-foreground/30" },
-                ]
-                const c = colors[i]
-                return (
-                  <Card
-                    key={i}
-                    className={`p-8 text-center space-y-4 border-2 border-border hover:${c.ring} transition-colors duration-300 bg-card`}
-                  >
-                    <div
-                      aria-hidden="true"
-                      className={`w-16 h-16 rounded-full ${c.icon} flex items-center justify-center mx-auto`}
-                    >
-                      <Icon className="w-8 h-8" />
-                    </div>
-                    <div aria-hidden="true" className={`text-6xl font-bold ${c.num}`}>
-                      0{i + 1}
-                    </div>
-                    <h3 className="text-xl font-bold text-card-foreground">
-                      {step.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {step.description}
-                    </p>
-                  </Card>
-                )
-              })}
+            <div className="max-w-6xl mx-auto">
+              <StepFlow steps={t.howItWorks.steps} icons={STEP_ICONS} />
             </div>
+          </div>
+        </section>
+
+        {/* ── Products Marquee ─────────────────────────────────────────────── */}
+        <ProductsMarquee eyebrow={t.marquee.eyebrow} aria={t.marquee.aria} items={t.marquee.items} />
+
+        {/* ── Mid CTA band ─────────────────────────────────────────────────── */}
+        <section className="relative py-10">
+          <div className="container mx-auto flex flex-col items-center gap-5 px-4 text-center sm:flex-row sm:justify-center sm:text-left">
+            <p data-reveal className="cg-reveal font-display text-xl font-semibold md:text-2xl">
+              {t.midCta.text}
+            </p>
+            <Button
+              size="default"
+              className="cg-sheen font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
+              asChild
+            >
+              <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "mid" }); (window as any).fbq?.('track', 'Lead') }}>
+                <WhatsAppIcon className="w-4 h-4 mr-2" />
+                {t.midCta.cta}
+              </a>
+            </Button>
           </div>
         </section>
 
@@ -337,7 +446,10 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                — {t.services.eyebrow} —
+              </p>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 mt-4 text-balance text-foreground font-display">
                 {t.services.title}
               </h2>
             </div>
@@ -346,15 +458,17 @@ export default function Home() {
               {t.services.items.map((item, i) => {
                 const Icon = SERVICE_ICONS[i]
                 return (
-                  <Card
+                  <div
                     key={i}
-                    className="p-6 space-y-4 border border-border hover:border-primary/50 transition-colors duration-300 bg-card group"
+                    data-reveal
+                    className="group cg-reveal cg-gradient-border cg-glow-hover rounded-2xl p-6 space-y-4"
+                    style={{ "--reveal-delay": `${i * 120}ms` } as React.CSSProperties}
                   >
                     <div
                       aria-hidden="true"
                       className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-300"
                     >
-                      <Icon className="w-6 h-6 text-primary" />
+                      <Icon className="w-6 h-6 text-primary cg-icon-pop" />
                     </div>
                     <h3 className="text-lg font-bold text-card-foreground">
                       {item.title}
@@ -362,7 +476,7 @@ export default function Home() {
                     <p className="text-muted-foreground leading-relaxed text-sm">
                       {item.description}
                     </p>
-                  </Card>
+                  </div>
                 )
               })}
             </div>
@@ -376,7 +490,10 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                — {t.testimonials.eyebrow} —
+              </p>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 mt-4 text-balance text-foreground font-display">
                 {t.testimonials.title}
               </h2>
             </div>
@@ -384,13 +501,15 @@ export default function Home() {
             {/* PLACEHOLDER testimonials — replace with real ones when available */}
             <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {TESTIMONIALS.map((item, i) => (
-                <Card
+                <div
                   key={i}
-                  className="p-8 space-y-6 border border-border bg-card relative"
+                  data-reveal
+                  className="cg-reveal cg-gradient-border rounded-2xl relative p-8 space-y-6"
+                  style={{ "--reveal-delay": `${i * 120}ms` } as React.CSSProperties}
                 >
                   {/* Large quotation mark */}
                   <span
-                    className="absolute top-4 left-6 text-6xl leading-none text-primary/20 font-display select-none"
+                    className="absolute top-4 left-6 text-6xl leading-none text-primary/25 font-display select-none"
                     aria-hidden="true"
                   >
                     &ldquo;
@@ -398,7 +517,7 @@ export default function Home() {
                   <p className="text-foreground leading-relaxed pt-6 relative z-10 text-left">
                     &ldquo;{item.quote}&rdquo;
                   </p>
-                  <div className="flex items-center gap-3 pt-2 border-t border-border">
+                  <div className="flex items-center gap-3 pt-2 border-t border-border/60">
                     <span aria-hidden="true" className="text-2xl">
                       {item.flag}
                     </span>
@@ -411,7 +530,7 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
@@ -427,18 +546,24 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-bold text-balance text-foreground font-display">
                 {t.about.title}
               </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed text-left">
-                {t.about.body}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                <a
-                  href="mailto:info@concierge.com.ar"
-                  className="text-primary hover:underline"
-                  onClick={() => trackEvent("email_click", { location: "about" })}
-                >
-                  {t.about.contact}
-                </a>
-              </p>
+              <div aria-hidden="true" className="mx-auto h-[3px] w-[120px] bg-primary" />
+              <div
+                data-reveal
+                className="cg-reveal cg-gradient-border-glass rounded-3xl p-8 md:p-10 text-left"
+              >
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  {t.about.body}
+                </p>
+                <p className="text-sm text-muted-foreground mt-4">
+                  <a
+                    href="mailto:info@concierge.com.ar"
+                    className="text-primary hover:underline"
+                    onClick={() => trackEvent("email_click", { location: "about" })}
+                  >
+                    {t.about.contact}
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -450,7 +575,10 @@ export default function Home() {
         >
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                — {t.faq.eyebrow} —
+              </p>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 mt-4 text-balance text-foreground font-display">
                 {t.faq.title}
               </h2>
             </div>
@@ -461,7 +589,7 @@ export default function Home() {
                   <AccordionItem
                     key={i}
                     value={`item-${i}`}
-                    className="border border-border rounded-xl bg-card px-6 data-[state=open]:border-primary/40 transition-colors duration-200"
+                    className="cg-gradient-border rounded-2xl px-6 transition-colors duration-200 data-[state=open]:border-primary/40 data-[state=open]:shadow-[0_0_30px_-12px_rgba(212,165,116,.4)]"
                   >
                     <AccordionTrigger className="text-left text-foreground font-semibold hover:no-underline py-5">
                       {item.q}
@@ -487,9 +615,15 @@ export default function Home() {
               sizes="100vw"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
+            <div aria-hidden="true" className="cg-grid-overlay absolute inset-0" />
           </div>
           <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl mx-auto text-center space-y-8">
+            <div data-reveal className="cg-reveal max-w-3xl mx-auto text-center space-y-8 relative">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-1/2 top-0 -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/4 rounded-full"
+                style={{ background: "radial-gradient(circle, rgba(212,165,116,.22), transparent 70%)" }}
+              />
               <h2 className="text-4xl md:text-6xl font-bold text-balance text-foreground font-display">
                 {t.finalCta.h2}
               </h2>
@@ -499,7 +633,7 @@ export default function Home() {
               <div className="flex flex-col items-center gap-3">
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
+                  className="cg-sheen text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   asChild
                 >
                   <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "final_cta" }); (window as any).fbq?.('track', 'Lead') }}>
@@ -517,6 +651,7 @@ export default function Home() {
                   {t.finalCta.chatCta}
                 </Button>
               </div>
+              <p className="mt-3 text-xs text-muted-foreground">{t.finalCta.ctaNote}</p>
             </div>
           </div>
         </section>
@@ -524,9 +659,10 @@ export default function Home() {
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
       <footer
-        className="bg-card border-t border-border pt-12"
+        className="bg-card pt-12"
         style={{ paddingBottom: "calc(3rem + env(safe-area-inset-bottom))" }}
       >
+        <div aria-hidden="true" className="h-px w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-10 md:gap-6 mb-10">
             {/* Brand */}
@@ -559,7 +695,7 @@ export default function Home() {
                   <a
                     key={i}
                     href={FOOTER_LINK_HREFS[i]}
-                    className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
+                    className="cg-underline block text-muted-foreground hover:text-foreground transition-colors text-sm"
                     onClick={() => trackEvent("footer_nav_click", { destination: FOOTER_LINK_HREFS[i] })}
                   >
                     {label}
@@ -618,6 +754,18 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* ── Sticky CTA bar (mobile only) — conditionally mounted, never just hidden */}
+      {showCtaBar && (
+        <CtaBar
+          label={t.ctaBar.label}
+          waLink={t.waLink}
+          onCta={() => {
+            trackEvent("whatsapp_click", { location: "sticky" })
+            ;(window as any).fbq?.('track', 'Lead')
+          }}
+        />
+      )}
     </>
   )
 }
