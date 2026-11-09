@@ -28,7 +28,7 @@ configuration.
 | `KV_REST_API_TOKEN` | server | no | same |
 | `NEXT_PUBLIC_GOOGLE_ADS_ID` | client | no | Google Ads tag, `AW-123456789` (Google Ads → Goals → Conversions → the action → Tag setup). Configured on the existing gtag.js. |
 | `NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_LABEL` | client | no | label of the Google Ads conversion action `whatsapp_click` (the part after `AW-…/` in its `send_to`). Without it the tag loads but no conversion fires. |
-| `NEXT_PUBLIC_OPENAI_PIXEL_ID` | client | no | ChatGPT Ads Measurement Pixel id (ads.openai.com → Conversions). Without it the pixel isn't loaded at all. |
+| `NEXT_PUBLIC_OPENAI_PIXEL_ID` | client | no | ChatGPT Ads Measurement Pixel id (ads.openai.com → Ads Manager → Conversions). Without it the pixel isn't loaded at all. Its format isn't documented, so it isn't validated — it is JSON-encoded into the snippet. |
 | `BING_SITE_VERIFICATION` | server | no | the `content` of Bing Webmaster Tools' `msvalidate.01` meta tag. Read at build time by `app/layout.tsx` metadata. |
 
 `/api/clicks` (the WhatsApp ref's paid-click proxy, [whatsapp-ref.md](whatsapp-ref.md)) reuses
@@ -36,9 +36,10 @@ configuration.
 the buttons fall back to `(ref GS)`.
 
 The four ad-tag variables are **all optional** and each tag is simply absent while its variable is
-empty. `lib/marketing.ts` pattern-checks them (they are interpolated into inline scripts): a
-malformed value disables the tag. `NEXT_PUBLIC_*` values are inlined at build time, so changing one
-needs a redeploy.
+empty. They end up inside inline scripts, so `lib/marketing.ts` pattern-checks the ones with a
+documented format (Google Ads id and label, Bing) — a malformed value disables the tag — and the
+OpenAI pixel id is JSON-encoded instead. `NEXT_PUBLIC_*` values are inlined at build time, so
+changing one needs a redeploy.
 
 `CRM_API_URL` and `INTERNAL_API_TOKEN` are **server-only on purpose** — no `NEXT_PUBLIC_` prefix.
 The token must never reach the browser. They're set in Vercel (Production scope) and are in no
@@ -101,15 +102,20 @@ event, it calls `reportWhatsAppConversion()` (`lib/marketing.ts`), which sends
 | Platform | Call | Needs |
 |---|---|---|
 | Google Ads | `gtag('event','conversion',{send_to:'AW-…/<label>'})` | `NEXT_PUBLIC_GOOGLE_ADS_ID` + `NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_LABEL` |
-| ChatGPT Ads | `oaiq('measure','custom',{type:'custom'},{custom_event_name:'whatsapp_click'})` | `NEXT_PUBLIC_OPENAI_PIXEL_ID` |
+| ChatGPT Ads | `oaiq('measure','lead_created',{type:'customer_action'})` | `NEXT_PUBLIC_OPENAI_PIXEL_ID` |
 
 - **Google Ads tag**: no second gtag.js — `app/layout.tsx`'s GA4 inline script adds
   `gtag('config','AW-…')` after the consent defaults, so consent mode covers it too.
-- **ChatGPT Ads pixel**: `components/openai-pixel.tsx`, the official snippet from
-  developers.openai.com/ads/measurement-pixel. If the visitor declined the cookie banner,
-  `oaiq('consent', false)` runs before `init`, as the docs require. It is a *custom* event so the
-  name matches the other platforms; if OpenAI Ads Manager needs a standard event to optimise, switch
-  the call to `oaiq('measure','lead_created',{type:'customer_action'})` in one place.
+- **ChatGPT Ads pixel**: `components/openai-pixel.tsx`, the official snippet verbatim from
+  <https://developers.openai.com/ads/measurement-pixel>. If the visitor declined the cookie banner,
+  `oaiq('consent', false)` runs before `init`, as the docs require (that also deletes the
+  `__oppref`/`__obref` cookies). Loaded `afterInteractive` rather than at the top of `<head>`: the
+  only event is a WhatsApp tap, well after load, and the stub queues calls until the SDK arrives.
+- **Which ChatGPT Ads event**: the standard **`lead_created`**, not a custom `whatsapp_click`. The
+  docs say to use a standard event whenever one matches (opening a WhatsApp chat is a lead) and a
+  custom one only when none does; custom events are also reported not to be usable as an
+  optimisation goal. The custom variant is ready in `lib/marketing.ts`
+  (`OPENAI_CUSTOM_WHATSAPP_CLICK`): switching is one line, plus the conversion in Ads Manager.
 - Any error in a tag is swallowed: it must never block the WhatsApp link.
 
 ### Content Security Policy
@@ -122,6 +128,9 @@ allowlist. If one is added, these hosts must be in it besides GA/Meta:
 | `script-src` | `https://bzrcdn.openai.com` (ChatGPT Ads pixel), `https://www.googletagmanager.com` |
 | `connect-src` | `https://bzr.openai.com`, `https://bzrcdn.openai.com`, `https://www.google.com`, `https://googleads.g.doubleclick.net` |
 | `img-src` | `https://bzr.openai.com`, `https://www.google.com`, `https://googleads.g.doubleclick.net` |
+
+The OpenAI hosts are the ones its docs list. If the policy defines `script-src-elem`, add the CDN
+there too, and allow the inline snippets with a nonce or hash — not `'unsafe-inline'`.
 
 ## SEO
 
