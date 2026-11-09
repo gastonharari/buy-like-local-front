@@ -79,6 +79,11 @@ region-less one, so EU visitors stay denied until they accept. Non-EU is opt-out
 `gtag('consent','update',…)` on accept. Declining stores `"denied"` and does not update — the
 defaults already cover it.
 
+The banner also drives the ChatGPT Ads pixel within the same visit: accept →
+`oaiq('consent', true)`, decline → `oaiq('consent', false)` (no more events, and its cookies are
+deleted). On later visits a stored `"denied"` sets consent to false before `init`. A visitor who
+hasn't chosen yet keeps the pixel's default (`true`), like Google outside the EEA.
+
 ### Custom events
 
 `lib/analytics.ts` exports a single helper:
@@ -109,7 +114,8 @@ event, it calls `reportWhatsAppConversion()` (`lib/marketing.ts`), which sends
 - **ChatGPT Ads pixel**: `components/openai-pixel.tsx`, the official snippet verbatim from
   <https://developers.openai.com/ads/measurement-pixel>. If the visitor declined the cookie banner,
   `oaiq('consent', false)` runs before `init`, as the docs require (that also deletes the
-  `__oppref`/`__obref` cookies). Loaded `afterInteractive` rather than at the top of `<head>`: the
+  `__oppref`/`__obref` cookies); accepting or declining during the visit updates it too (see
+  "Consent mode"). Loaded `afterInteractive` rather than at the top of `<head>`: the
   only event is a WhatsApp tap, well after load, and the stub queues calls until the SDK arrives.
 - **Which ChatGPT Ads event**: the standard **`lead_created`**, not a custom `whatsapp_click`. The
   docs say to use a standard event whenever one matches (opening a WhatsApp chat is a lead) and a
@@ -140,7 +146,9 @@ cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` 
 **FAQPage is per page, never in the layout** (the layout renders on every route, and a FAQPage
 must match the FAQ visible on its own page):
 
-- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`).
+- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`), **minus the questions
+  that mention PayPal** (`UNCONFIRMED_CLAIMS` in `lib/faq.ts`): PayPal isn't confirmed, and
+  structured data is what ChatGPT and search engines quote. The visible FAQ is unchanged.
 - `/en/*` and `/pt/*` render one built from the same objects as their visible FAQ
   (`components/guide/guide-page.tsx`, rules in [pages.md](pages.md#guide-pages-and-faq-hubs)).
 - `e2e/faq-jsonld.spec.ts` checks shape, count and text identity. Before a big content change, also

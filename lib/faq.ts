@@ -70,12 +70,22 @@ export function faqPageSchema(items: FaqItem[], path: string) {
   }
 }
 
-/** FAQPage for plain {q, a} pairs (the home page's accordion in lib/translations.ts). */
+/**
+ * Claims that must not reach structured data until Gastón confirms them (session-1 brief: "nada de
+ * PayPal"). Questions that mention them stay visible on the page — that copy is his call — but are
+ * left out of the JSON-LD, which ChatGPT and search engines quote.
+ */
+export const UNCONFIRMED_CLAIMS = /paypal/i
+
+/**
+ * FAQPage for plain {q, a} pairs (the home page's accordion in lib/translations.ts), minus the
+ * questions that mention an UNCONFIRMED_CLAIMS term.
+ */
 export function plainFaqPageSchema(items: Array<{ q: string; a: string }>) {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: items.map((item) => ({
+    mainEntity: items.filter((item) => !UNCONFIRMED_CLAIMS.test(`${item.q} ${item.a}`)).map((item) => ({
       "@type": "Question",
       name: item.q,
       acceptedAnswer: { "@type": "Answer", text: item.a },

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { FAQ_EN, FAQ_PT } from '../lib/content/faq-items';
+import { translations } from '../lib/translations';
 
 // FAQPage JSON-LD on the FAQ hubs and the guide pages: valid shape, the right number of
 // questions, and text identical to what the page shows (Google and Bing ignore — or penalise —
@@ -100,9 +101,29 @@ test('every direct answer is 40–60 words', () => {
   }
 });
 
-test('the landing has one FAQPage, built from its own FAQ', async ({ page }) => {
+test('the landing has one FAQPage: its own FAQ minus PayPal, matching the visible text', async ({ page }) => {
+  // Keep the cookie banner out of the way of the accordion clicks.
+  await page.addInitScript(() => localStorage.setItem('cookie_consent', 'denied'));
   await page.goto('/');
   const schemas = await faqPages(page);
   expect(schemas).toHaveLength(1);
-  expect(schemas[0].mainEntity.length).toBeGreaterThan(0);
+
+  // No PayPal in structured data until it's confirmed (the visible copy is Gastón's call).
+  expect(JSON.stringify(schemas[0])).not.toMatch(/paypal/i);
+  const expected = translations.en.faq.items.filter((i) => !/paypal/i.test(`${i.q} ${i.a}`));
+  const questions = schemas[0].mainEntity as Question[];
+  expect(questions.length).toBeGreaterThan(0);
+  expect(questions).toHaveLength(expected.length);
+
+  // Every question left is on the page with the same answer (the accordion mounts an answer only
+  // while it's open, so open each one).
+  const faq = page.locator('#faq');
+  for (const q of questions) {
+    const trigger = faq.getByRole('button', { name: q.name, exact: true });
+    await trigger.click();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    const contentId = await trigger.getAttribute('aria-controls');
+    const answer = await page.locator(`[id="${contentId}"]`).innerText();
+    expect(norm(answer)).toBe(norm(stripHtml(q.acceptedAnswer.text)));
+  }
 });
