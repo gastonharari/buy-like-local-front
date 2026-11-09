@@ -18,6 +18,9 @@ All server-to-server, authenticated with `X-Internal-Token: $INTERNAL_API_TOKEN`
 | `app/r/[code]/page.tsx` | `POST /api/internal/clicks` | log the click |
 | `app/api/r/start-whatsapp/route.ts` | `POST /api/internal/users/from-referral` | create + attribute the user, get a `wa.me` URL |
 
+Not to be confused with `POST /api/clicks` → `/api/internal/ad-clicks`: that one is for paid ad
+clicks and the WhatsApp ref ([whatsapp-ref.md](whatsapp-ref.md)), not partner referrals.
+
 `CRM_API_URL` and `INTERNAL_API_TOKEN` are **server-only** (no `NEXT_PUBLIC_` prefix) and
 **mandatory**. Without them: the referral page silently degrades to a generic "Concierge" fallback,
 and `/api/r/start-whatsapp` returns `500` so the modal shows "No pudimos conectar".
