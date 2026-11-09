@@ -14,6 +14,7 @@ They don't match — and the *other* concierge repo has the inverse trap.
 | [pages.md](pages.md) | routes, page sections, components, i18n |
 | [design-system.md](design-system.md) | tokens, CTA hierarchy, the iOS rules |
 | [referrals.md](referrals.md) | `/r/[code]`, the KV click outbox, the CRM handoff |
+| [whatsapp-ref.md](whatsapp-ref.md) | the `(ref XX)` on WhatsApp buttons, `/api/clicks`, utm/gclid storage |
 | [operations.md](operations.md) | env vars, analytics, CI, Vercel deploy |
 
 The CRM this site hands off to is a **separate repo** (`concierge-crm`, directory
@@ -29,6 +30,9 @@ job comments on the PR when one looks missing. It never fails the build. Escape 
 | If you changed | Update |
 |---|---|
 | `app/r/**`, `lib/kv.ts`, `app/api/r/**` | [referrals.md](referrals.md) |
+| `lib/wa-ref.ts`, `hooks/use-wa-ref.ts`, `app/api/clicks/**`, `components/attribution-capture.tsx` | [whatsapp-ref.md](whatsapp-ref.md) |
+| `lib/marketing.ts`, `components/openai-pixel.tsx`, `app/robots.ts`, `app/sitemap.ts` | [operations.md](operations.md) |
+| `lib/content/**`, `components/guide/**` | [pages.md](pages.md) |
 | `app/globals.css` | [design-system.md](design-system.md) |
 | `app/layout.tsx`, `lib/analytics.ts`, `.github/**` | [operations.md](operations.md) |
 | `app/**`, `components/**`, `lib/translations.ts` | [pages.md](pages.md) |

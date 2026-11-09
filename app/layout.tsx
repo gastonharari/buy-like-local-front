@@ -7,6 +7,9 @@ import Script from "next/script"
 import { Suspense } from "react"
 import { CookieBanner } from "@/components/cookie-banner"
 import { ChatWidget } from "@/components/chat-widget"
+import { AttributionCapture } from "@/components/attribution-capture"
+import { OpenAIPixel } from "@/components/openai-pixel"
+import { bingVerification, googleAdsConfigLine } from "@/lib/marketing"
 import "./globals.css"
 
 const inter = Inter({
@@ -74,6 +77,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: bingVerification(),
 }
 
 function JsonLd() {
@@ -122,61 +126,8 @@ function JsonLd() {
     },
   }
 
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "How does payment work?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "We send you a payment link via Mercado Pago or bank transfer details. You can pay in USD or ARS. You always see the exact total before paying.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Is Concierge safe?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. We're a registered company in Buenos Aires. We send you a detailed quote before charging anything. No payment without your approval.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How long does delivery take?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Depends on the order. Food delivery: 1-2 hours. Online purchases: 24-48 hours. Experiences and reservations: usually same day.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do you deliver to hotels or Airbnbs?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes, anywhere in Buenos Aires. Just send us the address.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do I need to create an account?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "No. Just WhatsApp. That's it.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "What languages do you speak?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "English, Español, and Português.",
-        },
-      },
-    ],
-  }
-
+  // No FAQPage here: this layout renders on every route, and a FAQPage must match the FAQ visible
+  // on its own page. The landing renders its own (app/page.tsx), and so do /en|pt/* (guide-page).
   return (
     <>
       <script
@@ -186,10 +137,6 @@ function JsonLd() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
     </>
   )
@@ -237,6 +184,7 @@ export default function RootLayout({
 
             gtag('js', new Date());
             gtag('config', 'G-JK2YHFCTCD');
+            ${googleAdsConfigLine()}
           `}
         </Script>
 
@@ -259,6 +207,8 @@ export default function RootLayout({
         <Suspense fallback={null}>{children}</Suspense>
         <CookieBanner />
         <ChatWidget />
+        <AttributionCapture />
+        <OpenAIPixel />
         <Analytics />
       </body>
     </html>

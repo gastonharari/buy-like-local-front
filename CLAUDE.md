@@ -14,6 +14,7 @@ Router, always dark. Hands visitors off to WhatsApp or the CRM's web chat.
 | [docs/pages.md](docs/pages.md) | routes, landing sections, components, i18n, copy scope |
 | [docs/design-system.md](docs/design-system.md) | token layers, CTA hierarchy, iOS rules |
 | [docs/referrals.md](docs/referrals.md) | `/r/[code]`, the KV click outbox, the CRM contract |
+| [docs/whatsapp-ref.md](docs/whatsapp-ref.md) | the `(ref XX)` on every WhatsApp button, `/api/clicks` |
 | [docs/operations.md](docs/operations.md) | env vars, analytics, SEO, CI, Vercel deploy |
 
 `design-system-SKILL.md` is the canonical token reference and auto-loads for UI work. The CRM is a

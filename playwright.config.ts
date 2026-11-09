@@ -7,7 +7,9 @@ import { defineConfig, devices } from '@playwright/test';
 // block makes `npm run test:e2e` self-contained — Playwright boots
 // `next dev -p 3001` itself and waits for it, both locally and in CI.
 // reuseExistingServer keeps a dev server you already have on :3001 locally.
-const PORT = 3001;
+// E2E_PORT moves both the server and the baseURL (e.g. E2E_PORT=3157 when :3001 is taken by
+// another checkout — reuseExistingServer would otherwise test that checkout's code).
+const PORT = Number(process.env.E2E_PORT ?? 3001);
 
 export default defineConfig({
   testDir: './e2e',
@@ -22,7 +24,7 @@ export default defineConfig({
   },
   projects: [{ name: 'ui', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run dev',
+    command: `npx next dev -p ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

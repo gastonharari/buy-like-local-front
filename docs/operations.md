@@ -26,6 +26,20 @@ configuration.
 | `NEXT_PUBLIC_FB_APP_ID` | client | no | Meta app id `/wa-connect` passes to `FB.init`; falls back to the Concierge app id |
 | `KV_REST_API_URL` | server | no | injected by Vercel when the KV integration is connected |
 | `KV_REST_API_TOKEN` | server | no | same |
+| `NEXT_PUBLIC_GOOGLE_ADS_ID` | client | no | Google Ads tag, `AW-123456789` (Google Ads → Goals → Conversions → the action → Tag setup). Configured on the existing gtag.js. |
+| `NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_LABEL` | client | no | label of the Google Ads conversion action `whatsapp_click` (the part after `AW-…/` in its `send_to`). Without it the tag loads but no conversion fires. |
+| `NEXT_PUBLIC_OPENAI_PIXEL_ID` | client | no | ChatGPT Ads Measurement Pixel id (ads.openai.com → Ads Manager → Conversions). Without it the pixel isn't loaded at all. Its format isn't documented, so it isn't validated — it is JSON-encoded into the snippet. |
+| `BING_SITE_VERIFICATION` | server | no | the `content` of Bing Webmaster Tools' `msvalidate.01` meta tag. Read at build time by `app/layout.tsx` metadata. |
+
+`/api/clicks` (the WhatsApp ref's paid-click proxy, [whatsapp-ref.md](whatsapp-ref.md)) reuses
+`CRM_API_URL` and `INTERNAL_API_TOKEN` — no new server variable. Without them it returns `500` and
+the buttons fall back to `(ref GS)`.
+
+The four ad-tag variables are **all optional** and each tag is simply absent while its variable is
+empty. They end up inside inline scripts, so `lib/marketing.ts` pattern-checks the ones with a
+documented format (Google Ads id and label, Bing) — a malformed value disables the tag — and the
+OpenAI pixel id is JSON-encoded instead. `NEXT_PUBLIC_*` values are inlined at build time, so
+changing one needs a redeploy.
 
 `CRM_API_URL` and `INTERNAL_API_TOKEN` are **server-only on purpose** — no `NEXT_PUBLIC_` prefix.
 The token must never reach the browser. They're set in Vercel (Production scope) and are in no
@@ -65,6 +79,11 @@ region-less one, so EU visitors stay denied until they accept. Non-EU is opt-out
 `gtag('consent','update',…)` on accept. Declining stores `"denied"` and does not update — the
 defaults already cover it.
 
+The banner also drives the ChatGPT Ads pixel within the same visit: accept →
+`oaiq('consent', true)`, decline → `oaiq('consent', false)` (no more events, and its cookies are
+deleted). On later visits a stored `"denied"` sets consent to false before `init`. A visitor who
+hasn't chosen yet keeps the pixel's default (`true`), like Google outside the EEA.
+
 ### Custom events
 
 `lib/analytics.ts` exports a single helper:
@@ -76,17 +95,82 @@ trackEvent(event: string, params?: Record<string,string>)
 It's a no-op when `window.gtag` is absent, so it's safe to call before consent or during SSR.
 
 Events currently fired: `section_view` per landing section, scroll-depth thresholds, `faq_expand`
-(with the question truncated to 100 chars), `cookie_consent` (`accept`/`decline`), and
-`fbq('track','Lead')` on the hero and final-CTA WhatsApp buttons.
+(with the question truncated to 100 chars), `cookie_consent` (`accept`/`decline`),
+`whatsapp_click` (`location`, and `ref` on the guide pages) on every WhatsApp button, and
+`fbq('track','Lead')` on the landing's hero and final-CTA WhatsApp buttons.
+
+### Ad tags
+
+`trackEvent("whatsapp_click", …)` is the single hook for WhatsApp conversions: besides the GA4
+event, it calls `reportWhatsAppConversion()` (`lib/marketing.ts`), which sends
+
+| Platform | Call | Needs |
+|---|---|---|
+| Google Ads | `gtag('event','conversion',{send_to:'AW-…/<label>'})` | `NEXT_PUBLIC_GOOGLE_ADS_ID` + `NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_LABEL` |
+| ChatGPT Ads | `oaiq('measure','lead_created',{type:'customer_action'})` | `NEXT_PUBLIC_OPENAI_PIXEL_ID` |
+
+- **Google Ads tag**: no second gtag.js — `app/layout.tsx`'s GA4 inline script adds
+  `gtag('config','AW-…')` after the consent defaults, so consent mode covers it too.
+- **ChatGPT Ads pixel**: `components/openai-pixel.tsx`, the official snippet verbatim from
+  <https://developers.openai.com/ads/measurement-pixel>. If the visitor declined the cookie banner,
+  `oaiq('consent', false)` runs before `init`, as the docs require (that also deletes the
+  `__oppref`/`__obref` cookies); accepting or declining during the visit updates it too (see
+  "Consent mode"). Loaded `afterInteractive` rather than at the top of `<head>`: the
+  only event is a WhatsApp tap, well after load, and the stub queues calls until the SDK arrives.
+- **Which ChatGPT Ads event**: the standard **`lead_created`**, not a custom `whatsapp_click`. The
+  docs say to use a standard event whenever one matches (opening a WhatsApp chat is a lead) and a
+  custom one only when none does; custom events are also reported not to be usable as an
+  optimisation goal. The custom variant is ready in `lib/marketing.ts`
+  (`OPENAI_CUSTOM_WHATSAPP_CLICK`): switching is one line, plus the conversion in Ads Manager.
+- Any error in a tag is swallowed: it must never block the WhatsApp link.
+
+### Content Security Policy
+
+The site sends **no CSP** today (see the headers in `next.config.mjs`), so the tags need no
+allowlist. If one is added, these hosts must be in it besides GA/Meta:
+
+| Directive | Hosts |
+|---|---|
+| `script-src` | `https://bzrcdn.openai.com` (ChatGPT Ads pixel), `https://www.googletagmanager.com` |
+| `connect-src` | `https://bzr.openai.com`, `https://bzrcdn.openai.com`, `https://www.google.com`, `https://googleads.g.doubleclick.net` |
+| `img-src` | `https://bzr.openai.com`, `https://www.google.com`, `https://googleads.g.doubleclick.net` |
+
+The OpenAI hosts are the ones its docs list. If the policy defines `script-src-elem`, add the CDN
+there too, and allow the inline snippets with a nonce or hash — not `'unsafe-inline'`.
 
 ## SEO
 
 `app/layout.tsx` sets `metadataBase: https://www.concierge.com.ar`, full OpenGraph and Twitter
-cards, and injects **three JSON-LD blocks** in `<head>`: `Organization`, `Service`, and `FAQPage`.
+cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` and `Service`.
 
-The FAQ schema must stay consistent with the FAQ rendered from `lib/translations.ts` — they're
-maintained separately, so changing one and not the other publishes structured data that doesn't
-match the page.
+**FAQPage is per page, never in the layout** (the layout renders on every route, and a FAQPage
+must match the FAQ visible on its own page):
+
+- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`), **minus the questions
+  that mention PayPal** (`UNCONFIRMED_CLAIMS` in `lib/faq.ts`): PayPal isn't confirmed, and
+  structured data is what ChatGPT and search engines quote. The visible FAQ is unchanged.
+- `/en/*` and `/pt/*` render one built from the same objects as their visible FAQ
+  (`components/guide/guide-page.tsx`, rules in [pages.md](pages.md#guide-pages-and-faq-hubs)).
+- `e2e/faq-jsonld.spec.ts` checks shape, count and text identity. Before a big content change, also
+  paste the URLs into validator.schema.org.
+
+### robots.txt and sitemap.xml
+
+- `app/robots.ts`: explicit `Allow: /` groups for **OAI-SearchBot**, **ChatGPT-User** and
+  **Bingbot**, plus `*`. A crawler that matches a named group ignores `*`, so each group repeats the
+  same Disallow list — only `/api/` and `/wa-connect`. GPTBot (training) isn't named and falls
+  under `*`.
+- `app/sitemap.ts`: `/`, the six guides, the two FAQ hubs and `/privacy`, with hreflang alternates
+  and their **real** last-modified dates (guides: `updated` in `lib/content/guides.ts`; `/` and
+  `/privacy`: constants in the file — bump them when those pages change). Not listed: `/r/*`,
+  `/track/*`, `/wa-connect`, `/payment-success`.
+
+### Bing Webmaster Tools
+
+ChatGPT search leans on Bing's index. Verification uses the meta-tag method:
+`BING_SITE_VERIFICATION` → `<meta name="msvalidate.01">` on every page (`verification` in the
+layout metadata). After it's deployed: add the site in Bing Webmaster Tools, verify, and submit
+`https://www.concierge.com.ar/sitemap.xml`.
 
 ## CI — `.github/workflows/ci.yml`
 
@@ -95,7 +179,7 @@ Runs on PRs to `main` and on pushes to `main`.
 | Job | Does |
 |---|---|
 | `build` | `next build` |
-| `e2e` | Playwright smoke (`e2e/landing-smoke.spec.ts`). Pinned to `ubuntu-24.04` — Playwright has no Chromium for 26.04 yet |
+| `e2e` | Playwright, everything under `e2e/` (landing smoke, privacy, tracking, wa-connect, the WhatsApp ref, the FAQ JSON-LD). Pinned to `ubuntu-24.04` — Playwright has no Chromium for 26.04 yet. Locally, `E2E_PORT=<port> npm run test:e2e` when `:3001` is taken by another checkout (otherwise `reuseExistingServer` silently tests that one). |
 | `e2e-coverage` | **warn only** — sticky PR comment when product code changed without an e2e test |
 | `docs-coverage` | **warn only** — sticky PR comment when product code changed without a `docs/` update |
 

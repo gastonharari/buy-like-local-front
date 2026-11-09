@@ -34,12 +34,15 @@ export function CookieBanner() {
       ad_user_data: "granted",
       ad_personalization: "granted",
     })
+    // ChatGPT Ads pixel (components/openai-pixel.tsx) — its docs ask for consent updates in-session
+    window.oaiq?.("consent", true)
     localStorage.setItem("cookie_consent", "granted")
     trackEvent("cookie_consent", { action: "accept" })
     setVisible(false)
   }
 
   const decline = () => {
+    window.oaiq?.("consent", false) // stops pixel events and deletes its __oppref/__obref cookies
     localStorage.setItem("cookie_consent", "denied")
     trackEvent("cookie_consent", { action: "decline" })
     setVisible(false)

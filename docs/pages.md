@@ -1,6 +1,6 @@
 # Pages, components and i18n
 
-Next.js 15 App Router. Eight routes, two of them API routes. Always dark, no theme toggle.
+Next.js 15 App Router. Always dark, no theme toggle.
 
 > Stack note: this repo is on **Next 15**, while the CRM is on **Next 16**. They are not pinned
 > together — don't "align" them casually, and don't let `npm audit fix --force` move either.
@@ -17,6 +17,12 @@ Next.js 15 App Router. Eight routes, two of them API routes. Always dark, no the
 | `/api/r/start-whatsapp` | route handler, `runtime: nodejs` | server-to-server hop into the CRM |
 | `/wa-connect` | server shell + client component, English only | **internal tool**, `noindex, nofollow`, not linked from anywhere. Launches Meta's WhatsApp **Embedded Signup v2 (Coexistence, `featureType: whatsapp_business_app_onboarding`)** — Meta retires the v2 launch shape on 2026-10-15, so this needs a verified migration to v4 before then — so the business admin can connect the company WhatsApp number — the one in the WhatsApp Business app — to Cloud API. Configuration id from `NEXT_PUBLIC_WA_CONFIG_ID` (or `?config_id=…` to override). When the popup posts `FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING`, the `FB.login` authorization `code` (30 s TTL) plus `waba_id`/`phone_number_id` are POSTed to this repo's own `/api/wa-onboarding`, which forwards them server-side (`CRM_API_URL`/`INTERNAL_API_TOKEN`, already required for referrals) to the CRM's `POST /api/internal/whatsapp/onboarding`, which subscribes the WABA and requests the contacts + history sync. A "Re-run sync" button repeats the call without a code (system-user token on the backend). Like `/privacy`, its copy is deliberately outside the EN/ES/PT i18n. |
 | `/api/wa-onboarding` | route handler, `runtime: nodejs` | server-to-server hop into the CRM for `/wa-connect`'s onboarding POST — same shape as `/api/r/start-whatsapp`, reuses `CRM_API_URL`/`INTERNAL_API_TOKEN` |
+| `/en/buy-on-mercadolibre-as-a-foreigner`, `/pt/comprar-no-mercadolibre-sendo-estrangeiro` | static server page | guide: MercadoLibre without a DNI. See [Guide pages](#guide-pages-and-faq-hubs). |
+| `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas` | static server page | guide: Mercado Pago as a tourist |
+| `/en/ticketek-passline-without-dni`, `/pt/ticketek-passline-sem-dni` | static server page | guide: show tickets without a DNI |
+| `/en/faq`, `/pt/faq` | static server page | FAQ hubs, 12 questions each, with FAQPage JSON-LD |
+| `/api/clicks` | route handler, `runtime: nodejs` | paid-click code proxy into the CRM (`/api/internal/ad-clicks`). See [whatsapp-ref.md](whatsapp-ref.md). |
+| `/robots.txt`, `/sitemap.xml` | `app/robots.ts`, `app/sitemap.ts` | crawler rules and the page list. See [operations.md](operations.md#seo). |
 
 `/r/[code]` sets `dynamic = "force-dynamic"` and `revalidate = 0` deliberately — the page must
 render per-request to log the click and read live partner data.
@@ -48,6 +54,15 @@ Two independent trackers, both firing GA4 events via `trackEvent`:
 - **Scroll depth** — percentage thresholds, deduped the same way.
 
 FAQ accordion expansion also fires an event, carrying the question text truncated to 100 chars.
+
+### WhatsApp links and FAQ schema
+
+- The four WhatsApp links use `useWhatsAppLink(t.waLink)`: the hand-written pre-filled message plus
+  the visitor's `(ref XX)` — see [whatsapp-ref.md](whatsapp-ref.md).
+- The landing renders its own **FAQPage JSON-LD**, built from `translations.en.faq.items` (English
+  is what the page server-renders), next to the FAQ section. Questions that mention PayPal are left
+  out of it until PayPal is confirmed; they stay visible. It used to be a hand-written copy in
+  `app/layout.tsx` that had drifted from the visible FAQ and was printed on every route.
 
 The dedupe sets are refs, not state, on purpose: re-rendering on every scroll event would be
 disastrous.
@@ -88,6 +103,53 @@ Every one of these is load-bearing, and most were bug fixes:
 **The iOS rule, generalised:** never leave a fixed-position overlay in the DOM while hidden. Use
 conditional rendering or `visibility: hidden`, and avoid `willChange: "transform"` on fixed
 elements.
+
+## Guide pages and FAQ hubs
+
+Eight static pages under `/en/*` and `/pt/*`, written to be found and quoted by ChatGPT search, Bing
+and Google: the first paragraph answers the question directly, then "how it works" in steps, a
+couple of short sections, 4–6 FAQ items, and the WhatsApp CTA.
+
+| File | What |
+|---|---|
+| `lib/content/guides.ts` | every page's copy, metadata, `updated` date and WhatsApp sentence; `GUIDE_UI` strings |
+| `lib/content/faq-items.ts` | the FAQ question pool (EN/PT, same ids) and the 12 ids of the hubs |
+| `lib/faq.ts` | publish guard, self-link removal, FAQPage JSON-LD builders |
+| `components/guide/guide-page.tsx` | the one layout all eight pages use, plus `guideMetadata()` (canonical, hreflang en/pt/x-default, OG) |
+| `components/whatsapp-button.tsx` | the CTA with the ref |
+| `app/{en,pt}/<slug>/page.tsx` | three-line route files |
+
+Why outside `lib/translations.ts`: these exist in EN and PT only, each language has its own URL
+and the copy is long-form. Same reasoning as `/privacy`. The root layout's `<html lang="en">`
+can't change per route, so PT pages wrap their content in `<div lang="pt-BR">`.
+
+**FAQ rules** (enforced by `e2e/faq-jsonld.spec.ts`):
+
+- Questions phrased as a traveler types them into ChatGPT. The direct answer (`answer`) is the
+  first one or two sentences, **40–60 words**, without selling; then an optional `detail` and a
+  link to the page that explains it (dropped automatically on that same page).
+- Answers are **always visible** (no accordion): the FAQPage JSON-LD is built from the same objects
+  and must match the page text exactly. The JSON-LD answer carries the link as an `<a>`.
+- Exactly one FAQPage per page; 12 questions on each hub, 4–6 on each guide.
+- **TODOs**: anything not yet confirmed goes in the item's `todo` field (`"TODO(gaston): …"`), which
+  is never rendered — the visible answer is an interim one that is safe to publish. As a second
+  guard, an item whose *visible* text contains `TODO` is neither rendered nor put in the JSON-LD.
+  List them with `grep -rn "TODO(gaston)" lib/content`.
+
+**Claims** (session brief + `BRAND.md`): the 10–20% fee, "quote before you pay, nothing charged
+until you approve", "waits for you where you're staying", returns/claims handled — all already on
+the site. Never: PayPal or any payment method, delivery times or dates, ticket availability,
+response times, DNI/bank help. The pages say what we *don't* do (QR payments, transfers, currency
+exchange, paperwork).
+
+**Adding a page**: add a `GuideContent` to `lib/content/guides.ts` (both languages, each pointing at
+the other with `alternatePath`), create the two three-line route files, and add the paths to
+`GUIDES` in `e2e/faq-jsonld.spec.ts`. The sitemap and the footer links pick it up from the content
+file. When you edit a page, bump its `updated` date — it is shown on the page and is the sitemap's
+`lastModified`.
+
+Not linked from the landing yet (to keep this PR off `app/page.tsx` while #13 rewrites it): they
+are reachable through the sitemap and link to each other. Add them to the landing footer after #13.
 
 ## i18n
 
