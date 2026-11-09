@@ -147,9 +147,11 @@ cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` 
 **FAQPage is per page, never in the layout** (the layout renders on every route, and a FAQPage
 must match the FAQ visible on its own page):
 
-- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`), **minus the questions
-  that mention PayPal** (`UNCONFIRMED_CLAIMS` in `lib/faq.ts`): PayPal isn't confirmed, and
-  structured data is what ChatGPT and search engines quote. The visible FAQ is unchanged.
+- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`). Since 2026-11-09 the
+  visible FAQ names no payment method (the payment answer says "payment link", no PayPal), so all
+  seven questions are in it. The guard stays: a question that mentions an `UNCONFIRMED_CLAIMS` term
+  (`lib/faq.ts`, today PayPal) is left out, because structured data is what ChatGPT and search
+  engines quote.
 - `/en/*` and `/pt/*` render one built from the same objects as their visible FAQ
   (`components/guide/guide-page.tsx`, rules in [pages.md](pages.md#guide-pages-and-faq-hubs)).
 - `e2e/faq-jsonld.spec.ts` checks shape, count and text identity. Before a big content change, also

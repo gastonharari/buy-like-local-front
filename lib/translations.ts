@@ -93,7 +93,7 @@ export const translations: Record<Lang, LangConfig> = {
       items: [
         {
           q: "How does payment work?",
-          a: "We send you a PayPal link. You can pay with credit card, debit card, or PayPal balance. You always see the exact total before paying.",
+          a: "We send you a payment link in the chat. You always see the exact total before paying.",
         },
         {
           q: "Is this safe?",
@@ -200,7 +200,7 @@ export const translations: Record<Lang, LangConfig> = {
       items: [
         {
           q: "Cómo funciona el pago?",
-          a: "Te mandamos un link de PayPal. Podés pagar con tarjeta de crédito, débito o saldo de PayPal. Siempre ves el total exacto antes de pagar.",
+          a: "Te mandamos un link de pago por el chat. Siempre ves el total exacto antes de pagar.",
         },
         {
           q: "Es seguro?",
@@ -313,7 +313,7 @@ export const translations: Record<Lang, LangConfig> = {
       items: [
         {
           q: "Como funciona o pagamento?",
-          a: "Enviamos um link do PayPal. Você pode pagar com cartão de crédito, débito ou saldo do PayPal. Sempre vê o total exato antes de pagar.",
+          a: "Enviamos um link de pagamento pelo chat. Você sempre vê o total exato antes de pagar.",
         },
         {
           q: "É seguro?",

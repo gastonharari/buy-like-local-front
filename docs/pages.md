@@ -60,9 +60,13 @@ FAQ accordion expansion also fires an event, carrying the question text truncate
 - The four WhatsApp links use `useWhatsAppLink(t.waLink)`: the hand-written pre-filled message plus
   the visitor's `(ref XX)` — see [whatsapp-ref.md](whatsapp-ref.md).
 - The landing renders its own **FAQPage JSON-LD**, built from `translations.en.faq.items` (English
-  is what the page server-renders), next to the FAQ section. Questions that mention PayPal are left
-  out of it until PayPal is confirmed; they stay visible. It used to be a hand-written copy in
+  is what the page server-renders), next to the FAQ section. It used to be a hand-written copy in
   `app/layout.tsx` that had drifted from the visible FAQ and was printed on every route.
+- **The FAQ names no payment method** (decision of 2026-11-09, `campaigns/2026-11-08/decisiones.md`
+  #6): "How does payment work?" says we send a payment link in the chat and you always see the
+  exact total before paying — in all three languages, no PayPal. `e2e/faq-jsonld.spec.ts` checks
+  the copy and the rendered accordion in EN/ES/PT. As a second guard, any question that mentions
+  an `UNCONFIRMED_CLAIMS` term (`lib/faq.ts`, today PayPal) is left out of the JSON-LD.
 
 The dedupe sets are refs, not state, on purpose: re-rendering on every scroll event would be
 disastrous.

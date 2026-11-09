@@ -101,6 +101,40 @@ test('every direct answer is 40–60 words', () => {
   }
 });
 
+// Decision 6 of 2026-11-09 (campaigns/2026-11-08/decisiones.md): the visible FAQ of the landing
+// names no payment method, PayPal included, in any language. Checked on the source and on the
+// rendered accordion (it mounts an answer only while it's open, so each one is opened).
+test('the landing FAQ copy never mentions PayPal, in any language', () => {
+  for (const lang of ['en', 'es', 'pt'] as const) {
+    for (const item of translations[lang].faq.items) {
+      expect(`${item.q} ${item.a}`, `${lang}: "${item.q}"`).not.toMatch(/paypal/i);
+    }
+  }
+});
+
+for (const lang of ['en', 'es', 'pt'] as const) {
+  test(`the landing's visible FAQ has no PayPal (${lang})`, async ({ page }) => {
+    await page.addInitScript((l) => {
+      localStorage.setItem('cookie_consent', 'denied');
+      localStorage.setItem('concierge-lang', l);
+    }, lang);
+    await page.goto('/');
+    const faq = page.locator('#faq');
+    // The stored language has been applied once the title is the one of that language.
+    await expect(faq.locator('h2')).toHaveText(translations[lang].faq.title);
+
+    for (const item of translations[lang].faq.items) {
+      const trigger = faq.getByRole('button', { name: item.q, exact: true });
+      await trigger.click();
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      const contentId = await trigger.getAttribute('aria-controls');
+      const answer = await page.locator(`[id="${contentId}"]`).innerText();
+      expect(norm(answer)).toBe(norm(item.a));
+    }
+    expect(await faq.innerText()).not.toMatch(/paypal/i);
+  });
+}
+
 test('the landing has one FAQPage: its own FAQ minus PayPal, matching the visible text', async ({ page }) => {
   // Keep the cookie banner out of the way of the accordion clicks.
   await page.addInitScript(() => localStorage.setItem('cookie_consent', 'denied'));
