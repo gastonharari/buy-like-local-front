@@ -54,13 +54,14 @@ copying values by hand.
 
 ## Analytics
 
-Three trackers, all wired in `app/layout.tsx`:
+Four trackers, all wired in `app/layout.tsx`:
 
 | | ID | Loaded |
 |---|---|---|
 | Google Analytics 4 | `G-JK2YHFCTCD` | `next/script`, `afterInteractive` |
 | Meta Pixel | `1272933548278550` | `afterInteractive`, fires `PageView` on load |
 | Vercel Analytics | — | `<Analytics />` from `@vercel/analytics/next` |
+| Vercel Speed Insights | — | `<SpeedInsights />` from `@vercel/speed-insights/next`; reports Core Web Vitals, data only flows from Vercel deployments |
 
 > The Meta Pixel block still carries a `{/* replace TODO_PIXEL_ID with actual pixel ID */}`
 > comment. The ID **is** set — the comment is stale.
