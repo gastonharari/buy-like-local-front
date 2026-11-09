@@ -21,6 +21,9 @@ import {
 } from "lucide-react"
 import { translations, type Lang } from "@/lib/translations"
 import { trackEvent } from "@/lib/analytics"
+import { useWhatsAppLink } from "@/hooks/use-wa-ref"
+import { JsonLd } from "@/components/json-ld"
+import { plainFaqPageSchema } from "@/lib/faq"
 
 // ─── Static data ────────────────────────────────────────────────────────────
 
@@ -151,6 +154,8 @@ export default function Home() {
   }
 
   const t = translations[lang]
+  // t.waLink + the visitor's " (ref XX)" — lib/wa-ref.ts
+  const waLink = useWhatsAppLink(t.waLink)
 
   return (
     <>
@@ -208,7 +213,7 @@ export default function Home() {
                 className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold"
                 asChild
               >
-                <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "header" })}>
+                <a href={waLink} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { location: "header" })}>
                   <WhatsAppIcon className="w-4 h-4 sm:mr-1.5" />
                   <span className="hidden sm:inline">WhatsApp</span>
                 </a>
@@ -263,7 +268,7 @@ export default function Home() {
                   className="text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   asChild
                 >
-                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "hero" }); (window as any).fbq?.('track', 'Lead') }}>
+                  <a href={waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "hero" }); (window as any).fbq?.('track', 'Lead') }}>
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.hero.cta}
                   </a>
@@ -448,6 +453,8 @@ export default function Home() {
           id="faq"
           className="py-24 bg-card/30 relative overflow-hidden scroll-mt-20"
         >
+          {/* FAQPage from the same items, in English: the language this page server-renders */}
+          <JsonLd data={plainFaqPageSchema(translations.en.faq.items)} />
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground font-display">
@@ -502,7 +509,7 @@ export default function Home() {
                   className="text-lg px-10 py-6 font-bold bg-accent text-accent-foreground hover:bg-accent/90 transition-[transform,box-shadow] duration-300 hover:scale-105 hover:shadow-xl"
                   asChild
                 >
-                  <a href={t.waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "final_cta" }); (window as any).fbq?.('track', 'Lead') }}>
+                  <a href={waLink} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("whatsapp_click", { location: "final_cta" }); (window as any).fbq?.('track', 'Lead') }}>
                     <WhatsAppIcon className="w-5 h-5 mr-2" />
                     {t.finalCta.cta}
                   </a>
@@ -581,7 +588,7 @@ export default function Home() {
                 info@concierge.com.ar
               </a>
               <a
-                href={t.waLink}
+                href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
