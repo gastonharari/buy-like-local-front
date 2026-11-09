@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, Poppins } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import Script from "next/script"
 import { Suspense } from "react"
 import { CookieBanner } from "@/components/cookie-banner"
@@ -210,6 +211,7 @@ export default function RootLayout({
         <AttributionCapture />
         <OpenAIPixel />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
