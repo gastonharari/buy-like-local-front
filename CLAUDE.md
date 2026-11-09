@@ -9,7 +9,7 @@ Landing page pública de Concierge. Multilenguaje (EN/ES/PT), Next.js 15 App Rou
 | Framework | Next.js 15 App Router |
 | Styling | Tailwind CSS v4 + shadcn/Radix UI |
 | Fonts | Inter (body) + Poppins (headings) + Geist Mono |
-| Analytics | Vercel Analytics + Google Analytics 4 (`G-JK2YHFCTCD`) + Meta Pixel (`1272933548278550`) |
+| Analytics | Vercel Analytics + Speed Insights + Google Analytics 4 (`G-JK2YHFCTCD`) + Meta Pixel (`1272933548278550`) |
 | Hosting | Vercel |
 
 ## Local dev
