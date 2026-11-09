@@ -119,7 +119,7 @@ couple of short sections, 4–6 FAQ items, and the WhatsApp CTA.
 | `lib/content/guides.ts` | every page's copy, metadata, `updated` date and WhatsApp sentence; `GUIDE_UI` strings |
 | `lib/content/faq-items.ts` | the FAQ question pool (EN/PT, same ids) and the 12 ids of the hubs |
 | `lib/faq.ts` | publish guard, self-link removal, FAQPage JSON-LD builders |
-| `components/guide/guide-page.tsx` | the one layout all eight pages use, plus `guideMetadata()` (canonical, hreflang en/pt/x-default, OG) |
+| `components/guide/guide-page.tsx` | the one layout all eight pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
 | `components/whatsapp-button.tsx` | the CTA with the ref |
 | `app/{en,pt}/<slug>/page.tsx` | three-line route files |
 
@@ -146,8 +146,17 @@ the site. Never: PayPal or any payment method, delivery times or dates, ticket a
 response times, DNI/bank help. The pages say what we *don't* do (QR payments, transfers, currency
 exchange, paperwork).
 
-**Adding a page**: add a `GuideContent` to `lib/content/guides.ts` (both languages, each pointing at
-the other with `alternatePath`), create the two three-line route files, and add the paths to
+**Language versions**: pages with the same `topic` (`mercadolibre`, `mercado-pago`, `tickets`,
+`faq`) are the same page in each language of `GUIDE_LANGS`. From that one key come the hreflang
+alternates of each page (`hreflangPaths()`: every language + `x-default` = English), the sitemap's
+alternates and the header's language switch (`EN | PT` codes like the landing's toggle, but links,
+since each language has its own URL; the current one is `aria-current="page"`). A topic missing
+in a language, or present twice, fails the build (check at the end of `guides.ts`), because
+hreflang that isn't reciprocal is ignored by Google. `e2e/guides-i18n.spec.ts` checks canonical,
+hreflang, `lang`, the switch and the sitemap for every page in the content file.
+
+**Adding a page**: add a `GuideContent` to `lib/content/guides.ts` in every language, all with the
+same `topic`, create the three-line route files, and add the paths to
 `GUIDES` in `e2e/faq-jsonld.spec.ts`. The sitemap and the footer links pick it up from the content
 file. When you edit a page, bump its `updated` date — it is shown on the page and is the sitemap's
 `lastModified`.

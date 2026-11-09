@@ -14,14 +14,21 @@ import { FAQ_EN, FAQ_PT, HUB_FAQ_IDS } from "@/lib/content/faq-items"
 // When you edit a page, bump its `updated` date: it is shown on the page and is the sitemap's
 // lastModified.
 
-export type GuideLang = "en" | "pt"
+/** Every language a guide exists in, in the order of the language switch (same as the landing). */
+export const GUIDE_LANGS = ["en", "pt"] as const
+export type GuideLang = (typeof GUIDE_LANGS)[number]
+
+/**
+ * What a page is about. The pages that share a topic are the same page in each language: they
+ * become each other's hreflang alternates and the targets of the language switch.
+ */
+export type GuideTopic = "mercadolibre" | "mercado-pago" | "tickets" | "faq"
 
 export type GuideContent = {
   lang: GuideLang
   /** URL path, also the key. */
   path: string
-  /** Same page in the other language (hreflang + language switch). */
-  alternatePath: string
+  topic: GuideTopic
   /** YYYY-MM-DD. */
   updated: string
   kind: "guide" | "faq"
@@ -53,7 +60,10 @@ export const GUIDE_UI: Record<
     faqLink: string
     privacy: string
     tagline: string
-    switchLabel: string
+    /** The language's own name, e.g. "Português" (tooltip of the language switch). */
+    languageName: string
+    /** aria-label of the language switch. */
+    languageNav: string
   }
 > = {
   en: {
@@ -71,7 +81,8 @@ export const GUIDE_UI: Record<
     faqLink: "FAQ",
     privacy: "Privacy Policy",
     tagline: "Products and show tickets in Buenos Aires, handled.",
-    switchLabel: "Português",
+    languageName: "English",
+    languageNav: "Language",
   },
   pt: {
     htmlLang: "pt-BR",
@@ -88,7 +99,8 @@ export const GUIDE_UI: Record<
     faqLink: "Perguntas frequentes",
     privacy: "Política de privacidade",
     tagline: "Produtos e ingressos para shows em Buenos Aires, resolvido.",
-    switchLabel: "English",
+    languageName: "Português",
+    languageNav: "Idioma",
   },
 }
 
@@ -106,7 +118,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "en",
     path: "/en/buy-on-mercadolibre-as-a-foreigner",
-    alternatePath: "/pt/comprar-no-mercadolibre-sendo-estrangeiro",
+    topic: "mercadolibre",
     updated: UPDATED,
     kind: "guide",
     meta: {
@@ -156,7 +168,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "pt",
     path: "/pt/comprar-no-mercadolibre-sendo-estrangeiro",
-    alternatePath: "/en/buy-on-mercadolibre-as-a-foreigner",
+    topic: "mercadolibre",
     updated: UPDATED,
     kind: "guide",
     meta: {
@@ -208,7 +220,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "en",
     path: "/en/mercado-pago-for-tourists",
-    alternatePath: "/pt/mercado-pago-para-turistas",
+    topic: "mercado-pago",
     updated: UPDATED,
     kind: "guide",
     meta: {
@@ -258,7 +270,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "pt",
     path: "/pt/mercado-pago-para-turistas",
-    alternatePath: "/en/mercado-pago-for-tourists",
+    topic: "mercado-pago",
     updated: UPDATED,
     kind: "guide",
     meta: {
@@ -310,7 +322,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "en",
     path: "/en/ticketek-passline-without-dni",
-    alternatePath: "/pt/ticketek-passline-sem-dni",
+    topic: "tickets",
     updated: UPDATED,
     kind: "guide",
     meta: {
@@ -359,7 +371,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "pt",
     path: "/pt/ticketek-passline-sem-dni",
-    alternatePath: "/en/ticketek-passline-without-dni",
+    topic: "tickets",
     updated: UPDATED,
     kind: "guide",
     meta: {
@@ -410,7 +422,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "en",
     path: "/en/faq",
-    alternatePath: "/pt/faq",
+    topic: "faq",
     updated: UPDATED,
     kind: "faq",
     meta: {
@@ -427,7 +439,7 @@ const PAGES: GuideContent[] = [
   {
     lang: "pt",
     path: "/pt/faq",
-    alternatePath: "/en/faq",
+    topic: "faq",
     updated: UPDATED,
     kind: "faq",
     meta: {
@@ -444,6 +456,27 @@ const PAGES: GuideContent[] = [
 ]
 
 export const GUIDE_PAGES: ReadonlyMap<string, GuideContent> = new Map(PAGES.map((p) => [p.path, p]))
+
+// Every topic exists once in every language, so the hreflang sets are complete and reciprocal
+// (Google drops an hreflang that the other page doesn't return). Checked at build time.
+for (const topic of new Set(PAGES.map((p) => p.topic))) {
+  for (const lang of GUIDE_LANGS) {
+    const n = PAGES.filter((p) => p.topic === topic && p.lang === lang).length
+    if (n !== 1) throw new Error(`guide topic "${topic}" has ${n} pages in "${lang}" (want exactly 1)`)
+  }
+}
+
+/** The same page in every language, itself included, in GUIDE_LANGS order. */
+export function languageVersions(page: GuideContent): GuideContent[] {
+  return GUIDE_LANGS.map((lang) => PAGES.find((p) => p.topic === page.topic && p.lang === lang)!)
+}
+
+/** hreflang → path for a page's topic. English is the x-default. */
+export function hreflangPaths(page: GuideContent): Record<string, string> {
+  const versions = languageVersions(page)
+  const paths: Record<string, string> = Object.fromEntries(versions.map((v) => [v.lang, v.path]))
+  return { ...paths, "x-default": paths.en }
+}
 
 export function getGuide(path: string): GuideContent {
   const page = GUIDE_PAGES.get(path)
