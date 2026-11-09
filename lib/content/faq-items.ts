@@ -1,6 +1,7 @@
 import type { FaqItem } from "@/lib/faq"
 
-// Question pool shared by the guide pages (4–6 each) and the /en/faq, /pt/faq hubs (12 each).
+// Question pool shared by the guide pages (4–6 each) and the /en/faq, /pt/faq, /es/faq hubs (12
+// each). Same ids in every language; e2e/faq-jsonld.spec.ts checks the pools match, TODOs included.
 //
 // Writing rules (session-1 brief + BRAND.md):
 // - Questions phrased the way a traveler types them into ChatGPT. No real customer phrasing from
@@ -13,6 +14,9 @@ import type { FaqItem } from "@/lib/faq"
 //   or times, ticket availability, response times, DNI/bank help.
 // - Anything that still needs Gastón goes in `todo` ("TODO(gaston): …"), which is never
 //   rendered; the visible answer stays a safe interim one.
+// - Spanish: rioplatense voseo ("podés", "mandanos"), as in BRAND.md ("Encargate de disfrutar")
+//   and the landing's ES copy. The reader is a Spanish-speaking foreigner in Argentina (Uruguay,
+//   Chile, Colombia, Spain…), not an Argentine: always "DNI argentino", never assume local ties.
 
 type Pool = Record<string, FaqItem>
 
@@ -232,7 +236,115 @@ export const FAQ_PT: Pool = {
   },
 }
 
-/** The 12 questions of /en/faq and /pt/faq, in order. */
+export const FAQ_ES: Pool = {
+  "ml-without-dni": {
+    id: "ml-without-dni",
+    q: "¿Puedo comprar en MercadoLibre sin DNI?",
+    answer:
+      "Por tu cuenta, no: MercadoLibre Argentina pide un DNI argentino para crear y verificar la cuenta, así que la mayoría de los extranjeros no puede terminar el registro. En Concierge lo compramos por vos: nos mandás el link del producto por WhatsApp, aprobás la cotización y lo compramos con nuestra cuenta local.",
+    detail: "Después te espera donde te quedes en Buenos Aires.",
+    link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
+  },
+  "ml-foreign-card": {
+    id: "ml-foreign-card",
+    q: "¿Puedo usar mi tarjeta extranjera en MercadoLibre Argentina?",
+    answer:
+      "Aunque tu tarjeta extranjera funcione, primero necesitás una cuenta de MercadoLibre Argentina, que pide DNI argentino, y muchas tarjetas de afuera se rechazan al pagar. En Concierge resolvemos las dos cosas: lo compramos por vos con nuestra cuenta local y pagamos acá, después de que apruebes la cotización.",
+    link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
+  },
+  "mercado-pago-tourist": {
+    id: "mercado-pago-tourist",
+    q: "¿Cómo uso Mercado Pago siendo turista?",
+    answer:
+      "En la mayoría de los casos no podés: abrir una cuenta de Mercado Pago requiere DNI argentino, y muchas tiendas online, MercadoLibre y los sitios de entradas cobran a través de él. Si lo que querés es un producto o una entrada para un show, en Concierge pagamos con nuestra propia cuenta y lo compramos por vos.",
+    detail: "No pagamos QR en negocios ni restaurantes, no enviamos dinero y no cambiamos moneda.",
+    link: { href: "/es/mercado-pago-para-turistas", label: "Guía: Mercado Pago para turistas" },
+  },
+  "tickets-foreigners": {
+    id: "tickets-foreigners",
+    q: "¿Un extranjero puede comprar entradas en Ticketek o Passline?",
+    answer:
+      "Muchas veces, por tu cuenta no: Ticketek y Passline suelen pedir DNI argentino al registrarte o al pagar, y las tarjetas extranjeras se rechazan seguido. En Concierge compramos las entradas por vos con nuestra cuenta local, después de que apruebes la cotización, siempre que haya entradas a la venta.",
+    link: { href: "/es/ticketek-passline-sin-dni", label: "Guía: Ticketek y Passline sin DNI" },
+  },
+  "tickets-how-get": {
+    id: "tickets-how-get",
+    q: "¿Cómo recibo las entradas que compran por mí?",
+    answer:
+      "Depende de cómo emite las entradas cada show: algunas son e-tickets, otras se transfieren en la app de la ticketera o se retiran en el lugar. Antes de comprar, revisamos con vos las reglas de ese show y te contamos cómo vas a entrar, así lo sabés antes de pagar.",
+    link: { href: "/es/ticketek-passline-sin-dni", label: "Guía: Ticketek y Passline sin DNI" },
+    todo: "TODO(gaston): mismo punto que el TODO de tickets-how-get en inglés: cómo le llega la entrada al cliente (e-ticket, transferencia en la app, retiro en boletería) y qué pasa con las entradas nominativas. La respuesta visible no promete un método.",
+  },
+  fee: {
+    id: "fee",
+    q: "¿Cómo cobra Concierge?",
+    answer:
+      "Concierge cobra una comisión de servicio del 10 al 20% del valor de la compra, según el pedido. Antes de comprar nada te mandamos una cotización con el total exacto, comisión incluida, y no se cobra nada hasta que la aprobás en el chat.",
+    detail: "No hay que registrarse: solo pagás las compras que aprobás.",
+    link: { href: "/es/faq#fee", label: "Todas las preguntas sobre Concierge" },
+  },
+  timing: {
+    id: "timing",
+    q: "¿Cuánto tarda una compra?",
+    answer:
+      "Depende de la tienda, del producto y de dónde sale, así que no prometemos un plazo fijo. Antes de que pagues, te contamos lo que sabemos sobre los tiempos de tu compra y te vamos avisando por el chat de WhatsApp hasta que te esté esperando donde te quedes.",
+    link: { href: "/es/faq#timing", label: "Todas las preguntas sobre Concierge" },
+    todo: "TODO(gaston): mismo punto que el TODO de timing en inglés: plazos típicos confirmados (MercadoLibre, tiendas locales, entradas). La respuesta visible no promete ningún plazo.",
+  },
+  "pay-from-abroad": {
+    id: "pay-from-abroad",
+    q: "¿Cómo les pago desde el exterior?",
+    answer:
+      "Pagás online, desde donde estés, después de aprobar la cotización. Para pagarnos no necesitás cuenta bancaria, tarjeta ni DNI de Argentina: te mandamos los datos de pago por el chat de WhatsApp, junto con el total exacto de tu cotización, que siempre ves antes de pagar.",
+    link: { href: "/es/faq#pay-from-abroad", label: "Todas las preguntas sobre Concierge" },
+    todo: "TODO(gaston): mismo punto que el TODO de pay-from-abroad en inglés: medios de pago confirmados. La respuesta visible no nombra ningún medio (decisión 6 del 9-nov: nada de PayPal).",
+  },
+  "where-receive": {
+    id: "where-receive",
+    q: "¿Dónde recibo lo que compran por mí?",
+    answer:
+      "Tu pedido te espera donde te quedes en Buenos Aires, sea un hotel o un Airbnb. Cuando aprobás la cotización nos mandás la dirección por el chat, y coordinamos el resto con vos por ahí, sin que tengas que hablar con la tienda ni con el correo.",
+    link: { href: "/es/faq#where-receive", label: "Todas las preguntas sobre Concierge" },
+  },
+  "what-can-you-buy": {
+    id: "what-can-you-buy",
+    q: "¿Qué puede comprar Concierge por mí?",
+    answer:
+      "En Concierge compramos productos en MercadoLibre y en tiendas locales, desde ropa y electrónica hasta vino y regalos, y entradas para shows y recitales en Buenos Aires. No hacemos delivery de comida, pagos con QR en negocios, transferencias de dinero, cambio de moneda ni trámites como DNI o cuenta bancaria.",
+    detail: "Lo ilegal o restringido también queda afuera.",
+    link: { href: "/es/faq#what-can-you-buy", label: "Todas las preguntas sobre Concierge" },
+  },
+  "local-stores": {
+    id: "local-stores",
+    q: "¿Compran en tiendas argentinas que no están en MercadoLibre?",
+    answer:
+      "Sí: además de MercadoLibre, compramos en tiendas online y sitios de marcas locales, como Frávega o Farmacity, cuando rechazan tarjetas extranjeras o piden DNI al pagar. Mandanos el link o el nombre del producto por WhatsApp y te lo cotizamos igual, con nuestra comisión del 10 al 20% incluida.",
+    link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
+  },
+  "dni-bank-help": {
+    id: "dni-bank-help",
+    q: "¿Me ayudan a sacar el DNI o a abrir una cuenta en un banco argentino?",
+    answer:
+      "No: en Concierge no hacemos trámites de DNI, residencia, banco ni Mercado Pago, y no podemos abrir cuentas a tu nombre. Lo que hacemos es comprar por vos con nuestra propia cuenta local, productos en MercadoLibre y en tiendas locales y entradas para shows, así no necesitás esos documentos para comprar.",
+    link: { href: "/es/mercado-pago-para-turistas", label: "Guía: Mercado Pago para turistas" },
+  },
+  safe: {
+    id: "safe",
+    q: "¿Es seguro que Concierge compre por mí?",
+    answer:
+      "Sí: siempre recibís una cotización detallada con el total exacto antes de que compremos nada, y no se cobra nada hasta que la aprobás. Todo pasa por el chat de WhatsApp, y si algo sale mal con el pedido, nos encargamos de las devoluciones y los reclamos con la tienda por vos.",
+    link: { href: "/es/faq#safe", label: "Todas las preguntas sobre Concierge" },
+  },
+  "phone-number": {
+    id: "phone-number",
+    q: "¿Necesito un número argentino o una cuenta en Concierge?",
+    answer:
+      "Ninguna de las dos cosas: nos escribís por WhatsApp desde tu propio número, de cualquier país, y no tenés que descargar ninguna app ni registrarte. Si no usás WhatsApp, también podés hablar con nosotros por el chat de la web, en español, inglés o portugués.",
+    link: { href: "/es/faq#phone-number", label: "Todas las preguntas sobre Concierge" },
+  },
+}
+
+/** The 12 questions of /en/faq, /pt/faq and /es/faq, in order. */
 export const HUB_FAQ_IDS = [
   "ml-without-dni",
   "mercado-pago-tourist",

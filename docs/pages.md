@@ -17,10 +17,10 @@ Next.js 15 App Router. Always dark, no theme toggle.
 | `/api/r/start-whatsapp` | route handler, `runtime: nodejs` | server-to-server hop into the CRM |
 | `/wa-connect` | server shell + client component, English only | **internal tool**, `noindex, nofollow`, not linked from anywhere. Launches Meta's WhatsApp **Embedded Signup v2 (Coexistence, `featureType: whatsapp_business_app_onboarding`)** — Meta retires the v2 launch shape on 2026-10-15, so this needs a verified migration to v4 before then — so the business admin can connect the company WhatsApp number — the one in the WhatsApp Business app — to Cloud API. Configuration id from `NEXT_PUBLIC_WA_CONFIG_ID` (or `?config_id=…` to override). When the popup posts `FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING`, the `FB.login` authorization `code` (30 s TTL) plus `waba_id`/`phone_number_id` are POSTed to this repo's own `/api/wa-onboarding`, which forwards them server-side (`CRM_API_URL`/`INTERNAL_API_TOKEN`, already required for referrals) to the CRM's `POST /api/internal/whatsapp/onboarding`, which subscribes the WABA and requests the contacts + history sync. A "Re-run sync" button repeats the call without a code (system-user token on the backend). Like `/privacy`, its copy is deliberately outside the EN/ES/PT i18n. |
 | `/api/wa-onboarding` | route handler, `runtime: nodejs` | server-to-server hop into the CRM for `/wa-connect`'s onboarding POST — same shape as `/api/r/start-whatsapp`, reuses `CRM_API_URL`/`INTERNAL_API_TOKEN` |
-| `/en/buy-on-mercadolibre-as-a-foreigner`, `/pt/comprar-no-mercadolibre-sendo-estrangeiro` | static server page | guide: MercadoLibre without a DNI. See [Guide pages](#guide-pages-and-faq-hubs). |
-| `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas` | static server page | guide: Mercado Pago as a tourist |
-| `/en/ticketek-passline-without-dni`, `/pt/ticketek-passline-sem-dni` | static server page | guide: show tickets without a DNI |
-| `/en/faq`, `/pt/faq` | static server page | FAQ hubs, 12 questions each, with FAQPage JSON-LD |
+| `/en/buy-on-mercadolibre-as-a-foreigner`, `/pt/comprar-no-mercadolibre-sendo-estrangeiro`, `/es/comprar-en-mercadolibre-siendo-extranjero` | static server page | guide: MercadoLibre without a DNI. See [Guide pages](#guide-pages-and-faq-hubs). |
+| `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas`, `/es/mercado-pago-para-turistas` | static server page | guide: Mercado Pago as a tourist |
+| `/en/ticketek-passline-without-dni`, `/pt/ticketek-passline-sem-dni`, `/es/ticketek-passline-sin-dni` | static server page | guide: show tickets without a DNI |
+| `/en/faq`, `/pt/faq`, `/es/faq` | static server page | FAQ hubs, 12 questions each, with FAQPage JSON-LD |
 | `/api/clicks` | route handler, `runtime: nodejs` | paid-click code proxy into the CRM (`/api/internal/ad-clicks`). See [whatsapp-ref.md](whatsapp-ref.md). |
 | `/robots.txt`, `/sitemap.xml` | `app/robots.ts`, `app/sitemap.ts` | crawler rules and the page list. See [operations.md](operations.md#seo). |
 
@@ -110,22 +110,35 @@ elements.
 
 ## Guide pages and FAQ hubs
 
-Eight static pages under `/en/*` and `/pt/*`, written to be found and quoted by ChatGPT search, Bing
-and Google: the first paragraph answers the question directly, then "how it works" in steps, a
+Twelve static pages under `/en/*`, `/es/*` and `/pt/*`, written to be found and quoted by ChatGPT
+search, Bing and Google: the first paragraph answers the question directly, then "how it works" in steps, a
 couple of short sections, 4–6 FAQ items, and the WhatsApp CTA.
 
 | File | What |
 |---|---|
 | `lib/content/guides.ts` | every page's copy, metadata, `updated` date and WhatsApp sentence; `GUIDE_UI` strings |
-| `lib/content/faq-items.ts` | the FAQ question pool (EN/PT, same ids) and the 12 ids of the hubs |
+| `lib/content/faq-items.ts` | the FAQ question pool (EN/ES/PT, same ids) and the 12 ids of the hubs |
 | `lib/faq.ts` | publish guard, self-link removal, FAQPage JSON-LD builders |
-| `components/guide/guide-page.tsx` | the one layout all eight pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
+| `components/guide/guide-page.tsx` | the one layout all twelve pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
 | `components/whatsapp-button.tsx` | the CTA with the ref |
-| `app/{en,pt}/<slug>/page.tsx` | three-line route files |
+| `app/{en,es,pt}/<slug>/page.tsx` | three-line route files |
 
-Why outside `lib/translations.ts`: these exist in EN and PT only, each language has its own URL
-and the copy is long-form. Same reasoning as `/privacy`. The root layout's `<html lang="en">`
-can't change per route, so PT pages wrap their content in `<div lang="pt-BR">`.
+Why outside `lib/translations.ts`: each language has its own URL and the copy is long-form. Same
+reasoning as `/privacy`.
+
+**`lang`**: the root layout's `<html lang="en">` can't change per route (it would take one root
+layout per language, i.e. moving every route into route groups, or reading the path from a header,
+which makes every page dynamic). So each page wraps its content in a `<div lang>` — `pt-BR` and
+`es-AR` — and declares its language through hreflang and `og:locale`.
+
+**The Spanish pages** (`/es/*`, added on 2026-11-09 for the campaigns, which now run in EN, ES and PT)
+are for **Spanish-speaking foreigners in Argentina** — Uruguayans, Chileans, Colombians, Spaniards —
+not for Argentines, who don't have the problem. The slugs are fixed: Google Ads (ad group ML-ES) and
+ChatGPT Ads already point at them. Copy rules on top of the ones below: rioplatense voseo
+("podés", "mandanos"), as in BRAND.md's ES tagline ("Encargate de disfrutar") and the landing's ES
+copy; always "DNI argentino" (a Spaniard has a DNI too); "te espera donde te quedes" as the
+fulfilment line (BRAND.md's approved phrasing). Their hreflang is plain `es`, so they serve every
+Spanish speaker.
 
 **FAQ rules** (enforced by `e2e/faq-jsonld.spec.ts`):
 
@@ -149,7 +162,7 @@ exchange, paperwork).
 **Language versions**: pages with the same `topic` (`mercadolibre`, `mercado-pago`, `tickets`,
 `faq`) are the same page in each language of `GUIDE_LANGS`. From that one key come the hreflang
 alternates of each page (`hreflangPaths()`: every language + `x-default` = English), the sitemap's
-alternates and the header's language switch (`EN | PT` codes like the landing's toggle, but links,
+alternates and the header's language switch (`EN | ES | PT` codes like the landing's toggle, but links,
 since each language has its own URL; the current one is `aria-current="page"`). A topic missing
 in a language, or present twice, fails the build (check at the end of `guides.ts`), because
 hreflang that isn't reciprocal is ignored by Google. `e2e/guides-i18n.spec.ts` checks canonical,

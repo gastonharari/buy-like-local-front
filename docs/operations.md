@@ -152,7 +152,7 @@ must match the FAQ visible on its own page):
   seven questions are in it. The guard stays: a question that mentions an `UNCONFIRMED_CLAIMS` term
   (`lib/faq.ts`, today PayPal) is left out, because structured data is what ChatGPT and search
   engines quote.
-- `/en/*` and `/pt/*` render one built from the same objects as their visible FAQ
+- `/en/*`, `/es/*` and `/pt/*` render one built from the same objects as their visible FAQ
   (`components/guide/guide-page.tsx`, rules in [pages.md](pages.md#guide-pages-and-faq-hubs)).
 - `e2e/faq-jsonld.spec.ts` checks shape, count and text identity. Before a big content change, also
   paste the URLs into validator.schema.org.
@@ -163,7 +163,7 @@ must match the FAQ visible on its own page):
   **Bingbot**, plus `*`. A crawler that matches a named group ignores `*`, so each group repeats the
   same Disallow list — only `/api/` and `/wa-connect`. GPTBot (training) isn't named and falls
   under `*`.
-- `app/sitemap.ts`: `/`, the six guides, the two FAQ hubs and `/privacy`, with hreflang alternates
+- `app/sitemap.ts`: `/`, the nine guides and three FAQ hubs (EN/ES/PT) and `/privacy`, with hreflang alternates
   and their **real** last-modified dates (guides: `updated` in `lib/content/guides.ts`; `/` and
   `/privacy`: constants in the file — bump them when those pages change). Not listed: `/r/*`,
   `/track/*`, `/wa-connect`, `/payment-success`.

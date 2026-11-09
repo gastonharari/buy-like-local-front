@@ -1,5 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
-import { FAQ_EN, FAQ_PT } from '../lib/content/faq-items';
+import { FAQ_EN, FAQ_ES, FAQ_PT } from '../lib/content/faq-items';
+import { GUIDE_PAGES } from '../lib/content/guides';
+import { UNCONFIRMED_CLAIMS } from '../lib/faq';
 import { translations } from '../lib/translations';
 
 // FAQPage JSON-LD on the FAQ hubs and the guide pages: valid shape, the right number of
@@ -16,15 +18,19 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-const HUBS = ['/en/faq', '/pt/faq'];
+const HUBS = ['/en/faq', '/pt/faq', '/es/faq'];
 const GUIDES = [
   '/en/buy-on-mercadolibre-as-a-foreigner',
   '/pt/comprar-no-mercadolibre-sendo-estrangeiro',
+  '/es/comprar-en-mercadolibre-siendo-extranjero',
   '/en/mercado-pago-for-tourists',
   '/pt/mercado-pago-para-turistas',
+  '/es/mercado-pago-para-turistas',
   '/en/ticketek-passline-without-dni',
   '/pt/ticketek-passline-sem-dni',
+  '/es/ticketek-passline-sin-dni',
 ];
+const POOLS = { en: FAQ_EN, pt: FAQ_PT, es: FAQ_ES };
 
 const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
 const stripHtml = (s: string) =>
@@ -76,6 +82,9 @@ async function check(page: Page, path: string) {
 
   const body = await page.locator('main').innerText();
   expect(body).not.toContain('TODO');
+  // No unconfirmed claim (PayPal) in the structured data nor on the page.
+  expect(JSON.stringify(schema)).not.toMatch(UNCONFIRMED_CLAIMS);
+  expect(body).not.toMatch(UNCONFIRMED_CLAIMS);
   return questions.length;
 }
 
@@ -94,10 +103,32 @@ for (const path of GUIDES) {
 }
 
 test('every direct answer is 40–60 words', () => {
-  for (const item of [...Object.values(FAQ_EN), ...Object.values(FAQ_PT)]) {
+  for (const item of Object.values(POOLS).flatMap((pool) => Object.values(pool))) {
     const words = item.answer.trim().split(/\s+/).length;
     expect(words, `${item.id}: "${item.q}" has ${words} words`).toBeGreaterThanOrEqual(40);
     expect(words, `${item.id}: "${item.q}" has ${words} words`).toBeLessThanOrEqual(60);
+  }
+});
+
+test('every language has the same questions, and the same ones wait on a TODO(gaston)', () => {
+  const ids = Object.keys(FAQ_EN).sort();
+  for (const [lang, pool] of Object.entries(POOLS)) {
+    expect(Object.keys(pool).sort(), `${lang} ids`).toEqual(ids);
+    for (const id of ids) {
+      expect(pool[id].id, `${lang}/${id}: id field`).toBe(id);
+      expect(Boolean(pool[id].todo), `${lang}/${id}: has a TODO like EN`).toBe(Boolean(FAQ_EN[id].todo));
+      if (pool[id].todo) expect(pool[id].todo, `${lang}/${id}: TODO format`).toMatch(/^TODO\(gaston\): /);
+      // Links stay within the item's own language.
+      if (pool[id].link) expect(pool[id].link!.href, `${lang}/${id}: link`).toMatch(new RegExp(`^/${lang}/`));
+    }
+  }
+});
+
+test('no guide copy claims to be official, MercadoLibre or a partner', () => {
+  for (const page of GUIDE_PAGES.values()) {
+    const copy = JSON.stringify({ ...page, faq: page.faq.map(({ todo: _todo, ...visible }) => visible) });
+    expect(copy, page.path).not.toMatch(/\b(oficial|official|partners?|socios?|parceir[oa]s?)\b/i);
+    expect(copy, page.path).not.toMatch(UNCONFIRMED_CLAIMS);
   }
 });
 

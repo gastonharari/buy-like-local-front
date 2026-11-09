@@ -128,7 +128,7 @@ function JsonLd() {
   }
 
   // No FAQPage here: this layout renders on every route, and a FAQPage must match the FAQ visible
-  // on its own page. The landing renders its own (app/page.tsx), and so do /en|pt/* (guide-page).
+  // on its own page. The landing renders its own (app/page.tsx), and so do /en|es|pt/* (guide-page).
   return (
     <>
       <script

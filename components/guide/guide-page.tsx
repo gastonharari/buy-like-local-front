@@ -74,7 +74,7 @@ export function GuidePage({ page }: { page: GuideContent }) {
             />
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Language switch: same "EN | PT" codes as the landing's toggle, but links, since each
+            {/* Language switch: same "EN | ES | PT" codes as the landing's toggle, but links, since each
                 language is its own URL. */}
             <nav aria-label={ui.languageNav} className="flex items-center text-sm text-muted-foreground">
               {languageVersions(page).map((version, i) => (
