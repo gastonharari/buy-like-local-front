@@ -168,6 +168,13 @@ in a language, or present twice, fails the build (check at the end of `guides.ts
 hreflang that isn't reciprocal is ignored by Google. `e2e/guides-i18n.spec.ts` checks canonical,
 hreflang, `lang`, the switch and the sitemap for every page in the content file.
 
+**Header on phones**: below `sm` the header's WhatsApp button is icon-only (`iconOnlyOnMobile` on
+`WhatsAppButton`; "WhatsApp" stays as its `aria-label`, like the landing's header) and the logo
+caps at 32px high, so logo + `EN | ES | PT` + button fit in 320px. With the full "WhatsApp" label
+the header was 411px wide and mobile browsers zoomed the whole page out. When checking this, compare
+`scrollWidth` with the *device* width: on a mobile viewport `innerWidth` grows with the content, so
+`scrollWidth > innerWidth` never fires.
+
 **Adding a page**: add a `GuideContent` to `lib/content/guides.ts` in every language, all with the
 same `topic`, create the three-line route files, and add the paths to
 `GUIDES` in `e2e/faq-jsonld.spec.ts`. The sitemap and the footer links pick it up from the content

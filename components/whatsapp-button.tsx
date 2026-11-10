@@ -32,12 +32,15 @@ export function WhatsAppButton({
   label,
   location,
   size = "lg",
+  iconOnlyOnMobile = false,
 }: {
   message: string
   label: string
   /** GA4 `location` param, e.g. "guide_hero". */
   location: string
   size?: "sm" | "lg"
+  /** Below `sm`, show only the icon (the label stays as the accessible name). For tight headers. */
+  iconOnlyOnMobile?: boolean
 }) {
   const ref = useWaRef()
   const big = size === "lg"
@@ -56,10 +59,11 @@ export function WhatsAppButton({
         target="_blank"
         rel="noopener noreferrer"
         data-wa-ref={ref ?? ""}
+        aria-label={iconOnlyOnMobile ? label : undefined}
         onClick={() => trackEvent("whatsapp_click", { location, ref: ref ?? "none" })}
       >
         <WhatsAppIcon className={big ? "w-5 h-5 mr-2" : "w-4 h-4"} />
-        {label}
+        {iconOnlyOnMobile ? <span className="hidden sm:inline">{label}</span> : label}
       </a>
     </Button>
   )

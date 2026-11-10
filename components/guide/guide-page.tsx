@@ -69,7 +69,7 @@ export function GuidePage({ page }: { page: GuideContent }) {
               alt="Concierge Buenos Aires"
               width={232}
               height={61}
-              className="h-auto max-h-[44px] w-auto"
+              className="h-auto max-h-[32px] sm:max-h-[44px] w-auto"
               priority
             />
           </Link>
@@ -104,7 +104,13 @@ export function GuidePage({ page }: { page: GuideContent }) {
                 </span>
               ))}
             </nav>
-            <WhatsAppButton message={page.waMessage} label="WhatsApp" location="guide_header" size="sm" />
+            <WhatsAppButton
+              message={page.waMessage}
+              label="WhatsApp"
+              location="guide_header"
+              size="sm"
+              iconOnlyOnMobile
+            />
           </div>
         </div>
       </header>

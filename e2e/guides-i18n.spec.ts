@@ -87,3 +87,31 @@ test('sitemap.xml lists every language version with the same hreflang alternates
     expect(entries.get(url)).toEqual(expected);
   }
 });
+
+// On a phone the header (logo + EN | ES | PT + WhatsApp) must fit in 320px. On a mobile viewport
+// the browser widens the layout viewport to fit oversized content and zooms the whole page out, so
+// innerWidth grows with it: the check is against the device width, not innerWidth.
+test.describe('on a 320px phone', () => {
+  test.use({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
+
+  for (const path of ['/en/faq', '/es/comprar-en-mercadolibre-siendo-extranjero', '/pt/ticketek-passline-sem-dni']) {
+    test(`${path}: nothing wider than the screen, header WhatsApp is icon-only`, async ({ page }) => {
+      await page.goto(path);
+      const header = page.locator('header');
+      const wa = header.locator('a[href^="https://wa.me/"]');
+      await expect(wa).toBeVisible();
+
+      const widths = await page.evaluate(() => ({
+        doc: document.documentElement.scrollWidth,
+        inner: window.innerWidth,
+        header: Math.max(...[...document.querySelectorAll('header *')].map((el) => el.getBoundingClientRect().right)),
+      }));
+      expect(widths.header, 'header right edge').toBeLessThanOrEqual(320);
+      expect(widths.doc, 'page width').toBeLessThanOrEqual(320);
+      expect(widths.inner, 'layout viewport (grows when content overflows)').toBe(320);
+
+      await expect(wa).toHaveAttribute('aria-label', 'WhatsApp');
+      await expect(wa.getByText('WhatsApp')).toBeHidden();
+    });
+  }
+});
