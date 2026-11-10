@@ -163,10 +163,23 @@ must match the FAQ visible on its own page):
   **Bingbot**, plus `*`. A crawler that matches a named group ignores `*`, so each group repeats the
   same Disallow list — only `/api/` and `/wa-connect`. GPTBot (training) isn't named and falls
   under `*`.
-- `app/sitemap.ts`: `/`, the twelve guides and three FAQ hubs (EN/ES/PT) and `/privacy`, with hreflang alternates
+- `app/sitemap.ts`: `/`, the nine guides and three FAQ hubs (EN/ES/PT) and `/privacy`, with hreflang alternates
   and their **real** last-modified dates (guides: `updated` in `lib/content/guides.ts`; `/` and
   `/privacy`: constants in the file — bump them when those pages change). Not listed: `/r/*`,
   `/track/*`, `/wa-connect`, `/payment-success`.
+
+### Redirects
+
+`next.config.mjs` → `redirects()`, all permanent (308), query string kept by Next:
+
+| From | To | Why |
+|---|---|---|
+| `/en/mercado-pago-for-tourists` | `/en/buy-on-mercadolibre-as-a-foreigner` | decision 10 (2026-11-10): no Mercado Pago for tourists |
+| `/pt/mercado-pago-para-turistas` | `/pt/comprar-no-mercadolibre-sendo-estrangeiro` | same |
+| `/es/mercado-pago-para-turistas` | `/es/comprar-en-mercadolibre-siendo-extranjero` | same (never deployed, but the slug was in campaign plans) |
+
+Tested in `e2e/no-mercado-pago.spec.ts`. Once Bing/Google have dropped the old URLs, the redirects can
+stay at no cost; don't reuse the slugs.
 
 ### Bing Webmaster Tools
 

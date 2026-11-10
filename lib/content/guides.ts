@@ -1,8 +1,12 @@
 import type { FaqItem } from "@/lib/faq"
 import { FAQ_EN, FAQ_ES, FAQ_PT, HUB_FAQ_IDS } from "@/lib/content/faq-items"
 
-// The guide pages (online shopping in Argentina, MercadoLibre, Mercado Pago, Ticketek/Passline) and
-// the FAQ hubs, in EN, ES and PT: copy, metadata and sitemap dates.
+// The guide pages (online shopping in Argentina, MercadoLibre, Ticketek/Passline) and the FAQ hubs,
+// in EN, ES and PT: copy, metadata and sitemap dates.
+//
+// No Mercado Pago (decision 10 of 2026-11-10): Concierge doesn't do Mercado Pago for tourists. Its
+// old guide URLs redirect to the MercadoLibre guide of the same language (next.config.mjs), and
+// e2e/no-mercado-pago.spec.ts fails if any page offers it again.
 //
 // Why this isn't in lib/translations.ts: each language has its own URL (the ES slugs are fixed by
 // the Google and ChatGPT Ads campaigns), and the copy is long-form. translations.ts stays the
@@ -30,7 +34,7 @@ export type GuideLang = (typeof GUIDE_LANGS)[number]
  * What a page is about. The pages that share a topic are the same page in each language: they
  * become each other's hreflang alternates and the targets of the language switch.
  */
-export type GuideTopic = "online-shopping" | "mercadolibre" | "mercado-pago" | "tickets" | "faq"
+export type GuideTopic = "online-shopping" | "mercadolibre" | "tickets" | "faq"
 
 export type GuideContent = {
   lang: GuideLang
@@ -140,6 +144,8 @@ const pick = (pool: Record<string, FaqItem>, ids: readonly string[]): FaqItem[] 
   })
 
 const UPDATED = "2026-11-09"
+/** The hubs lost the Mercado Pago question on this date (decision 10). */
+const FAQ_UPDATED = "2026-11-10"
 
 const PAGES: GuideContent[] = [
   // ── Online shopping (for people who don't know MercadoLibre yet) ────────────────────────────
@@ -467,158 +473,6 @@ const PAGES: GuideContent[] = [
     waMessage: "¡Hola! Necesito ayuda para comprar algo en MercadoLibre",
   },
 
-  // ── Mercado Pago ────────────────────────────────────────────────────────────────────────────
-  {
-    lang: "en",
-    path: "/en/mercado-pago-for-tourists",
-    topic: "mercado-pago",
-    updated: UPDATED,
-    kind: "guide",
-    meta: {
-      title: "Mercado Pago for tourists: can you use it without a DNI? | Concierge",
-      description:
-        "Opening a Mercado Pago account requires an Argentine DNI, so most tourists can't use it. For products and show tickets, Concierge pays with our account and buys for you.",
-    },
-    eyebrow: "Mercado Pago · Buenos Aires",
-    h1: "Mercado Pago for tourists",
-    lead: "Without an Argentine DNI you can't open a Mercado Pago account, so as a tourist you usually can't use it to pay online stores, MercadoLibre or ticket sites. Concierge buys for you: tell us what you want on WhatsApp, approve the quote, and we pay with our own local account.",
-    steps: [
-      {
-        title: "Tell us what you want",
-        text: "Send us the link to the product, or the name of the show, on WhatsApp.",
-      },
-      {
-        title: "Approve the quote",
-        text: "We send you the exact total, with our fee of 10 to 20% included. Nothing is charged until you say yes.",
-      },
-      {
-        title: "We pay and buy it",
-        text: "We pay with our own account and place the order for you.",
-      },
-      {
-        title: "You get it",
-        text: "Products wait for you where you're staying in Buenos Aires. For tickets, we tell you before buying how you'll get in.",
-      },
-    ],
-    sections: [
-      {
-        title: "Why Mercado Pago matters",
-        paragraphs: [
-          "Mercado Pago is the payment app behind MercadoLibre and many Argentine online stores and ticket sites. To open an account it asks for an Argentine DNI, so without one you get stuck at the payment step.",
-        ],
-      },
-      {
-        title: "What we can and can't do",
-        paragraphs: [
-          "We can buy products on MercadoLibre and in local stores, and tickets to shows and concerts.",
-          "We can't pay QR codes in shops, restaurants or taxis, send money, exchange currency, or help with DNI, bank or Mercado Pago paperwork.",
-        ],
-      },
-    ],
-    faq: pick(FAQ_EN, ["mercado-pago-tourist", "what-can-you-buy", "dni-bank-help", "pay-from-abroad", "fee"]),
-    waMessage: "Hi! I need help buying something that asks for Mercado Pago",
-  },
-  {
-    lang: "pt",
-    path: "/pt/mercado-pago-para-turistas",
-    topic: "mercado-pago",
-    updated: UPDATED,
-    kind: "guide",
-    meta: {
-      title: "Mercado Pago para turistas: dá pra usar sem DNI? | Concierge",
-      description:
-        "Abrir uma conta no Mercado Pago exige DNI argentino, então a maioria dos turistas não consegue usar. Para produtos e ingressos, o Concierge paga e compra por você.",
-    },
-    eyebrow: "Mercado Pago · Buenos Aires",
-    h1: "Mercado Pago para turistas",
-    lead: "Sem DNI argentino não dá para abrir uma conta no Mercado Pago, então, como turista, você normalmente não consegue usar para pagar lojas online, o MercadoLibre ou sites de ingressos. O Concierge compra por você: conta no WhatsApp o que você quer, aprova o orçamento e a gente paga com a nossa conta local.",
-    steps: [
-      {
-        title: "Conta o que você quer",
-        text: "Manda o link do produto, ou o nome do show, no WhatsApp.",
-      },
-      {
-        title: "Aprova o orçamento",
-        text: "A gente manda o total exato, com a nossa taxa de 10 a 20% incluída. Nada é cobrado até você dizer que sim.",
-      },
-      {
-        title: "A gente paga e compra",
-        text: "Pagamos com a nossa conta e fazemos o pedido por você.",
-      },
-      {
-        title: "Chega até você",
-        text: "Produtos ficam te esperando onde você está hospedado em Buenos Aires. Para ingressos, a gente explica antes de comprar como você vai entrar.",
-      },
-    ],
-    sections: [
-      {
-        title: "Por que o Mercado Pago importa",
-        paragraphs: [
-          "O Mercado Pago é o app de pagamento por trás do MercadoLibre e de muitas lojas online e sites de ingressos argentinos. Para abrir uma conta ele pede DNI argentino, então sem ele você trava na hora de pagar.",
-        ],
-      },
-      {
-        title: "O que a gente faz e o que não faz",
-        paragraphs: [
-          "A gente compra produtos no MercadoLibre e em lojas locais, e ingressos para shows e concertos.",
-          "A gente não paga QR em lojas, restaurantes ou táxis, não envia dinheiro, não troca moeda e não ajuda com trâmites de DNI, banco ou Mercado Pago.",
-        ],
-      },
-    ],
-    faq: pick(FAQ_PT, ["mercado-pago-tourist", "what-can-you-buy", "dni-bank-help", "pay-from-abroad", "fee"]),
-    waMessage: "Oi! Preciso de ajuda para comprar algo que pede Mercado Pago",
-  },
-  {
-    lang: "es",
-    path: "/es/mercado-pago-para-turistas",
-    topic: "mercado-pago",
-    updated: UPDATED,
-    kind: "guide",
-    meta: {
-      title: "Mercado Pago para turistas: ¿se puede usar sin DNI? | Concierge",
-      description:
-        "Para abrir una cuenta de Mercado Pago hace falta DNI argentino, así que la mayoría de los turistas no puede usarlo. Para productos y entradas, pagamos y compramos por vos.",
-    },
-    eyebrow: "Mercado Pago · Buenos Aires",
-    h1: "Mercado Pago para turistas",
-    lead: "Sin DNI argentino no podés abrir una cuenta de Mercado Pago, así que, como turista, normalmente no podés usarlo para pagar en tiendas online, en MercadoLibre o en sitios de entradas. En Concierge compramos por vos: nos contás por WhatsApp qué querés, aprobás la cotización y pagamos con nuestra propia cuenta local.",
-    steps: [
-      {
-        title: "Contanos qué querés",
-        text: "Mandanos por WhatsApp el link del producto o el nombre del show.",
-      },
-      {
-        title: "Aprobá la cotización",
-        text: "Te mandamos el total exacto, con nuestra comisión del 10 al 20% incluida. No se cobra nada hasta que digas que sí.",
-      },
-      {
-        title: "Pagamos y compramos",
-        text: "Pagamos con nuestra cuenta y hacemos el pedido por vos.",
-      },
-      {
-        title: "Lo tenés",
-        text: "Los productos te esperan donde te quedes en Buenos Aires. Con las entradas, antes de comprar te contamos cómo vas a entrar.",
-      },
-    ],
-    sections: [
-      {
-        title: "Por qué importa Mercado Pago",
-        paragraphs: [
-          "Mercado Pago es la app de pagos detrás de MercadoLibre y de muchas tiendas online y sitios de entradas de Argentina. Para abrir una cuenta pide DNI argentino, así que sin DNI te trabás en el momento de pagar.",
-        ],
-      },
-      {
-        title: "Qué hacemos y qué no",
-        paragraphs: [
-          "Compramos productos en MercadoLibre y en tiendas locales, y entradas para shows y recitales.",
-          "No pagamos QR en negocios, restaurantes ni taxis, no enviamos dinero, no cambiamos moneda y no ayudamos con trámites de DNI, banco ni Mercado Pago.",
-        ],
-      },
-    ],
-    faq: pick(FAQ_ES, ["mercado-pago-tourist", "what-can-you-buy", "dni-bank-help", "pay-from-abroad", "fee"]),
-    waMessage: "¡Hola! Necesito ayuda para comprar algo que pide Mercado Pago",
-  },
-
   // ── Ticketek / Passline ─────────────────────────────────────────────────────────────────────
   {
     lang: "en",
@@ -773,16 +627,16 @@ const PAGES: GuideContent[] = [
     lang: "en",
     path: "/en/faq",
     topic: "faq",
-    updated: UPDATED,
+    updated: FAQ_UPDATED,
     kind: "faq",
     meta: {
       title: "Buying in Argentina as a foreigner: FAQ | Concierge",
       description:
-        "Can you buy on MercadoLibre without a DNI? Use Mercado Pago as a tourist? Buy Ticketek tickets as a foreigner? Short answers, and how Concierge charges (10 to 20%).",
+        "Can you buy on MercadoLibre without a DNI? Shop in local online stores? Buy Ticketek tickets as a foreigner? Short answers, and how Concierge charges (10 to 20%).",
     },
     eyebrow: "FAQ",
     h1: "Buying in Argentina as a foreigner: questions and answers",
-    lead: "Straight answers about MercadoLibre, Mercado Pago, Ticketek and Passline when you don't have an Argentine DNI, and about how Concierge buys for you.",
+    lead: "Straight answers about MercadoLibre, local online stores, Ticketek and Passline when you don't have an Argentine DNI, and about how Concierge buys for you.",
     faq: pick(FAQ_EN, HUB_FAQ_IDS),
     waMessage: "Hi! I need help buying something in Argentina",
   },
@@ -790,16 +644,16 @@ const PAGES: GuideContent[] = [
     lang: "pt",
     path: "/pt/faq",
     topic: "faq",
-    updated: UPDATED,
+    updated: FAQ_UPDATED,
     kind: "faq",
     meta: {
       title: "Comprar na Argentina sendo estrangeiro: perguntas frequentes | Concierge",
       description:
-        "Dá pra comprar no MercadoLibre sem DNI? Usar o Mercado Pago sendo turista? Comprar ingresso na Ticketek sendo estrangeiro? Respostas curtas, e como o Concierge cobra.",
+        "Dá pra comprar no MercadoLibre sem DNI? Comprar em lojas online locais? Comprar ingresso na Ticketek sendo estrangeiro? Respostas curtas, e como o Concierge cobra.",
     },
     eyebrow: "Perguntas frequentes",
     h1: "Comprar na Argentina sendo estrangeiro: perguntas e respostas",
-    lead: "Respostas diretas sobre MercadoLibre, Mercado Pago, Ticketek e Passline quando você não tem DNI argentino, e sobre como o Concierge compra por você.",
+    lead: "Respostas diretas sobre MercadoLibre, lojas online locais, Ticketek e Passline quando você não tem DNI argentino, e sobre como o Concierge compra por você.",
     faq: pick(FAQ_PT, HUB_FAQ_IDS),
     waMessage: "Oi! Preciso de ajuda para comprar algo na Argentina",
   },
@@ -807,16 +661,16 @@ const PAGES: GuideContent[] = [
     lang: "es",
     path: "/es/faq",
     topic: "faq",
-    updated: UPDATED,
+    updated: FAQ_UPDATED,
     kind: "faq",
     meta: {
       title: "Comprar en Argentina siendo extranjero: preguntas frecuentes | Concierge",
       description:
-        "¿Se puede comprar en MercadoLibre sin DNI? ¿Usar Mercado Pago siendo turista? ¿Comprar entradas en Ticketek siendo extranjero? Respuestas cortas, y cómo cobra Concierge.",
+        "¿Se puede comprar en MercadoLibre sin DNI? ¿Comprar en tiendas online locales? ¿Comprar entradas en Ticketek siendo extranjero? Respuestas cortas, y cómo cobra Concierge.",
     },
     eyebrow: "Preguntas frecuentes",
     h1: "Comprar en Argentina siendo extranjero: preguntas y respuestas",
-    lead: "Respuestas directas sobre MercadoLibre, Mercado Pago, Ticketek y Passline cuando no tenés DNI argentino, y sobre cómo compramos por vos en Concierge.",
+    lead: "Respuestas directas sobre MercadoLibre, tiendas online locales, Ticketek y Passline cuando no tenés DNI argentino, y sobre cómo compramos por vos en Concierge.",
     faq: pick(FAQ_ES, HUB_FAQ_IDS),
     waMessage: "¡Hola! Necesito ayuda para comprar algo en Argentina",
   },

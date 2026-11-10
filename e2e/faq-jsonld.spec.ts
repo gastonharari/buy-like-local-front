@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { FAQ_EN, FAQ_ES, FAQ_PT } from '../lib/content/faq-items';
+import { FAQ_EN, FAQ_ES, FAQ_PT, HUB_FAQ_IDS } from '../lib/content/faq-items';
 import { GUIDE_PAGES } from '../lib/content/guides';
 import { UNCONFIRMED_CLAIMS } from '../lib/faq';
 import { translations } from '../lib/translations';
@@ -26,9 +26,6 @@ const GUIDES = [
   '/en/buy-on-mercadolibre-as-a-foreigner',
   '/pt/comprar-no-mercadolibre-sendo-estrangeiro',
   '/es/comprar-en-mercadolibre-siendo-extranjero',
-  '/en/mercado-pago-for-tourists',
-  '/pt/mercado-pago-para-turistas',
-  '/es/mercado-pago-para-turistas',
   '/en/ticketek-passline-without-dni',
   '/pt/ticketek-passline-sem-dni',
   '/es/ticketek-passline-sin-dni',
@@ -91,9 +88,15 @@ async function check(page: Page, path: string) {
   return questions.length;
 }
 
+// 11 since decision 10 (2026-11-10) took out the Mercado Pago question; never padded back to 12.
+test('the hubs have 11 questions', () => {
+  expect(HUB_FAQ_IDS).toHaveLength(11);
+  expect(HUB_FAQ_IDS as readonly string[]).not.toContain('mercado-pago-tourist');
+});
+
 for (const path of HUBS) {
-  test(`${path}: FAQPage with 12 questions matching the visible text`, async ({ page }) => {
-    expect(await check(page, path)).toBe(12);
+  test(`${path}: FAQPage with ${HUB_FAQ_IDS.length} questions matching the visible text`, async ({ page }) => {
+    expect(await check(page, path)).toBe(HUB_FAQ_IDS.length);
   });
 }
 

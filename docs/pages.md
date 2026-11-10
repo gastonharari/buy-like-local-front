@@ -19,9 +19,9 @@ Next.js 15 App Router. Always dark, no theme toggle.
 | `/api/wa-onboarding` | route handler, `runtime: nodejs` | server-to-server hop into the CRM for `/wa-connect`'s onboarding POST — same shape as `/api/r/start-whatsapp`, reuses `CRM_API_URL`/`INTERNAL_API_TOKEN` |
 | `/en/online-shopping-in-argentina`, `/pt/compras-online-na-argentina`, `/es/compras-online-en-argentina` | static server page | guide: online shopping in Argentina, for people who don't know MercadoLibre yet. See [Guide pages](#guide-pages-and-faq-hubs). |
 | `/en/buy-on-mercadolibre-as-a-foreigner`, `/pt/comprar-no-mercadolibre-sendo-estrangeiro`, `/es/comprar-en-mercadolibre-siendo-extranjero` | static server page | guide: MercadoLibre without a DNI |
-| `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas`, `/es/mercado-pago-para-turistas` | static server page | guide: Mercado Pago as a tourist |
+| `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas`, `/es/mercado-pago-para-turistas` | **308 redirect** (`redirects()` in `next.config.mjs`) | removed guides → the MercadoLibre guide of the same language, query string kept. See [No Mercado Pago](#no-mercado-pago). |
 | `/en/ticketek-passline-without-dni`, `/pt/ticketek-passline-sem-dni`, `/es/ticketek-passline-sin-dni` | static server page | guide: show tickets without a DNI |
-| `/en/faq`, `/pt/faq`, `/es/faq` | static server page | FAQ hubs, 12 questions each, with FAQPage JSON-LD |
+| `/en/faq`, `/pt/faq`, `/es/faq` | static server page | FAQ hubs, 11 questions each, with FAQPage JSON-LD |
 | `/api/clicks` | route handler, `runtime: nodejs` | paid-click code proxy into the CRM (`/api/internal/ad-clicks`). See [whatsapp-ref.md](whatsapp-ref.md). |
 | `/robots.txt`, `/sitemap.xml` | `app/robots.ts`, `app/sitemap.ts` | crawler rules and the page list. See [operations.md](operations.md#seo). |
 
@@ -111,16 +111,16 @@ elements.
 
 ## Guide pages and FAQ hubs
 
-Fifteen static pages under `/en/*`, `/es/*` and `/pt/*` (four guides and the FAQ hub, in three languages), written to be found and quoted by ChatGPT
+Twelve static pages under `/en/*`, `/es/*` and `/pt/*` (three guides and the FAQ hub, in three languages), written to be found and quoted by ChatGPT
 search, Bing and Google: the first paragraph answers the question directly, then "how it works" in steps, a
 couple of short sections, 4–6 FAQ items, and the WhatsApp CTA.
 
 | File | What |
 |---|---|
 | `lib/content/guides.ts` | every page's copy, metadata, `updated` date and WhatsApp sentence; `GUIDE_UI` strings |
-| `lib/content/faq-items.ts` | the FAQ question pool (EN/ES/PT, same ids) and the 12 ids of the hubs |
+| `lib/content/faq-items.ts` | the FAQ question pool (EN/ES/PT, same ids) and the 11 ids of the hubs |
 | `lib/faq.ts` | publish guard, self-link removal, FAQPage JSON-LD builders |
-| `components/guide/guide-page.tsx` | the one layout all fifteen pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
+| `components/guide/guide-page.tsx` | the one layout all twelve pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
 | `components/whatsapp-button.tsx` | the CTA with the ref |
 | `app/{en,es,pt}/<slug>/page.tsx` | three-line route files |
 
@@ -141,7 +141,7 @@ section; `e2e/guides-i18n.spec.ts` checks it). Google's
 "Compras" ad groups land here, so the slugs are fixed. **Amazon** may only appear as a neutral
 comparison ("the way you'd use Amazon at home") — never say or imply that Amazon doesn't deliver to
 or operate in Argentina; `e2e/faq-jsonld.spec.ts` rejects any other sentence that names it. Their
-FAQ adds one question to the pool, `where-shop-online`, which is not on the hubs (they stay at 12).
+FAQ adds one question to the pool, `where-shop-online`, which is not on the hubs (they stay at 11).
 
 **The Spanish pages** (`/es/*`, added on 2026-11-09 for the campaigns, which now run in EN, ES and PT)
 are for **Spanish-speaking foreigners in Argentina** — Uruguayans, Chileans, Colombians, Spaniards —
@@ -159,7 +159,8 @@ Spanish speaker.
   link to the page that explains it (dropped automatically on that same page).
 - Answers are **always visible** (no accordion): the FAQPage JSON-LD is built from the same objects
   and must match the page text exactly. The JSON-LD answer carries the link as an `<a>`.
-- Exactly one FAQPage per page; 12 questions on each hub, 4–6 on each guide.
+- Exactly one FAQPage per page; 11 questions on each hub (12 until decision 10 removed the
+  Mercado Pago one — don't pad it back), 4–6 on each guide.
 - **TODOs**: anything not yet confirmed goes in the item's `todo` field (`"TODO(gaston): …"`), which
   is never rendered — the visible answer is an interim one that is safe to publish. As a second
   guard, an item whose *visible* text contains `TODO` is neither rendered nor put in the JSON-LD.
@@ -171,8 +172,8 @@ the site. Never: PayPal or any payment method, delivery times or dates, ticket a
 response times, DNI/bank help. The pages say what we *don't* do (QR payments, transfers, currency
 exchange, paperwork).
 
-**Language versions**: pages with the same `topic` (`online-shopping`, `mercadolibre`, `mercado-pago`,
-`tickets`, `faq`) are the same page in each language of `GUIDE_LANGS`. From that one key come the hreflang
+**Language versions**: pages with the same `topic` (`online-shopping`, `mercadolibre`, `tickets`,
+`faq`) are the same page in each language of `GUIDE_LANGS`. From that one key come the hreflang
 alternates of each page (`hreflangPaths()`: every language + `x-default` = English), the sitemap's
 alternates and the header's language switch (`EN | ES | PT` codes like the landing's toggle, but links,
 since each language has its own URL; the current one is `aria-current="page"`). A topic missing
@@ -195,6 +196,21 @@ file. When you edit a page, bump its `updated` date — it is shown on the page 
 
 Not linked from the landing yet (to keep this PR off `app/page.tsx` while #13 rewrites it): they
 are reachable through the sitemap and link to each other. Add them to the landing footer after #13.
+
+### No Mercado Pago
+
+Decision 10 (2026-11-10, `campaigns/2026-11-08/decisiones.md`): **Concierge doesn't do Mercado Pago
+for tourists.** The guides `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas` and
+`/es/mercado-pago-para-turistas` were deleted (EN/PT had been live since PR #33) and the FAQ
+question "How do I use Mercado Pago as a tourist?" left the pool, so the hubs have 11 questions.
+The three URLs answer a **308** to the MercadoLibre guide of the same language (`redirects()` in
+`next.config.mjs`), keeping the query string so `utm_*`/`gclid` — and the WhatsApp ref — survive an
+old ad or bookmark.
+
+What may still mention Mercado Pago: only statements that we *don't* do it (the `dni-bank-help`
+answer: "doesn't handle DNI, residency, bank or Mercado Pago paperwork"). Never as a service, a
+guide, a payment method or a keyword. `e2e/no-mercado-pago.spec.ts` checks the redirects and that no
+route or link points at `/*/mercado-pago*`.
 
 ## i18n
 

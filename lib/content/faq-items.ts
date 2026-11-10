@@ -1,6 +1,6 @@
 import type { FaqItem } from "@/lib/faq"
 
-// Question pool shared by the guide pages (4–6 each) and the /en/faq, /pt/faq, /es/faq hubs (12
+// Question pool shared by the guide pages (4–6 each) and the /en/faq, /pt/faq, /es/faq hubs (11
 // each). Same ids in every language; e2e/faq-jsonld.spec.ts checks the pools match, TODOs included.
 //
 // Writing rules (session-1 brief + BRAND.md):
@@ -42,14 +42,6 @@ export const FAQ_EN: Pool = {
     answer:
       "Even when a foreign card works, you first need a MercadoLibre Argentina account, which asks for an Argentine DNI, and many foreign cards are declined at checkout anyway. Concierge gets around both: we buy it for you with our local account and pay locally, after you approve the quote.",
     link: { href: "/en/buy-on-mercadolibre-as-a-foreigner", label: "Guide: buying on MercadoLibre as a foreigner" },
-  },
-  "mercado-pago-tourist": {
-    id: "mercado-pago-tourist",
-    q: "How do I use Mercado Pago as a tourist?",
-    answer:
-      "In most cases you can't: opening a Mercado Pago account requires an Argentine DNI, and many local online stores, MercadoLibre and ticket sites take payment through it. If what you want is a product or a show ticket, Concierge pays with our own account and buys it for you.",
-    detail: "We don't pay QR codes in shops or restaurants, send money or exchange currency.",
-    link: { href: "/en/mercado-pago-for-tourists", label: "Guide: Mercado Pago for tourists" },
   },
   "tickets-foreigners": {
     id: "tickets-foreigners",
@@ -117,7 +109,7 @@ export const FAQ_EN: Pool = {
     q: "Can you help me get a DNI or open an Argentine bank account?",
     answer:
       "No: Concierge doesn't handle DNI, residency, bank or Mercado Pago paperwork, and we can't open accounts in your name. What we do is buy for you with our own local account, products on MercadoLibre and in local stores and tickets to shows, so you don't need them to buy.",
-    link: { href: "/en/mercado-pago-for-tourists", label: "Guide: Mercado Pago for tourists" },
+    link: { href: "/en/faq#dni-bank-help", label: "All questions about Concierge" },
   },
   safe: {
     id: "safe",
@@ -157,14 +149,6 @@ export const FAQ_PT: Pool = {
     answer:
       "Mesmo quando o cartão estrangeiro funciona, primeiro você precisa de uma conta no MercadoLibre da Argentina, que pede DNI argentino, e muitos cartões de fora são recusados no checkout. O Concierge resolve as duas coisas: a gente compra por você com a nossa conta local e paga aqui, depois que você aprova o orçamento.",
     link: { href: "/pt/comprar-no-mercadolibre-sendo-estrangeiro", label: "Guia: comprar no MercadoLibre sendo estrangeiro" },
-  },
-  "mercado-pago-tourist": {
-    id: "mercado-pago-tourist",
-    q: "Como usar o Mercado Pago sendo turista?",
-    answer:
-      "Na maioria dos casos, não dá: abrir uma conta no Mercado Pago exige DNI argentino, e muitas lojas online, o MercadoLibre e sites de ingressos recebem por ele. Se o que você quer é um produto ou um ingresso para um show, o Concierge paga com a nossa conta e compra por você.",
-    detail: "A gente não paga QR em lojas ou restaurantes, não envia dinheiro e não troca moeda.",
-    link: { href: "/pt/mercado-pago-para-turistas", label: "Guia: Mercado Pago para turistas" },
   },
   "tickets-foreigners": {
     id: "tickets-foreigners",
@@ -232,7 +216,7 @@ export const FAQ_PT: Pool = {
     q: "Vocês ajudam a tirar DNI ou abrir conta em banco argentino?",
     answer:
       "Não: o Concierge não cuida de trâmites de DNI, residência, banco ou Mercado Pago, e não abre contas no seu nome. O que a gente faz é comprar por você com a nossa conta local, produtos no MercadoLibre e em lojas locais e ingressos para shows, então você não precisa desses documentos para comprar.",
-    link: { href: "/pt/mercado-pago-para-turistas", label: "Guia: Mercado Pago para turistas" },
+    link: { href: "/pt/faq#dni-bank-help", label: "Todas as perguntas sobre o Concierge" },
   },
   safe: {
     id: "safe",
@@ -272,14 +256,6 @@ export const FAQ_ES: Pool = {
     answer:
       "Aunque tu tarjeta extranjera funcione, primero necesitás una cuenta de MercadoLibre Argentina, que pide DNI argentino, y muchas tarjetas de afuera se rechazan al pagar. En Concierge resolvemos las dos cosas: lo compramos por vos con nuestra cuenta local y pagamos acá, después de que apruebes la cotización.",
     link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
-  },
-  "mercado-pago-tourist": {
-    id: "mercado-pago-tourist",
-    q: "¿Cómo uso Mercado Pago siendo turista?",
-    answer:
-      "En la mayoría de los casos no podés: abrir una cuenta de Mercado Pago requiere DNI argentino, y muchas tiendas online, MercadoLibre y los sitios de entradas cobran a través de él. Si lo que querés es un producto o una entrada para un show, en Concierge pagamos con nuestra propia cuenta y lo compramos por vos.",
-    detail: "No pagamos QR en negocios ni restaurantes, no enviamos dinero y no cambiamos moneda.",
-    link: { href: "/es/mercado-pago-para-turistas", label: "Guía: Mercado Pago para turistas" },
   },
   "tickets-foreigners": {
     id: "tickets-foreigners",
@@ -347,7 +323,7 @@ export const FAQ_ES: Pool = {
     q: "¿Me ayudan a sacar el DNI o a abrir una cuenta en un banco argentino?",
     answer:
       "No: en Concierge no hacemos trámites de DNI, residencia, banco ni Mercado Pago, y no podemos abrir cuentas a tu nombre. Lo que hacemos es comprar por vos con nuestra propia cuenta local, productos en MercadoLibre y en tiendas locales y entradas para shows, así no necesitás esos documentos para comprar.",
-    link: { href: "/es/mercado-pago-para-turistas", label: "Guía: Mercado Pago para turistas" },
+    link: { href: "/es/faq#dni-bank-help", label: "Todas las preguntas sobre Concierge" },
   },
   safe: {
     id: "safe",
@@ -365,10 +341,12 @@ export const FAQ_ES: Pool = {
   },
 }
 
-/** The 12 questions of /en/faq, /pt/faq and /es/faq, in order. */
+/**
+ * The questions of /en/faq, /pt/faq and /es/faq, in order. 11 since decision 10 (2026-11-10) took
+ * out "How do I use Mercado Pago as a tourist?"; don't pad it back to 12.
+ */
 export const HUB_FAQ_IDS = [
   "ml-without-dni",
-  "mercado-pago-tourist",
   "tickets-foreigners",
   "fee",
   "timing",

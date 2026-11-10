@@ -105,8 +105,8 @@ test('organic ChatGPT: "(ref CO)" with no POST, kept while navigating', async ({
   await expect.poll(() => waText(heroWa(page))).toBe('Oi! Preciso de ajuda para comprar algo na Argentina (ref CO)');
 
   // Client-side navigation through the footer, then a full load without params.
-  await page.locator('footer a[href="/pt/mercado-pago-para-turistas"]').click();
-  await expect(page).toHaveURL(/\/pt\/mercado-pago-para-turistas$/);
+  await page.locator('footer a[href="/pt/comprar-no-mercadolibre-sendo-estrangeiro"]').click();
+  await expect(page).toHaveURL(/\/pt\/comprar-no-mercadolibre-sendo-estrangeiro$/);
   await expect.poll(() => waText(heroWa(page))).toMatch(/ \(ref CO\)$/);
   await page.goto('/en/ticketek-passline-without-dni');
   await expect.poll(() => waText(heroWa(page))).toMatch(/ \(ref CO\)$/);
