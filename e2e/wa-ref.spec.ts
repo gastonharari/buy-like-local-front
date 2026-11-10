@@ -185,6 +185,31 @@ test('ES: no utm and no click id, no ref', async ({ page }) => {
   expect(await waText(heroWa(page))).toBe('¡Hola! Necesito ayuda para comprar algo en Argentina');
 });
 
+// Online-shopping guides (decision 8 of 2026-11-09): Google's "Compras" ad groups land here with a
+// gclid, in each language.
+const SHOPPING = [
+  ['/en/online-shopping-in-argentina', 'Hi! I want to buy something online in Argentina'],
+  ['/pt/compras-online-na-argentina', 'Oi! Quero comprar algo online na Argentina'],
+  ['/es/compras-online-en-argentina', '¡Hola! Quiero comprar algo online en Argentina'],
+] as const;
+
+for (const [path, sentence] of SHOPPING) {
+  test(`${path}: google ad click ends the message in "(ref GS-XXXX)"`, async ({ page }) => {
+    const mock = await mockClicks(page, ok('GS-4MPR'));
+    const landing = `${path}?utm_source=google&utm_medium=cpc&utm_campaign=compras&gclid=test-shopping`;
+    await page.goto(landing);
+
+    await expect.poll(() => waText(heroWa(page))).toBe(`${sentence} (ref GS-4MPR)`);
+    expect(mock.bodies).toHaveLength(1);
+    expect(mock.bodies[0].gclid).toBe('test-shopping');
+    expect(mock.bodies[0].utm_campaign).toBe('compras');
+    expect(mock.bodies[0].landing_url).toBe(landing);
+    for (const link of await page.locator('a[href^="https://wa.me/"]').all()) {
+      expect(await waText(link)).toBe(`${sentence} (ref GS-4MPR)`);
+    }
+  });
+}
+
 test('ref rules (pure functions)', () => {
   expect(refForSource('google')).toBe('GS');
   expect(refForSource(' Google ')).toBe('GS');

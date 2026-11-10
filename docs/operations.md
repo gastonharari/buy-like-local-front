@@ -163,7 +163,7 @@ must match the FAQ visible on its own page):
   **Bingbot**, plus `*`. A crawler that matches a named group ignores `*`, so each group repeats the
   same Disallow list — only `/api/` and `/wa-connect`. GPTBot (training) isn't named and falls
   under `*`.
-- `app/sitemap.ts`: `/`, the nine guides and three FAQ hubs (EN/ES/PT) and `/privacy`, with hreflang alternates
+- `app/sitemap.ts`: `/`, the twelve guides and three FAQ hubs (EN/ES/PT) and `/privacy`, with hreflang alternates
   and their **real** last-modified dates (guides: `updated` in `lib/content/guides.ts`; `/` and
   `/privacy`: constants in the file — bump them when those pages change). Not listed: `/r/*`,
   `/track/*`, `/wa-connect`, `/payment-success`.

@@ -20,6 +20,9 @@ test.beforeEach(async ({ page }) => {
 
 const HUBS = ['/en/faq', '/pt/faq', '/es/faq'];
 const GUIDES = [
+  '/en/online-shopping-in-argentina',
+  '/pt/compras-online-na-argentina',
+  '/es/compras-online-en-argentina',
   '/en/buy-on-mercadolibre-as-a-foreigner',
   '/pt/comprar-no-mercadolibre-sendo-estrangeiro',
   '/es/comprar-en-mercadolibre-siendo-extranjero',
@@ -129,6 +132,11 @@ test('no guide copy claims to be official, MercadoLibre or a partner', () => {
     const copy = JSON.stringify({ ...page, faq: page.faq.map(({ todo: _todo, ...visible }) => visible) });
     expect(copy, page.path).not.toMatch(/\b(oficial|official|partners?|socios?|parceir[oa]s?)\b/i);
     expect(copy, page.path).not.toMatch(UNCONFIRMED_CLAIMS);
+    // Amazon only as a neutral comparison, never "Amazon doesn't deliver / operate here".
+    for (const sentence of copy.split(/(?<=[.!?:])\s+|","/)) {
+      if (!/amazon/i.test(sentence)) continue;
+      expect(sentence, page.path).toMatch(/the way you'd use Amazon at home|como você usaria a Amazon em casa|como vos usarías Amazon en tu país/);
+    }
   }
 });
 

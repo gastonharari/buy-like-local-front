@@ -158,6 +158,13 @@ export function GuidePage({ page }: { page: GuideContent }) {
                   {p}
                 </p>
               ))}
+              {section.link && (
+                <p>
+                  <Link href={section.link.href} className="text-primary hover:underline">
+                    {section.link.label}
+                  </Link>
+                </p>
+              )}
             </section>
           ))}
 

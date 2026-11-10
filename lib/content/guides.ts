@@ -1,8 +1,8 @@
 import type { FaqItem } from "@/lib/faq"
 import { FAQ_EN, FAQ_ES, FAQ_PT, HUB_FAQ_IDS } from "@/lib/content/faq-items"
 
-// The guide pages (MercadoLibre, Mercado Pago, Ticketek/Passline) and the FAQ hubs, in EN, ES and
-// PT: copy, metadata and sitemap dates.
+// The guide pages (online shopping in Argentina, MercadoLibre, Mercado Pago, Ticketek/Passline) and
+// the FAQ hubs, in EN, ES and PT: copy, metadata and sitemap dates.
 //
 // Why this isn't in lib/translations.ts: each language has its own URL (the ES slugs are fixed by
 // the Google and ChatGPT Ads campaigns), and the copy is long-form. translations.ts stays the
@@ -16,6 +16,9 @@ import { FAQ_EN, FAQ_ES, FAQ_PT, HUB_FAQ_IDS } from "@/lib/content/faq-items"
 // Spanish is for Spanish-speaking foreigners in Argentina, not for Argentines: rioplatense voseo
 // (BRAND.md, "Encargate de disfrutar"), always "DNI argentino".
 //
+// Amazon may only appear as a neutral comparison ("the way you'd use Amazon at home"). Never say
+// or imply that Amazon doesn't deliver to or operate in Argentina (e2e/faq-jsonld.spec.ts checks).
+//
 // When you edit a page, bump its `updated` date: it is shown on the page and is the sitemap's
 // lastModified.
 
@@ -27,7 +30,7 @@ export type GuideLang = (typeof GUIDE_LANGS)[number]
  * What a page is about. The pages that share a topic are the same page in each language: they
  * become each other's hreflang alternates and the targets of the language switch.
  */
-export type GuideTopic = "mercadolibre" | "mercado-pago" | "tickets" | "faq"
+export type GuideTopic = "online-shopping" | "mercadolibre" | "mercado-pago" | "tickets" | "faq"
 
 export type GuideContent = {
   lang: GuideLang
@@ -43,7 +46,8 @@ export type GuideContent = {
   /** First paragraph: the direct answer. */
   lead: string
   steps?: Array<{ title: string; text: string }>
-  sections?: Array<{ title: string; paragraphs: string[] }>
+  /** Optional `link` after the paragraphs, e.g. to the MercadoLibre guide in the same language. */
+  sections?: Array<{ title: string; paragraphs: string[]; link?: { href: string; label: string } }>
   faq: FaqItem[]
   /** Pre-filled WhatsApp sentence in the page's language; the ref is appended at runtime. */
   waMessage: string
@@ -138,6 +142,179 @@ const pick = (pool: Record<string, FaqItem>, ids: readonly string[]): FaqItem[] 
 const UPDATED = "2026-11-09"
 
 const PAGES: GuideContent[] = [
+  // ── Online shopping (for people who don't know MercadoLibre yet) ────────────────────────────
+  {
+    lang: "en",
+    path: "/en/online-shopping-in-argentina",
+    topic: "online-shopping",
+    updated: UPDATED,
+    kind: "guide",
+    meta: {
+      title: "Online shopping in Argentina as a tourist: where to buy and how | Concierge",
+      description:
+        "In Argentina most online shopping happens on MercadoLibre, which asks for an Argentine DNI. Concierge buys it for you: send the link, or what you're looking for, on WhatsApp.",
+    },
+    eyebrow: "Online shopping · Argentina",
+    h1: "Online shopping in Argentina as a tourist",
+    lead: "In Argentina, most online shopping happens on MercadoLibre, the marketplace locals use the way you'd use Amazon at home. To buy there you need an account verified with an Argentine DNI, so most tourists can't. Concierge buys it for you: send us the link, or just what you're looking for, on WhatsApp, approve the quote, and it waits for you where you're staying in Buenos Aires.",
+    steps: [
+      {
+        title: "Tell us what you want",
+        text: "Send the link, a screenshot, or just describe it: \"a Boca Juniors shirt, size M\". If you don't have a link, we look for it.",
+      },
+      {
+        title: "Approve the quote",
+        text: "We send you the exact total, with our fee of 10 to 20% included. Nothing is charged until you say yes.",
+      },
+      {
+        title: "We buy it",
+        text: "We buy it with our local account, on MercadoLibre or in the local store, and follow the order for you in the chat.",
+      },
+      {
+        title: "It waits where you stay",
+        text: "Your order waits for you where you're staying in Buenos Aires, hotel or Airbnb.",
+      },
+    ],
+    sections: [
+      {
+        title: "Where Argentina shops online",
+        paragraphs: [
+          "Most Argentines shop online on MercadoLibre, for almost anything: clothes, football shirts, electronics, wine, gifts.",
+          "Local chains such as Fravega (electronics) or Farmacity (pharmacy and beauty) also sell on their own websites, and they often ask for a DNI or decline foreign cards at checkout.",
+        ],
+        link: { href: "/en/buy-on-mercadolibre-as-a-foreigner", label: "Guide: buying on MercadoLibre as a foreigner" },
+      },
+      {
+        title: "Why tourists get stuck",
+        paragraphs: [
+          "To buy on MercadoLibre you need an account, and the account is verified with an Argentine DNI. Without one you can't finish signing up, and many foreign cards are declined at checkout anyway. That's where we come in: we buy with our own local account.",
+        ],
+      },
+      {
+        title: "Already here or still planning the trip",
+        paragraphs: [
+          "You can message us before you travel or once you're in Buenos Aires. We quote it, buy it once you approve, and your order waits for you where you're staying.",
+        ],
+      },
+    ],
+    faq: pick(FAQ_EN, ["where-shop-online", "ml-without-dni", "local-stores", "what-can-you-buy", "fee", "where-receive"]),
+    waMessage: "Hi! I want to buy something online in Argentina",
+  },
+  {
+    lang: "pt",
+    path: "/pt/compras-online-na-argentina",
+    topic: "online-shopping",
+    updated: UPDATED,
+    kind: "guide",
+    meta: {
+      title: "Compras online na Argentina sendo turista: onde comprar e como | Concierge",
+      description:
+        "Na Argentina, a maior parte das compras online acontece no MercadoLibre, que pede DNI argentino. O Concierge compra por você: manda o link, ou o que você procura, no WhatsApp.",
+    },
+    eyebrow: "Compras online · Argentina",
+    h1: "Compras online na Argentina sendo turista",
+    lead: "Na Argentina, a maior parte das compras online acontece no MercadoLibre, o marketplace que os argentinos usam como você usaria a Amazon em casa. Para comprar lá você precisa de uma conta verificada com DNI argentino, então a maioria dos turistas não consegue. O Concierge compra por você: manda o link, ou só o que você procura, no WhatsApp, aprova o orçamento e ele fica te esperando onde você está hospedado em Buenos Aires.",
+    steps: [
+      {
+        title: "Conta o que você quer",
+        text: "Manda o link, um print ou só descreve: \"uma camisa do Boca Juniors, tamanho M\". Se você não tem o link, a gente procura.",
+      },
+      {
+        title: "Aprova o orçamento",
+        text: "A gente manda o total exato, com a nossa taxa de 10 a 20% incluída. Nada é cobrado até você dizer que sim.",
+      },
+      {
+        title: "A gente compra",
+        text: "Compramos com a nossa conta local, no MercadoLibre ou na loja local, e acompanhamos o pedido por você no chat.",
+      },
+      {
+        title: "Fica te esperando",
+        text: "Seu pedido fica te esperando onde você está hospedado em Buenos Aires, hotel ou Airbnb.",
+      },
+    ],
+    sections: [
+      {
+        title: "Onde a Argentina compra online",
+        paragraphs: [
+          "A maioria dos argentinos compra online no MercadoLibre, para quase tudo: roupa, camisa de futebol, eletrônicos, vinho, presentes.",
+          "Redes locais como Fravega (eletrônicos) ou Farmacity (farmácia e beleza) também vendem nos próprios sites, e costumam pedir DNI ou recusar cartão estrangeiro no checkout.",
+        ],
+        link: { href: "/pt/comprar-no-mercadolibre-sendo-estrangeiro", label: "Guia: comprar no MercadoLibre sendo estrangeiro" },
+      },
+      {
+        title: "Por que o turista trava",
+        paragraphs: [
+          "Para comprar no MercadoLibre você precisa de uma conta, e a conta é verificada com DNI argentino. Sem ele você não termina o cadastro, e muitos cartões estrangeiros são recusados no checkout de qualquer jeito. É aí que a gente entra: compramos com a nossa conta local.",
+        ],
+      },
+      {
+        title: "Já está aqui ou ainda planejando a viagem",
+        paragraphs: [
+          "Você pode falar com a gente antes de viajar ou quando já estiver em Buenos Aires. A gente faz o orçamento, compra depois que você aprova e o pedido fica te esperando onde você está hospedado.",
+        ],
+      },
+    ],
+    faq: pick(FAQ_PT, ["where-shop-online", "ml-without-dni", "local-stores", "what-can-you-buy", "fee", "where-receive"]),
+    waMessage: "Oi! Quero comprar algo online na Argentina",
+  },
+  {
+    lang: "es",
+    path: "/es/compras-online-en-argentina",
+    topic: "online-shopping",
+    updated: UPDATED,
+    kind: "guide",
+    meta: {
+      title: "Compras online en Argentina siendo turista: dónde comprar y cómo | Concierge",
+      description:
+        "En Argentina casi todo se compra online en MercadoLibre, que pide DNI argentino. Lo compramos por vos: mandanos por WhatsApp el link o lo que estás buscando.",
+    },
+    eyebrow: "Compras online · Argentina",
+    h1: "Compras online en Argentina siendo turista",
+    lead: "En Argentina casi todo se compra online en MercadoLibre, el marketplace que la gente usa como vos usarías Amazon en tu país. Para comprar ahí necesitás una cuenta verificada con DNI argentino, así que la mayoría de los turistas no puede. En Concierge lo compramos por vos: nos mandás por WhatsApp el link, o solo lo que buscás, aprobás la cotización y te espera donde te quedes en Buenos Aires.",
+    steps: [
+      {
+        title: "Contanos qué querés",
+        text: "Mandanos el link, una captura o solo describilo: \"una camiseta de Boca Juniors, talle M\". Si no tenés el link, lo buscamos nosotros.",
+      },
+      {
+        title: "Aprobá la cotización",
+        text: "Te mandamos el total exacto, con nuestra comisión del 10 al 20% incluida. No se cobra nada hasta que digas que sí.",
+      },
+      {
+        title: "Lo compramos",
+        text: "Lo compramos con nuestra cuenta local, en MercadoLibre o en la tienda local, y seguimos el pedido por vos en el chat.",
+      },
+      {
+        title: "Te espera donde te quedes",
+        text: "Tu pedido te espera donde te quedes en Buenos Aires, hotel o Airbnb.",
+      },
+    ],
+    sections: [
+      {
+        title: "Dónde compra online Argentina",
+        paragraphs: [
+          "La mayoría de los argentinos compra online en MercadoLibre, y para casi todo: ropa, camisetas de fútbol, electrónica, vino, regalos.",
+          "Cadenas locales como Frávega (electrónica) o Farmacity (farmacia y belleza) también venden en sus propias webs, y suelen pedir DNI o rechazar tarjetas extranjeras al pagar.",
+        ],
+        link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
+      },
+      {
+        title: "Por qué el turista se traba",
+        paragraphs: [
+          "Para comprar en MercadoLibre necesitás una cuenta, y la cuenta se verifica con DNI argentino. Sin DNI no podés terminar el registro, y además muchas tarjetas extranjeras se rechazan al pagar. Ahí entramos nosotros: compramos con nuestra cuenta local.",
+        ],
+      },
+      {
+        title: "Si ya estás acá o todavía planeás el viaje",
+        paragraphs: [
+          "Podés escribirnos antes de viajar o cuando ya estés en Buenos Aires. Te pasamos la cotización, compramos cuando la aprobás y tu pedido te espera donde te quedes.",
+        ],
+      },
+    ],
+    faq: pick(FAQ_ES, ["where-shop-online", "ml-without-dni", "local-stores", "what-can-you-buy", "fee", "where-receive"]),
+    waMessage: "¡Hola! Quiero comprar algo online en Argentina",
+  },
+
   // ── MercadoLibre ────────────────────────────────────────────────────────────────────────────
   {
     lang: "en",

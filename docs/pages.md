@@ -17,7 +17,8 @@ Next.js 15 App Router. Always dark, no theme toggle.
 | `/api/r/start-whatsapp` | route handler, `runtime: nodejs` | server-to-server hop into the CRM |
 | `/wa-connect` | server shell + client component, English only | **internal tool**, `noindex, nofollow`, not linked from anywhere. Launches Meta's WhatsApp **Embedded Signup v2 (Coexistence, `featureType: whatsapp_business_app_onboarding`)** — Meta retires the v2 launch shape on 2026-10-15, so this needs a verified migration to v4 before then — so the business admin can connect the company WhatsApp number — the one in the WhatsApp Business app — to Cloud API. Configuration id from `NEXT_PUBLIC_WA_CONFIG_ID` (or `?config_id=…` to override). When the popup posts `FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING`, the `FB.login` authorization `code` (30 s TTL) plus `waba_id`/`phone_number_id` are POSTed to this repo's own `/api/wa-onboarding`, which forwards them server-side (`CRM_API_URL`/`INTERNAL_API_TOKEN`, already required for referrals) to the CRM's `POST /api/internal/whatsapp/onboarding`, which subscribes the WABA and requests the contacts + history sync. A "Re-run sync" button repeats the call without a code (system-user token on the backend). Like `/privacy`, its copy is deliberately outside the EN/ES/PT i18n. |
 | `/api/wa-onboarding` | route handler, `runtime: nodejs` | server-to-server hop into the CRM for `/wa-connect`'s onboarding POST — same shape as `/api/r/start-whatsapp`, reuses `CRM_API_URL`/`INTERNAL_API_TOKEN` |
-| `/en/buy-on-mercadolibre-as-a-foreigner`, `/pt/comprar-no-mercadolibre-sendo-estrangeiro`, `/es/comprar-en-mercadolibre-siendo-extranjero` | static server page | guide: MercadoLibre without a DNI. See [Guide pages](#guide-pages-and-faq-hubs). |
+| `/en/online-shopping-in-argentina`, `/pt/compras-online-na-argentina`, `/es/compras-online-en-argentina` | static server page | guide: online shopping in Argentina, for people who don't know MercadoLibre yet. See [Guide pages](#guide-pages-and-faq-hubs). |
+| `/en/buy-on-mercadolibre-as-a-foreigner`, `/pt/comprar-no-mercadolibre-sendo-estrangeiro`, `/es/comprar-en-mercadolibre-siendo-extranjero` | static server page | guide: MercadoLibre without a DNI |
 | `/en/mercado-pago-for-tourists`, `/pt/mercado-pago-para-turistas`, `/es/mercado-pago-para-turistas` | static server page | guide: Mercado Pago as a tourist |
 | `/en/ticketek-passline-without-dni`, `/pt/ticketek-passline-sem-dni`, `/es/ticketek-passline-sin-dni` | static server page | guide: show tickets without a DNI |
 | `/en/faq`, `/pt/faq`, `/es/faq` | static server page | FAQ hubs, 12 questions each, with FAQPage JSON-LD |
@@ -110,7 +111,7 @@ elements.
 
 ## Guide pages and FAQ hubs
 
-Twelve static pages under `/en/*`, `/es/*` and `/pt/*`, written to be found and quoted by ChatGPT
+Fifteen static pages under `/en/*`, `/es/*` and `/pt/*` (four guides and the FAQ hub, in three languages), written to be found and quoted by ChatGPT
 search, Bing and Google: the first paragraph answers the question directly, then "how it works" in steps, a
 couple of short sections, 4–6 FAQ items, and the WhatsApp CTA.
 
@@ -119,7 +120,7 @@ couple of short sections, 4–6 FAQ items, and the WhatsApp CTA.
 | `lib/content/guides.ts` | every page's copy, metadata, `updated` date and WhatsApp sentence; `GUIDE_UI` strings |
 | `lib/content/faq-items.ts` | the FAQ question pool (EN/ES/PT, same ids) and the 12 ids of the hubs |
 | `lib/faq.ts` | publish guard, self-link removal, FAQPage JSON-LD builders |
-| `components/guide/guide-page.tsx` | the one layout all twelve pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
+| `components/guide/guide-page.tsx` | the one layout all fifteen pages use, plus `guideMetadata()` (canonical, hreflang for every language + x-default = EN, OG) |
 | `components/whatsapp-button.tsx` | the CTA with the ref |
 | `app/{en,es,pt}/<slug>/page.tsx` | three-line route files |
 
@@ -130,6 +131,16 @@ reasoning as `/privacy`.
 layout per language, i.e. moving every route into route groups, or reading the path from a header,
 which makes every page dynamic). So each page wraps its content in a `<div lang>` — `pt-BR` and
 `es-AR` — and declares its language through hreflang and `og:locale`.
+
+**The online-shopping guides** (`/en/online-shopping-in-argentina`, `/pt/compras-online-na-argentina`,
+`/es/compras-online-en-argentina`, decision 8 of 2026-11-09) are for the traveler who wants to buy
+something online and doesn't know MercadoLibre: the first lines say that in Argentina most online
+shopping happens on MercadoLibre, that it asks for an Argentine DNI, and that we buy for you; a
+section links to the MercadoLibre guide of the same language (`link` on a section). Google's
+"Compras" ad groups land here, so the slugs are fixed. **Amazon** may only appear as a neutral
+comparison ("the way you'd use Amazon at home") — never say or imply that Amazon doesn't deliver to
+or operate in Argentina; `e2e/faq-jsonld.spec.ts` rejects any other sentence that names it. Their
+FAQ adds one question to the pool, `where-shop-online`, which is not on the hubs (they stay at 12).
 
 **The Spanish pages** (`/es/*`, added on 2026-11-09 for the campaigns, which now run in EN, ES and PT)
 are for **Spanish-speaking foreigners in Argentina** — Uruguayans, Chileans, Colombians, Spaniards —
@@ -159,8 +170,8 @@ the site. Never: PayPal or any payment method, delivery times or dates, ticket a
 response times, DNI/bank help. The pages say what we *don't* do (QR payments, transfers, currency
 exchange, paperwork).
 
-**Language versions**: pages with the same `topic` (`mercadolibre`, `mercado-pago`, `tickets`,
-`faq`) are the same page in each language of `GUIDE_LANGS`. From that one key come the hreflang
+**Language versions**: pages with the same `topic` (`online-shopping`, `mercadolibre`, `mercado-pago`,
+`tickets`, `faq`) are the same page in each language of `GUIDE_LANGS`. From that one key come the hreflang
 alternates of each page (`hreflangPaths()`: every language + `x-default` = English), the sitemap's
 alternates and the header's language switch (`EN | ES | PT` codes like the landing's toggle, but links,
 since each language has its own URL; the current one is `aria-current="page"`). A topic missing

@@ -21,6 +21,13 @@ import type { FaqItem } from "@/lib/faq"
 type Pool = Record<string, FaqItem>
 
 export const FAQ_EN: Pool = {
+  "where-shop-online": {
+    id: "where-shop-online",
+    q: "Where can I shop online in Argentina as a tourist?",
+    answer:
+      "Mostly on MercadoLibre: it's where Argentina shops online, the way you'd use Amazon at home, and many local stores sell there too. To buy on it you need an account verified with an Argentine DNI, so most tourists can't check out. Concierge buys it for you with our local account once you approve the quote.",
+    link: { href: "/en/buy-on-mercadolibre-as-a-foreigner", label: "Guide: buying on MercadoLibre as a foreigner" },
+  },
   "ml-without-dni": {
     id: "ml-without-dni",
     q: "Can I buy on MercadoLibre without a DNI?",
@@ -129,6 +136,13 @@ export const FAQ_EN: Pool = {
 }
 
 export const FAQ_PT: Pool = {
+  "where-shop-online": {
+    id: "where-shop-online",
+    q: "Onde comprar online na Argentina sendo turista?",
+    answer:
+      "Principalmente no MercadoLibre: é onde a Argentina compra online, como você usaria a Amazon em casa, e muitas lojas locais vendem lá também. Para comprar, você precisa de uma conta verificada com DNI argentino, então a maioria dos turistas não consegue finalizar. O Concierge compra por você com a nossa conta local, depois que você aprova o orçamento.",
+    link: { href: "/pt/comprar-no-mercadolibre-sendo-estrangeiro", label: "Guia: comprar no MercadoLibre sendo estrangeiro" },
+  },
   "ml-without-dni": {
     id: "ml-without-dni",
     q: "Dá pra comprar no MercadoLibre sem DNI?",
@@ -237,6 +251,13 @@ export const FAQ_PT: Pool = {
 }
 
 export const FAQ_ES: Pool = {
+  "where-shop-online": {
+    id: "where-shop-online",
+    q: "¿Dónde puedo comprar online en Argentina siendo turista?",
+    answer:
+      "Sobre todo en MercadoLibre: es donde Argentina compra online, como vos usarías Amazon en tu país, y muchas tiendas locales también venden ahí. Para comprar necesitás una cuenta verificada con DNI argentino, así que la mayoría de los turistas no puede comprar. En Concierge lo compramos por vos con nuestra cuenta local, después de que apruebes la cotización.",
+    link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
+  },
   "ml-without-dni": {
     id: "ml-without-dni",
     q: "¿Puedo comprar en MercadoLibre sin DNI?",
