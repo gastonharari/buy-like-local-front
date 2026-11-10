@@ -3,6 +3,7 @@ import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { GUIDE_PAGES } from '../lib/content/guides';
 import { FAQ_EN, FAQ_ES, FAQ_PT } from '../lib/content/faq-items';
+import { translations } from '../lib/translations';
 
 // Decision 10 (2026-11-10, campaigns/2026-11-08/decisiones.md): Concierge doesn't do Mercado Pago
 // for tourists. The three Mercado Pago guides are gone and redirect (308, next.config.mjs) to the
@@ -62,5 +63,47 @@ test('no page in the sitemap links to /*/mercado-pago*', async ({ page, request 
     await page.goto(path);
     const hrefs = await page.locator('a[href], link[href]').evaluateAll((els) => els.map((e) => e.getAttribute('href') ?? ''));
     expect(hrefs.filter((h) => MP_PATH.test(h)), path).toEqual([]);
+  }
+});
+
+// Mercado Pago may only appear in a sentence that says we DON'T do it. Every other sentence that
+// names it — in visible text, <title>/<meta> (keywords, description, OpenGraph) or JSON-LD — fails,
+// so a new mention has to be reviewed against decision 10 and, if it's a "we don't", added here.
+const ALLOWED_MP_SENTENCES = [
+  /doesn't handle DNI, residency, bank or Mercado Pago paperwork/, // FAQ dni-bank-help, EN
+  /não cuida de trâmites de DNI, residência, banco ou Mercado Pago/, // PT
+  /no hacemos trámites de DNI, residencia, banco ni Mercado Pago/, // ES
+];
+const MP_TEXT = /mercado ?pago/i;
+
+function offending(text: string): string[] {
+  return text
+    .split(/(?<=[.!?])\s+|\n+/)
+    .filter((sentence) => MP_TEXT.test(sentence) && !ALLOWED_MP_SENTENCES.some((ok) => ok.test(sentence)));
+}
+
+test('no page, metadata or JSON-LD offers Mercado Pago as a service', async ({ page, request }) => {
+  // Sources the rendered check can't fully see: the landing's FAQ answers mount only when opened.
+  for (const lang of ['en', 'es', 'pt'] as const) {
+    expect(offending(JSON.stringify(translations[lang]).replace(/","/g, '. ')), `translations.${lang}`).toEqual([]);
+  }
+
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const paths = [...xml.matchAll(/<loc>https:\/\/www\.concierge\.com\.ar([^<]*)<\/loc>/g)].map((m) => m[1] || '/');
+  for (const path of paths) {
+    await page.goto(path);
+    const visible = await page.locator('body').innerText();
+    const head = await page.evaluate(() =>
+      [
+        document.title,
+        ...[...document.querySelectorAll('meta[name], meta[property]')].map((m) => m.getAttribute('content') ?? ''),
+      ].join('\n'),
+    );
+    const jsonLd = (await page.locator('script[type="application/ld+json"]').allTextContents())
+      .map((block) => JSON.stringify(JSON.parse(block)).replace(/","/g, '. '))
+      .join('\n');
+    expect(offending(visible), `${path}: visible text`).toEqual([]);
+    expect(offending(head), `${path}: <title>/<meta>`).toEqual([]);
+    expect(offending(jsonLd), `${path}: JSON-LD`).toEqual([]);
   }
 });

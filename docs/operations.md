@@ -142,7 +142,10 @@ there too, and allow the inline snippets with a nonce or hash — not `'unsafe-i
 ## SEO
 
 `app/layout.tsx` sets `metadataBase: https://www.concierge.com.ar`, full OpenGraph and Twitter
-cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` and `Service`.
+cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` and `Service`. The
+`Service` offer names no payment method (decision 6) and nothing mentions Mercado Pago or QR
+payments (decision 10, 2026-11-10; `e2e/no-mercado-pago.spec.ts` checks every page's metadata and
+JSON-LD).
 
 **FAQPage is per page, never in the layout** (the layout renders on every route, and a FAQPage
 must match the FAQ visible on its own page):

@@ -209,8 +209,12 @@ old ad or bookmark.
 
 What may still mention Mercado Pago: only statements that we *don't* do it (the `dni-bank-help`
 answer: "doesn't handle DNI, residency, bank or Mercado Pago paperwork"). Never as a service, a
-guide, a payment method or a keyword. `e2e/no-mercado-pago.spec.ts` checks the redirects and that no
-route or link points at `/*/mercado-pago*`.
+guide, a payment method or a keyword — the site-wide metadata in `app/layout.tsx` lost the
+"Mercado Pago tourist" keyword and the `Service` JSON-LD's "Payment via Mercado Pago, bank transfer,
+or crypto" and "handle QR payments" (in Argentina, QR payments are Mercado Pago's).
+`e2e/no-mercado-pago.spec.ts` checks the redirects, that no route or link points at
+`/*/mercado-pago*`, and that on every sitemap page (visible text, `<title>`/`<meta>`, JSON-LD) and in
+`translations.ts` any sentence naming Mercado Pago is one of the allowed "we don't" sentences.
 
 ## i18n
 

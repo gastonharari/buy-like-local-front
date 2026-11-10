@@ -47,7 +47,6 @@ export const metadata: Metadata = {
     "PedidosYa foreign card",
     "Argentina tourist shopping",
     "buy like local Buenos Aires",
-    "Mercado Pago tourist",
     "Argentina expat shopping",
   ],
   openGraph: {
@@ -109,7 +108,7 @@ function JsonLd() {
     "@type": "Service",
     name: "Concierge — Buenos Aires Local Concierge",
     description:
-      "WhatsApp-based concierge service for foreign tourists in Buenos Aires. We buy on MercadoLibre, order food delivery, make reservations, handle QR payments, and deliver to your hotel or Airbnb.",
+      "WhatsApp-based concierge service for foreign tourists in Buenos Aires. We buy on MercadoLibre, order food delivery, make reservations, and deliver to your hotel or Airbnb.",
     provider: {
       "@type": "Organization",
       name: "Concierge",
@@ -123,7 +122,8 @@ function JsonLd() {
       "@type": "Offer",
       priceCurrency: "USD",
       description:
-        "Service fee typically 10-20% of order value. Exact quote sent before purchase. Payment via Mercado Pago, bank transfer, or crypto.",
+        // No payment method named (decision 6) and no Mercado Pago (decision 10, 2026-11-10).
+        "Service fee typically 10-20% of order value. Exact quote sent before purchase.",
     },
   }
 
