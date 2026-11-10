@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { GUIDE_PAGES } from "@/lib/content/guides"
+import { GUIDE_PAGES, hreflangPaths } from "@/lib/content/guides"
 import { SITE_URL } from "@/lib/faq"
 
 // /sitemap.xml — every public, indexable page with its real last-modified date (not the build
@@ -14,14 +14,16 @@ const PRIVACY_UPDATED = "2026-09-01"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const guides: MetadataRoute.Sitemap = [...GUIDE_PAGES.values()].map((page) => {
-    const en = page.lang === "en" ? page.path : page.alternatePath
-    const pt = page.lang === "pt" ? page.path : page.alternatePath
+    // Same hreflang set as the page's own <link rel="alternate">, x-default left to the page.
+    const { "x-default": _default, ...languages } = hreflangPaths(page)
     return {
       url: `${SITE_URL}${page.path}`,
       lastModified: page.updated,
       changeFrequency: "monthly",
       priority: page.kind === "faq" ? 0.8 : 0.9,
-      alternates: { languages: { en: `${SITE_URL}${en}`, pt: `${SITE_URL}${pt}` } },
+      alternates: {
+        languages: Object.fromEntries(Object.entries(languages).map(([l, path]) => [l, `${SITE_URL}${path}`])),
+      },
     }
   })
 

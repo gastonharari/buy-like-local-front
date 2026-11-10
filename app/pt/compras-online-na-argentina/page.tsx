@@ -2,7 +2,7 @@ import { GuidePage, guideMetadata } from "@/components/guide/guide-page"
 import { getGuide } from "@/lib/content/guides"
 
 // Copy, FAQ and metadata: lib/content/guides.ts. Layout: components/guide/guide-page.tsx.
-const page = getGuide("/pt/mercado-pago-para-turistas")
+const page = getGuide("/pt/compras-online-na-argentina")
 
 export const metadata = guideMetadata(page)
 

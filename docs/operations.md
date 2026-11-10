@@ -142,15 +142,20 @@ there too, and allow the inline snippets with a nonce or hash — not `'unsafe-i
 ## SEO
 
 `app/layout.tsx` sets `metadataBase: https://www.concierge.com.ar`, full OpenGraph and Twitter
-cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` and `Service`.
+cards, and injects **two site-wide JSON-LD blocks** in `<head>`: `Organization` and `Service`. The
+`Service` offer names no payment method (decision 6) and nothing mentions Mercado Pago or QR
+payments (decision 10, 2026-11-10; `e2e/no-mercado-pago.spec.ts` checks every page's metadata and
+JSON-LD).
 
 **FAQPage is per page, never in the layout** (the layout renders on every route, and a FAQPage
 must match the FAQ visible on its own page):
 
-- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`), **minus the questions
-  that mention PayPal** (`UNCONFIRMED_CLAIMS` in `lib/faq.ts`): PayPal isn't confirmed, and
-  structured data is what ChatGPT and search engines quote. The visible FAQ is unchanged.
-- `/en/*` and `/pt/*` render one built from the same objects as their visible FAQ
+- `/` renders one built from `translations.en.faq.items` (`app/page.tsx`). Since 2026-11-09 the
+  visible FAQ names no payment method (the payment answer says "payment link", no PayPal), so all
+  seven questions are in it. The guard stays: a question that mentions an `UNCONFIRMED_CLAIMS` term
+  (`lib/faq.ts`, today PayPal) is left out, because structured data is what ChatGPT and search
+  engines quote.
+- `/en/*`, `/es/*` and `/pt/*` render one built from the same objects as their visible FAQ
   (`components/guide/guide-page.tsx`, rules in [pages.md](pages.md#guide-pages-and-faq-hubs)).
 - `e2e/faq-jsonld.spec.ts` checks shape, count and text identity. Before a big content change, also
   paste the URLs into validator.schema.org.
@@ -161,10 +166,23 @@ must match the FAQ visible on its own page):
   **Bingbot**, plus `*`. A crawler that matches a named group ignores `*`, so each group repeats the
   same Disallow list — only `/api/` and `/wa-connect`. GPTBot (training) isn't named and falls
   under `*`.
-- `app/sitemap.ts`: `/`, the six guides, the two FAQ hubs and `/privacy`, with hreflang alternates
+- `app/sitemap.ts`: `/`, the nine guides and three FAQ hubs (EN/ES/PT) and `/privacy`, with hreflang alternates
   and their **real** last-modified dates (guides: `updated` in `lib/content/guides.ts`; `/` and
   `/privacy`: constants in the file — bump them when those pages change). Not listed: `/r/*`,
   `/track/*`, `/wa-connect`, `/payment-success`.
+
+### Redirects
+
+`next.config.mjs` → `redirects()`, all permanent (308), query string kept by Next:
+
+| From | To | Why |
+|---|---|---|
+| `/en/mercado-pago-for-tourists` | `/en/buy-on-mercadolibre-as-a-foreigner` | decision 10 (2026-11-10): no Mercado Pago for tourists |
+| `/pt/mercado-pago-para-turistas` | `/pt/comprar-no-mercadolibre-sendo-estrangeiro` | same |
+| `/es/mercado-pago-para-turistas` | `/es/comprar-en-mercadolibre-siendo-extranjero` | same (never deployed, but the slug was in campaign plans) |
+
+Tested in `e2e/no-mercado-pago.spec.ts`. Once Bing/Google have dropped the old URLs, the redirects can
+stay at no cost; don't reuse the slugs.
 
 ### Bing Webmaster Tools
 

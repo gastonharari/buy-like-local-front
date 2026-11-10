@@ -1,11 +1,11 @@
-// FAQ items for the guide pages and the /en/faq, /pt/faq hubs, and the FAQPage JSON-LD built from
+// FAQ items for the guide pages and the /en/faq, /es/faq, /pt/faq hubs, and the FAQPage JSON-LD built from
 // them. The visible text and the JSON-LD come from the same object, so they can't drift apart
 // (e2e/faq-jsonld.spec.ts checks it against the rendered page anyway).
 
 export const SITE_URL = "https://www.concierge.com.ar"
 
 export type FaqItem = {
-  /** Stable anchor id: /en/faq#<id>. Same id in EN and PT. */
+  /** Stable anchor id: /en/faq#<id>. Same id in every language. */
   id: string
   q: string
   /** The direct answer: first one or two sentences, 40–60 words, no selling. */

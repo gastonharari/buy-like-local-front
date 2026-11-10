@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
-import { creatorName, refForSource, resolveRef, withRef } from '../lib/wa-ref';
+import { creatorName, refForSource, resolveRef, whatsappUrl, withRef } from '../lib/wa-ref';
 
 // WhatsApp ref ("(ref GS-7K2Q)", "(ref CO)", …) — contract: campaigns/2026-11-08/contrato-api-clicks.md.
 //
@@ -105,8 +105,8 @@ test('organic ChatGPT: "(ref CO)" with no POST, kept while navigating', async ({
   await expect.poll(() => waText(heroWa(page))).toBe('Oi! Preciso de ajuda para comprar algo na Argentina (ref CO)');
 
   // Client-side navigation through the footer, then a full load without params.
-  await page.locator('footer a[href="/pt/mercado-pago-para-turistas"]').click();
-  await expect(page).toHaveURL(/\/pt\/mercado-pago-para-turistas$/);
+  await page.locator('footer a[href="/pt/comprar-no-mercadolibre-sendo-estrangeiro"]').click();
+  await expect(page).toHaveURL(/\/pt\/comprar-no-mercadolibre-sendo-estrangeiro$/);
   await expect.poll(() => waText(heroWa(page))).toMatch(/ \(ref CO\)$/);
   await page.goto('/en/ticketek-passline-without-dni');
   await expect.poll(() => waText(heroWa(page))).toMatch(/ \(ref CO\)$/);
@@ -142,6 +142,74 @@ test('the landing\'s own WhatsApp buttons get the ref too', async ({ page }) => 
   await expect.poll(() => waText(hero)).toMatch(/ \(ref IG\)$/);
 });
 
+// Spanish pages (founder decision of 2026-11-09): Google's ML-ES ad group lands on the ES
+// MercadoLibre guide with a gclid, and ChatGPT Ads uses the same page with utm_source=chatgpt_ads.
+const GUIDE_ES = '/es/comprar-en-mercadolibre-siendo-extranjero';
+
+test('ES: google ad click POSTs on landing and the button ends in "(ref GS-XXXX)"', async ({ page }) => {
+  const mock = await mockClicks(page, ok('GS-7K2Q'));
+  await page.goto(`${GUIDE_ES}?utm_source=google&utm_medium=cpc&utm_campaign=ml_es&gclid=test-es`);
+
+  await expect
+    .poll(() => waText(heroWa(page)))
+    .toBe('¡Hola! Necesito ayuda para comprar algo en MercadoLibre (ref GS-7K2Q)');
+
+  expect(mock.bodies).toHaveLength(1);
+  expect(mock.bodies[0].gclid).toBe('test-es');
+  expect(mock.bodies[0].landing_url).toBe(`${GUIDE_ES}?utm_source=google&utm_medium=cpc&utm_campaign=ml_es&gclid=test-es`);
+  for (const link of await page.locator('a[href^="https://wa.me/"]').all()) {
+    expect(await waText(link)).toMatch(/ \(ref GS-7K2Q\)$/);
+  }
+});
+
+test('ES: the ChatGPT Ads landing URL gives "(ref CA)" without a POST', async ({ page }) => {
+  const mock = await mockClicks(page, ok('GS-ZZZZ'));
+  await page.goto(`${GUIDE_ES}?utm_source=chatgpt_ads&utm_campaign=test1`);
+  await expect
+    .poll(() => waText(heroWa(page)))
+    .toBe('¡Hola! Necesito ayuda para comprar algo en MercadoLibre (ref CA)');
+
+  // The channel survives navigation to the other ES pages.
+  await page.locator('footer a[href="/es/ticketek-passline-sin-dni"]').click();
+  await expect(page).toHaveURL(/\/es\/ticketek-passline-sin-dni$/);
+  await expect
+    .poll(() => waText(heroWa(page)))
+    .toBe('¡Hola! Necesito ayuda para comprar entradas para un show en Buenos Aires (ref CA)');
+  expect(mock.bodies).toHaveLength(0);
+});
+
+test('ES: no utm and no click id, no ref', async ({ page }) => {
+  await page.goto('/es/faq');
+  await expect(heroWa(page)).toBeVisible();
+  await page.waitForTimeout(500);
+  expect(await waText(heroWa(page))).toBe('¡Hola! Necesito ayuda para comprar algo en Argentina');
+});
+
+// Online-shopping guides (decision 8 of 2026-11-09): Google's "Compras" ad groups land here with a
+// gclid, in each language.
+const SHOPPING = [
+  ['/en/online-shopping-in-argentina', 'Hi! I want to buy something online in Argentina'],
+  ['/pt/compras-online-na-argentina', 'Oi! Quero comprar algo online na Argentina'],
+  ['/es/compras-online-en-argentina', '¡Hola! Quiero comprar algo online en Argentina'],
+] as const;
+
+for (const [path, sentence] of SHOPPING) {
+  test(`${path}: google ad click ends the message in "(ref GS-XXXX)"`, async ({ page }) => {
+    const mock = await mockClicks(page, ok('GS-4MPR'));
+    const landing = `${path}?utm_source=google&utm_medium=cpc&utm_campaign=compras&gclid=test-shopping`;
+    await page.goto(landing);
+
+    await expect.poll(() => waText(heroWa(page))).toBe(`${sentence} (ref GS-4MPR)`);
+    expect(mock.bodies).toHaveLength(1);
+    expect(mock.bodies[0].gclid).toBe('test-shopping');
+    expect(mock.bodies[0].utm_campaign).toBe('compras');
+    expect(mock.bodies[0].landing_url).toBe(landing);
+    for (const link of await page.locator('a[href^="https://wa.me/"]').all()) {
+      expect(await waText(link)).toBe(`${sentence} (ref GS-4MPR)`);
+    }
+  });
+}
+
 test('ref rules (pure functions)', () => {
   expect(refForSource('google')).toBe('GS');
   expect(refForSource(' Google ')).toBe('GS');
@@ -171,4 +239,8 @@ test('ref rules (pure functions)', () => {
   for (const ref of ['GS-7K2Q', 'GS', 'CA', 'CO', 'IG', 'CR-JUANPEREZ']) {
     expect(`Hi! (ref ${ref})`.match(crm)?.slice(1).filter(Boolean).join('-').toUpperCase()).toBe(ref);
   }
+  // Also after a Spanish sentence with "¡" and accents, as the ES pages send it.
+  const es = new URL(whatsappUrl('¡Hola! Necesito ayuda para comprar algo en MercadoLibre', 'GS-7K2Q')).searchParams.get('text')!;
+  expect(es).toBe('¡Hola! Necesito ayuda para comprar algo en MercadoLibre (ref GS-7K2Q)');
+  expect(es.match(crm)?.slice(1)).toEqual(['GS', '7K2Q']);
 });

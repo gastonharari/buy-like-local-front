@@ -3,28 +3,25 @@ import Image from "next/image"
 import Link from "next/link"
 import { JsonLd } from "@/components/json-ld"
 import { WhatsAppButton } from "@/components/whatsapp-button"
-import { GUIDE_UI, guidesIn, type GuideContent } from "@/lib/content/guides"
+import { GUIDE_UI, guidesIn, hreflangPaths, languageVersions, type GuideContent } from "@/lib/content/guides"
 import { SITE_URL, answerBody, faqForPage, faqPageSchema } from "@/lib/faq"
 
-// Server-rendered page for the six guides and the two FAQ hubs (lib/content/guides.ts). Everything
+// Server-rendered page for every guide and FAQ hub in lib/content/guides.ts. Everything
 // except the WhatsApp buttons is static HTML, so crawlers (OAI-SearchBot, Bingbot, Googlebot)
 // read the answers and the FAQ without running JavaScript. FAQ answers are always visible —
 // no accordion — because the FAQPage JSON-LD must match text that is on the page.
 
 export function guideMetadata(page: GuideContent): Metadata {
   const ui = GUIDE_UI[page.lang]
-  const enPath = page.lang === "en" ? page.path : page.alternatePath
-  const ptPath = page.lang === "pt" ? page.path : page.alternatePath
+  const languages = Object.fromEntries(
+    Object.entries(hreflangPaths(page)).map(([hreflang, path]) => [hreflang, `${SITE_URL}${path}`]),
+  )
   return {
     title: page.meta.title,
     description: page.meta.description,
     alternates: {
       canonical: `${SITE_URL}${page.path}`,
-      languages: {
-        en: `${SITE_URL}${enPath}`,
-        pt: `${SITE_URL}${ptPath}`,
-        "x-default": `${SITE_URL}${enPath}`,
-      },
+      languages,
     },
     robots: { index: true, follow: true },
     openGraph: {
@@ -45,8 +42,8 @@ export function guideMetadata(page: GuideContent): Metadata {
   }
 }
 
-function formatDate(iso: string, lang: GuideContent["lang"]): string {
-  return new Date(`${iso}T12:00:00Z`).toLocaleDateString(lang === "en" ? "en-US" : "pt-BR", {
+function formatDate(iso: string, locale: string): string {
+  return new Date(`${iso}T12:00:00Z`).toLocaleDateString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -72,19 +69,48 @@ export function GuidePage({ page }: { page: GuideContent }) {
               alt="Concierge Buenos Aires"
               width={232}
               height={61}
-              className="h-auto max-h-[44px] w-auto"
+              className="h-auto max-h-[32px] sm:max-h-[44px] w-auto"
               priority
             />
           </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              href={page.alternatePath}
-              hrefLang={page.lang === "en" ? "pt" : "en"}
-              className="min-h-[44px] inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {ui.switchLabel}
-            </Link>
-            <WhatsAppButton message={page.waMessage} label="WhatsApp" location="guide_header" size="sm" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Language switch: same "EN | ES | PT" codes as the landing's toggle, but links, since each
+                language is its own URL. */}
+            <nav aria-label={ui.languageNav} className="flex items-center text-sm text-muted-foreground">
+              {languageVersions(page).map((version, i) => (
+                <span key={version.lang} className="flex items-center">
+                  {i > 0 && (
+                    <span aria-hidden="true" className="mx-0.5 opacity-30">
+                      |
+                    </span>
+                  )}
+                  {version.lang === page.lang ? (
+                    <span
+                      aria-current="page"
+                      className="min-h-[44px] min-w-[28px] inline-flex items-center justify-center font-semibold text-foreground"
+                    >
+                      {version.lang.toUpperCase()}
+                    </span>
+                  ) : (
+                    <Link
+                      href={version.path}
+                      hrefLang={version.lang}
+                      title={GUIDE_UI[version.lang].languageName}
+                      className="min-h-[44px] min-w-[28px] inline-flex items-center justify-center hover:text-foreground transition-colors"
+                    >
+                      {version.lang.toUpperCase()}
+                    </Link>
+                  )}
+                </span>
+              ))}
+            </nav>
+            <WhatsAppButton
+              message={page.waMessage}
+              label="WhatsApp"
+              location="guide_header"
+              size="sm"
+              iconOnlyOnMobile
+            />
           </div>
         </div>
       </header>
@@ -101,7 +127,7 @@ export function GuidePage({ page }: { page: GuideContent }) {
             <div className="flex flex-col items-start gap-3 pt-2">
               <WhatsAppButton message={page.waMessage} label={ui.cta} location="guide_hero" />
               <p className="text-xs text-muted-foreground">
-                {ui.updated} <time dateTime={page.updated}>{formatDate(page.updated, page.lang)}</time>
+                {ui.updated} <time dateTime={page.updated}>{formatDate(page.updated, ui.htmlLang)}</time>
               </p>
             </div>
           </section>
@@ -132,6 +158,13 @@ export function GuidePage({ page }: { page: GuideContent }) {
                   {p}
                 </p>
               ))}
+              {section.link && (
+                <p>
+                  <Link href={section.link.href} className="text-primary hover:underline">
+                    {section.link.label}
+                  </Link>
+                </p>
+              )}
             </section>
           ))}
 
