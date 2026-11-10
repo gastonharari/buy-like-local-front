@@ -94,7 +94,14 @@ test('sitemap.xml lists every language version with the same hreflang alternates
 test.describe('on a 320px phone', () => {
   test.use({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
 
-  for (const path of ['/en/faq', '/es/comprar-en-mercadolibre-siendo-extranjero', '/pt/ticketek-passline-sem-dni']) {
+  for (const path of [
+    '/en/faq',
+    '/es/comprar-en-mercadolibre-siendo-extranjero',
+    '/pt/ticketek-passline-sem-dni',
+    '/en/online-shopping-in-argentina',
+    '/pt/compras-online-na-argentina',
+    '/es/compras-online-en-argentina',
+  ]) {
     test(`${path}: nothing wider than the screen, header WhatsApp is icon-only`, async ({ page }) => {
       await page.goto(path);
       const header = page.locator('header');
@@ -115,3 +122,14 @@ test.describe('on a 320px phone', () => {
     });
   }
 });
+
+// The online-shopping guides (for people who don't know MercadoLibre) end their body with a link to
+// the MercadoLibre guide in the same language: the last section before the FAQ carries it.
+for (const guide of PAGES.filter((p) => p.topic === 'online-shopping')) {
+  test(`${guide.path}: the body ends with a link to the MercadoLibre guide in ${guide.lang}`, async ({ page }) => {
+    const ml = PAGES.find((p) => p.topic === 'mercadolibre' && p.lang === guide.lang)!;
+    await page.goto(guide.path);
+    const lastBodySection = page.locator('#faq').locator('xpath=preceding-sibling::section[1]');
+    await expect(lastBodySection.locator(`a[href="${ml.path}"]`)).toBeVisible();
+  });
+}

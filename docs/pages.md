@@ -135,8 +135,9 @@ which makes every page dynamic). So each page wraps its content in a `<div lang>
 **The online-shopping guides** (`/en/online-shopping-in-argentina`, `/pt/compras-online-na-argentina`,
 `/es/compras-online-en-argentina`, decision 8 of 2026-11-09) are for the traveler who wants to buy
 something online and doesn't know MercadoLibre: the first lines say that in Argentina most online
-shopping happens on MercadoLibre, that it asks for an Argentine DNI, and that we buy for you; a
-section links to the MercadoLibre guide of the same language (`link` on a section). Google's
+shopping happens on MercadoLibre, that it asks for an Argentine DNI, and that we buy for you; the
+last section of the body links to the MercadoLibre guide of the same language (`link` on a
+section; `e2e/guides-i18n.spec.ts` checks it). Google's
 "Compras" ad groups land here, so the slugs are fixed. **Amazon** may only appear as a neutral
 comparison ("the way you'd use Amazon at home") — never say or imply that Amazon doesn't deliver to
 or operate in Argentina; `e2e/faq-jsonld.spec.ts` rejects any other sentence that names it. Their

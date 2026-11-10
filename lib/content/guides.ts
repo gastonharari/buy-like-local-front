@@ -177,14 +177,6 @@ const PAGES: GuideContent[] = [
     ],
     sections: [
       {
-        title: "Where Argentina shops online",
-        paragraphs: [
-          "Most Argentines shop online on MercadoLibre, for almost anything: clothes, football shirts, electronics, wine, gifts.",
-          "Local chains such as Fravega (electronics) or Farmacity (pharmacy and beauty) also sell on their own websites, and they often ask for a DNI or decline foreign cards at checkout.",
-        ],
-        link: { href: "/en/buy-on-mercadolibre-as-a-foreigner", label: "Guide: buying on MercadoLibre as a foreigner" },
-      },
-      {
         title: "Why tourists get stuck",
         paragraphs: [
           "To buy on MercadoLibre you need an account, and the account is verified with an Argentine DNI. Without one you can't finish signing up, and many foreign cards are declined at checkout anyway. That's where we come in: we buy with our own local account.",
@@ -195,6 +187,14 @@ const PAGES: GuideContent[] = [
         paragraphs: [
           "You can message us before you travel or once you're in Buenos Aires. We quote it, buy it once you approve, and your order waits for you where you're staying.",
         ],
+      },
+      {
+        title: "Where Argentina shops online",
+        paragraphs: [
+          "Most Argentines shop online on MercadoLibre, for almost anything: clothes, football shirts, electronics, wine, gifts.",
+          "Local chains such as Fravega (electronics) or Farmacity (pharmacy and beauty) also sell on their own websites, and they often ask for a DNI or decline foreign cards at checkout.",
+        ],
+        link: { href: "/en/buy-on-mercadolibre-as-a-foreigner", label: "Guide: buying on MercadoLibre as a foreigner" },
       },
     ],
     faq: pick(FAQ_EN, ["where-shop-online", "ml-without-dni", "local-stores", "what-can-you-buy", "fee", "where-receive"]),
@@ -234,14 +234,6 @@ const PAGES: GuideContent[] = [
     ],
     sections: [
       {
-        title: "Onde a Argentina compra online",
-        paragraphs: [
-          "A maioria dos argentinos compra online no MercadoLibre, para quase tudo: roupa, camisa de futebol, eletrônicos, vinho, presentes.",
-          "Redes locais como Fravega (eletrônicos) ou Farmacity (farmácia e beleza) também vendem nos próprios sites, e costumam pedir DNI ou recusar cartão estrangeiro no checkout.",
-        ],
-        link: { href: "/pt/comprar-no-mercadolibre-sendo-estrangeiro", label: "Guia: comprar no MercadoLibre sendo estrangeiro" },
-      },
-      {
         title: "Por que o turista trava",
         paragraphs: [
           "Para comprar no MercadoLibre você precisa de uma conta, e a conta é verificada com DNI argentino. Sem ele você não termina o cadastro, e muitos cartões estrangeiros são recusados no checkout de qualquer jeito. É aí que a gente entra: compramos com a nossa conta local.",
@@ -252,6 +244,14 @@ const PAGES: GuideContent[] = [
         paragraphs: [
           "Você pode falar com a gente antes de viajar ou quando já estiver em Buenos Aires. A gente faz o orçamento, compra depois que você aprova e o pedido fica te esperando onde você está hospedado.",
         ],
+      },
+      {
+        title: "Onde a Argentina compra online",
+        paragraphs: [
+          "A maioria dos argentinos compra online no MercadoLibre, para quase tudo: roupa, camisa de futebol, eletrônicos, vinho, presentes.",
+          "Redes locais como Fravega (eletrônicos) ou Farmacity (farmácia e beleza) também vendem nos próprios sites, e costumam pedir DNI ou recusar cartão estrangeiro no checkout.",
+        ],
+        link: { href: "/pt/comprar-no-mercadolibre-sendo-estrangeiro", label: "Guia: comprar no MercadoLibre sendo estrangeiro" },
       },
     ],
     faq: pick(FAQ_PT, ["where-shop-online", "ml-without-dni", "local-stores", "what-can-you-buy", "fee", "where-receive"]),
@@ -291,14 +291,6 @@ const PAGES: GuideContent[] = [
     ],
     sections: [
       {
-        title: "Dónde compra online Argentina",
-        paragraphs: [
-          "La mayoría de los argentinos compra online en MercadoLibre, y para casi todo: ropa, camisetas de fútbol, electrónica, vino, regalos.",
-          "Cadenas locales como Frávega (electrónica) o Farmacity (farmacia y belleza) también venden en sus propias webs, y suelen pedir DNI o rechazar tarjetas extranjeras al pagar.",
-        ],
-        link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
-      },
-      {
         title: "Por qué el turista se traba",
         paragraphs: [
           "Para comprar en MercadoLibre necesitás una cuenta, y la cuenta se verifica con DNI argentino. Sin DNI no podés terminar el registro, y además muchas tarjetas extranjeras se rechazan al pagar. Ahí entramos nosotros: compramos con nuestra cuenta local.",
@@ -309,6 +301,14 @@ const PAGES: GuideContent[] = [
         paragraphs: [
           "Podés escribirnos antes de viajar o cuando ya estés en Buenos Aires. Te pasamos la cotización, compramos cuando la aprobás y tu pedido te espera donde te quedes.",
         ],
+      },
+      {
+        title: "Dónde compra online Argentina",
+        paragraphs: [
+          "La mayoría de los argentinos compra online en MercadoLibre, y para casi todo: ropa, camisetas de fútbol, electrónica, vino, regalos.",
+          "Cadenas locales como Frávega (electrónica) o Farmacity (farmacia y belleza) también venden en sus propias webs, y suelen pedir DNI o rechazar tarjetas extranjeras al pagar.",
+        ],
+        link: { href: "/es/comprar-en-mercadolibre-siendo-extranjero", label: "Guía: comprar en MercadoLibre siendo extranjero" },
       },
     ],
     faq: pick(FAQ_ES, ["where-shop-online", "ml-without-dni", "local-stores", "what-can-you-buy", "fee", "where-receive"]),
